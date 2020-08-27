@@ -1,0 +1,59 @@
+{
+  "name": "froute",
+  "version": "1.0.0",
+  "description": "Type safe and flexible router for React",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "repository": "git@github.com:fleur-js/froute.git",
+  "author": "Hanakla <ragg.devpr@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "clean-dist": "rm -rf ./dist",
+    "build:declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
+    "build:esm": "bili",
+    "build:commonjs": "tsc -m commonjs --outDir ./dist",
+    "build": "yarn build:declarations && yarn build:esm && yarn build:commonjs",
+    "prepublishOnly": "yarn clean-dist && yarn build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "peerDependencies": {
+    "react": ">= 16.8.x"
+  },
+  "devDependencies": {
+    "@types/history": "^4.7.7",
+    "@types/jest": "^26.0.10",
+    "@types/path-to-regexp": "^1.7.0",
+    "@types/react": "^16.9.47",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "bili": "^5.0.5",
+    "cross-env": "^7.0.2",
+    "eslint": "^7.7.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.2.5",
+    "jest": "^26.4.2",
+    "lint-staged": "^10.2.11",
+    "prettier": "^2.1.1",
+    "react": "^16.13.1",
+    "ts-jest": "^26.2.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "history": "^5.0.0",
+    "path-to-regexp": "^6.1.0"
+  }
+}
