@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   ReactNode,
@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  ComponentType,
 } from "react";
 import { RouteDefiner } from "./RouteDefiner";
 import { canUseDOM } from "./utils";
@@ -18,20 +19,24 @@ import { Match } from "path-to-regexp";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
-type FrouteMatch = {
+interface FrouteMatch {
   route: RouteDefiner<any>;
   match: Match;
-};
+}
+
+interface RouterOptions {}
 
 export class RouterContext {
-  status?: number;
+  public status?: number = 200;
+  // public pathname: string;
+  private actor: ActorDef<any>;
 
   constructor(
-    public url: string,
+    public currentPath: string,
     public routes: { [key: string]: RouteDefiner<any> }
   ) {}
 
-  matchedRoute(pathname: string): FrouteMatch | false {
+  public matchedRoute(pathname: string): FrouteMatch | false {
     for (const route of Object.values(this.routes)) {
       const match = route.match(pathname);
       if (!match) continue;
@@ -45,28 +50,31 @@ export class RouterContext {
     return false;
   }
 
-  async preload() {
-    const matchedRoute = this.matchedRoute(this.url);
+  public setPath(pathname: string) {
+    this.currentPath = pathname;
+  }
+
+  public async preloadCurrent(...preloadArgs: any[]) {
+    const matchedRoute = this.matchedRoute(this.currentPath);
     if (!matchedRoute) return;
 
     const actor = matchedRoute.route.getActor();
     if (!actor) return;
 
-    // let component: ComponentType<any>
-    // if (typeof actor.component === 'function') {
-    // component = await actor.component()
-    return null;
+    await actor.component();
+    await actor.preload?.apply(null, preloadArgs);
   }
 }
 
-const Context = createContext<RouterContext>(null);
+const Context = createContext<RouterContext | null>(null);
 Context.displayName = "FrouteContext";
 
 export const createRouterContext = (
   url: string,
-  routes: { [key: string]: RouteDefiner<any> }
+  routes: { [key: string]: RouteDefiner<any> },
+  options: RouterOptions
 ) => {
-  return new RouterContext(url, routes);
+  return new RouterContext(url, routes, options);
 };
 
 export const FrouteContext = ({
@@ -85,11 +93,7 @@ export const FrouteContext = ({
 
   const handleChangeLocation: LocationListener = useCallback(
     (({ pathname, search, hash, state }, action) => {
-      // if (state && state.fluerHandled) return
-      // executeOperation(navigateOp, {
-      //   type: action,
-      //   url: pathname + search + hash,
-      // })
+      context.setPath(pathname);
     }) as LocationListener,
     []
   );
@@ -110,10 +114,10 @@ export const FrouteContext = ({
 
       scrollTimerId = (setTimeout(() => {
         // if (route) {
-        //   history.replace(route.url, {
-        //     scrollX: window.scrollX || window.pageXOffset,
-        //     scrollY: window.scrollY || window.pageYOffset,
-        //   });
+        history.replace(context.currentPath, {
+          scrollX: window.scrollX || window.pageXOffset,
+          scrollY: window.scrollY || window.pageYOffset,
+        });
         // }
       }, 150) as any) as number;
     };
@@ -142,7 +146,7 @@ export const useRoute = () => {
 };
 
 export const useLocation = () => {
-  const { status } = useRoute();
+  // const { status } = useRoute();
 };
 
 export const useParams = () => {};

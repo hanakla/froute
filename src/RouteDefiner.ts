@@ -3,6 +3,7 @@ import { match, Match } from "path-to-regexp";
 
 interface ActorDef {
   component: () => Promise<ComponentType<any>> | ComponentType<any>;
+  preload?: (...args: any[]) => Promise<void>;
   [key: string]: any;
 }
 

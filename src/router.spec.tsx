@@ -1,4 +1,4 @@
-import { route, FrouteContext, createRouterContext } from "./router";
+import { route, FrouteContext, createRouterContext, useRoute } from "./router";
 
 describe("router", () => {
   const routes = {
@@ -6,13 +6,16 @@ describe("router", () => {
   };
 
   it("", async () => {
-    const context = createRouterContext("/", routes);
-    await context.preload();
+    const routerContext = createRouterContext("/", routes);
+    await routerContext.preloadCurrent();
 
     const App = () => {
-      //   useRouter();
+      const { renderRoute } = useRoute();
+      return <div>{renderRoute()}</div>;
     };
 
-    <FrouteContext context={context}></FrouteContext>;
+    <FrouteContext context={routerContext}>
+      <App />
+    </FrouteContext>;
   });
 });
