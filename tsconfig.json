@@ -11,6 +11,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
+    "strict": true,
     "jsx": "react",
     "forceConsistentCasingInFileNames": true,
     "lib": ["es2015", "es2016", "es2017", "dom"],

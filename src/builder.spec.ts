@@ -1,14 +1,15 @@
-import { route } from "./index";
+// import { route } from "./index";
 import { buildPath } from "./builder";
+import { routeBy } from "./RouteDefiner";
 
 describe("index", () => {
   describe("buildPath", () => {
     it("Should build path", () => {
-      const def = route("users")
+      const def = routeBy("users")
         .param("id")
         .action({ component: () => null });
 
-      const def2 = route("users")
+      const def2 = routeBy("users")
         .param("id")
         .path("comments")
         .param("commentId")
