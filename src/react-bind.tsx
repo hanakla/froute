@@ -23,18 +23,18 @@ const Context = createContext<RouterContext | null>(null);
 Context.displayName = "FrouteContext";
 
 export const FrouteContext = ({
-  context,
+  router,
   children,
 }: {
-  context: RouterContext;
+  router: RouterContext;
   children: ReactNode;
 }) => {
-  const { history } = useMemo(() => context, []);
+  const { history } = useMemo(() => router, []);
 
   useIsomorphicEffect(() => {
     const unlisten = history.listen(({ action, location }) => {
-      context.navigate(location);
-      if (action === Action.Push) context.preloadCurrent();
+      router.navigate(location);
+      if (action === Action.Push) router.preloadCurrent();
     });
 
     return () => unlisten();
@@ -50,7 +50,7 @@ export const FrouteContext = ({
       }
 
       scrollTimerId = (setTimeout(() => {
-        const location = context.getCurrentLocation();
+        const location = router.getCurrentLocation();
         if (!location) return;
 
         history.replace(location, {
@@ -68,7 +68,7 @@ export const FrouteContext = ({
     };
   }, []);
 
-  return <Context.Provider value={context}>{children}</Context.Provider>;
+  return <Context.Provider value={router}>{children}</Context.Provider>;
 };
 
 const isRoutable = (href: string | undefined) => {
@@ -126,7 +126,22 @@ export const ResponseCode = ({
   const router = useRouter();
 
   useMemo(() => {
-    router.setStatus(status);
+    router.statusCode = status;
+  }, []);
+
+  return <>{children}</>;
+};
+
+export const Redirect: React.FC<{ url: string; status?: number }> = ({
+  url,
+  status = 302,
+  children,
+}) => {
+  const router = useRouter();
+
+  useMemo(() => {
+    router.statusCode = status;
+    router.redirectTo = url;
   }, []);
 
   return <>{children}</>;
@@ -152,12 +167,21 @@ export const useRouteRender = () => {
     return () => router.unobserveFinishPreload(rerender);
   }, [router, rerender]);
 
+  useIsomorphicEffect(() => {
+    const unlisten = router.history.listen(({ action }) => {
+      if (action === Action.Pop) {
+        rerender();
+      }
+    });
+    return () => unlisten();
+  }, []);
+
   return useMemo(() => ({ PageComponent }), [match]);
 };
 
 export const useLocation = () => {
-  const context = useRouter();
-  const location = context.getCurrentLocation();
+  const router = useRouter();
+  const location = router.getCurrentLocation();
 
   return useMemo(
     () => ({
@@ -180,9 +204,9 @@ export const useParams: UseParams = <T extends IRoute<any> = IRoute<any>>(
   // @ts-expect-error
   route?: T
 ) => {
-  const context = useRouter();
-  const location = context.getCurrentLocation();
-  const match = location ? context.resolveRoute(location.pathname) : null;
+  const router = useRouter();
+  const location = router.getCurrentLocation();
+  const match = location ? router.resolveRoute(location.pathname) : null;
 
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
@@ -202,11 +226,11 @@ export const useNavigation = () => {
 };
 
 export const useUrlBuilder = () => {
-  const context = useRouter();
+  const router = useRouter();
   return useMemo(
     () => ({
-      buildPath: context.buildPath,
+      buildPath: router.buildPath,
     }),
-    []
+    [router]
   );
 };

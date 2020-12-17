@@ -8,6 +8,7 @@ export {
   useUrlBuilder,
   Link,
   ResponseCode,
+  Redirect,
   FrouteContext,
 } from "./react-bind";
 export { buildPath } from "./builder";

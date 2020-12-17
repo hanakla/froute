@@ -863,13 +863,26 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
-"@fleur/froute@0.1.0-pre.6":
-  version "0.1.0-pre.6"
-  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0-pre.6.tgz#e9c03fed087f716fed6a510ad42bb0c184ccc55c"
-  integrity sha512-qiAEEEpUF3sQOxxjoUd5Y1FZ6Pq3+kcIS9ZSkAITLscMosFMNw1my/HRi/P1YkwQgXb7DNKHO741LsJ3IfkIag==
+"@fleur/fleur@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@fleur/fleur/-/fleur-2.0.0.tgz#e92a0b8d05037c84573065c0c564ce46cf929933"
+  integrity sha512-MuYFpB1jqkAZKGXm15oq31Q3dpwLn7zeDoIv+xC0krVMeSZnHfdcqzYJ8ScI7rsfrwQ0G2TYG3Zq0+v/eMCtjw==
+  dependencies:
+    immer "^8.0.0"
+    invariant "^2.2.4"
+
+"@fleur/froute@0.1.0-pre.8":
+  version "0.1.0-pre.8"
+  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0-pre.8.tgz#b3cc307dc60858929e36cab0037b73dc038fe11b"
+  integrity sha512-2Fs+j2cn0aTVGcFwFWRnW2NTxQ0yBvMQfUkqm0ML7Tg+8qSHtFr4++C9uHV2njlgc4P0dPzQ2Ik0N9tjg1E26A==
   dependencies:
     history "^5.0.0"
     path-to-regexp "^6.1.0"
+
+"@fleur/react@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@fleur/react/-/react-4.0.1.tgz#fb5068d4dc7d84439222811c836e8e66f0f39ef8"
+  integrity sha512-8r+G9aK2bk6ckyNRfIUPxGMEPsxPl1EKkQqtjZAnnKoH4LGy6lHUPA3QZZBC3+Eb9i9hHyjgfQ42bydkvnJLXw==
 
 "@iarna/toml@^2.2.0":
   version "2.2.5"
@@ -2715,6 +2728,11 @@ ieee754@^1.1.4:
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
   integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
 
+immer@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-8.0.0.tgz#08763549ba9dd7d5e2eb4bec504a8315bd9440c2"
+  integrity sha512-jm87NNBAIG4fHwouilCHIecFXp5rMGkiFrAuhVO685UnMAlOneEAnOyzPt8OnP47TC11q/E7vpzZe0WvwepFTg==
+
 import-fresh@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/import-fresh/-/import-fresh-2.0.0.tgz#d81355c15612d386c61f9ddd3922d4304822a546"
@@ -2750,6 +2768,13 @@ inherits@2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
+
+invariant@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
+  integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
+  dependencies:
+    loose-envify "^1.0.0"
 
 is-absolute-url@^2.0.0:
   version "2.1.0"
@@ -3171,7 +3196,7 @@ log-symbols@^2.2.0:
   dependencies:
     chalk "^2.0.1"
 
-loose-envify@^1.1.0:
+loose-envify@^1.0.0, loose-envify@^1.1.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
   integrity sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==

@@ -54,16 +54,16 @@ describe("Usage", () => {
 
   it("Routing", async () => {
     const reqUrl = "/users/1";
-    const context = createRouterContext(routes, routerOptions);
+    const router = createRouterContext(routes, routerOptions);
 
-    context.navigate(reqUrl);
-    await context.preloadCurrent();
+    router.navigate(reqUrl);
+    await router.preloadCurrent();
   });
 
   it("In React", async () => {
-    const context = createRouterContext(routes, routerOptions);
-    context.navigate("/users/1");
-    await context.preloadCurrent();
+    const router = createRouterContext(routes, routerOptions);
+    router.navigate("/users/1");
+    await router.preloadCurrent();
 
     const App = () => {
       // Get preloaded Page component
@@ -72,7 +72,7 @@ describe("Usage", () => {
     };
 
     const result = render(
-      <FrouteContext context={context}>
+      <FrouteContext router={router}>
         <App />
       </FrouteContext>
     );
@@ -83,7 +83,7 @@ describe("Usage", () => {
   });
 
   it("Building", async () => {
-    const context = createRouterContext(routes, routerOptions);
-    context.buildPath(routes.usersShow, { id: "1" });
+    const router = createRouterContext(routes, routerOptions);
+    router.buildPath(routes.usersShow, { id: "1" });
   });
 });

@@ -34,7 +34,8 @@ export const createRouterContext = (
 };
 
 export class RouterContext {
-  public status = 200;
+  public statusCode = 200;
+  public redirectTo: string | null = null;
   public history: History;
 
   private location: Location | null = null;
@@ -77,10 +78,6 @@ export class RouterContext {
 
   public buildPath<R extends IRoute<any>>(route: R, params: ParamsOfRoute<R>) {
     return buildPath(route, params);
-  }
-
-  public setStatus(status: number) {
-    this.status = status;
   }
 
   public getCurrentMatch() {

@@ -8,6 +8,11 @@ export default () => {
       Here is index
       <br />
       <Link href={buildPath(routes.userShow, { id: "1" })}>Go to user</Link>
+      <br />
+      <Link href={buildPath(routes.userShow, { id: "404" })}>
+        Go to not found user
+      </Link>
+      <br />
     </div>
   );
 };

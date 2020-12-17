@@ -14,7 +14,9 @@
     "parcel": "^1.12.4"
   },
   "dependencies": {
-    "@fleur/froute": "0.1.0-pre.6",
+    "@fleur/fleur": "^2.0.0",
+    "@fleur/froute": "0.1.0-pre.8",
+    "@fleur/react": "^4.0.1",
     "domready": "^1.0.8",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
