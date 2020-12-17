@@ -1,5 +1,5 @@
 {
-  "name": "froute",
+  "name": "@fleur/froute",
   "version": "0.1.0-pre.1",
   "description": "Type safe and flexible router for React",
   "main": "dist/index.js",
