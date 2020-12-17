@@ -97,12 +97,13 @@ export const Link = forwardRef<
     (e: React.MouseEvent<HTMLAnchorElement>) => {
       if (props.onClick) props.onClick(e);
       if (e.isDefaultPrevented()) return;
+      if (!props.href) return;
       if (isModifiedEvent(e)) return;
       if (!isRoutable(props.href)) return;
 
       e.preventDefault();
 
-      const parsed = parseUrl(props.href!);
+      const parsed = parseUrl(props.href);
 
       push(
         (parsed.pathname || "") + (parsed.query || "") + (parsed.hash || "")
@@ -115,7 +116,11 @@ export const Link = forwardRef<
 });
 
 export const useRouter = () => {
-  const context = useContext(Context)!;
+  const context = useContext(Context);
+  if (!context) {
+    throw new Error("FrouteContext must be placed of top of useRouter");
+  }
+
   return context;
 };
 
@@ -148,6 +153,8 @@ interface UseParams {
 }
 
 export const useParams: UseParams = <T extends IRoute<any> = IRoute<any>>(
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   route?: T
 ) => {
   const context = useRouter();

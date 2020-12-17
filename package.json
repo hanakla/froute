@@ -1,6 +1,6 @@
 {
   "name": "froute",
-  "version": "1.0.0",
+  "version": "0.1.0-pre.1",
   "description": "Type safe and flexible router for React",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -53,6 +53,7 @@
     "react": "^16.13.1",
     "react-dom": "^17.0.1",
     "react-test-renderer": "^17.0.1",
+    "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.4.4",
     "typescript": "^4.0.2"
   },
