@@ -2,7 +2,9 @@ import { ComponentType } from "react";
 import { match, Match } from "path-to-regexp";
 
 export interface ActorDef<R extends IRoute<any>> {
-  component: () => Promise<ComponentType<any>> | ComponentType<any>;
+  component: () =>
+    | Promise<{ default: ComponentType<any> } | ComponentType<any>>
+    | ComponentType<any>;
   preload?: (
     context: any,
     params: ParamsOfRoute<R>,
@@ -35,7 +37,8 @@ class Actor<R extends IRoute<any>> implements ActorDef<R> {
   public async loadComponent() {
     if (this.cache) return this.cache;
 
-    this.cache = await this.component();
+    const module = await this.component();
+    this.cache = (module as any).default ?? module;
     return this.cache;
   }
 
