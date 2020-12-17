@@ -129,7 +129,7 @@ export const ResponseCode = ({
     router.setStatus(status);
   }, []);
 
-  return children;
+  return <>{children}</>;
 };
 
 export const useRouter = () => {
