@@ -116,7 +116,7 @@ export const Link = forwardRef<
   return <a ref={ref} {...props} onClick={handleClick} />;
 });
 
-export const ResponseStatus = ({
+export const ResponseCode = ({
   status,
   children,
 }: {

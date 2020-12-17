@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "examples",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel src/index.html --open "
+  },
+  "devDependencies": {
+    "@types/domready": "^1.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "parcel": "^1.12.4"
+  },
+  "dependencies": {
+    "@fleur/froute": "0.1.0-pre.6",
+    "domready": "^1.0.8",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "regenerator-runtime": "^0.13.7"
+  }
+}
