@@ -7,6 +7,7 @@ export {
   useRouteRender,
   useUrlBuilder,
   Link,
+  ResponseStatus,
   FrouteContext,
 } from "./react-bind";
 export { buildPath } from "./builder";

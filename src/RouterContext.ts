@@ -39,6 +39,7 @@ export class RouterContext {
 
   private location: Location | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
+  private listener: Set<() => void> = new Set();
 
   constructor(
     public routes: { [key: string]: IRoute<any> },
@@ -90,6 +91,14 @@ export class RouterContext {
     return this.location;
   }
 
+  public observeFinishPreload(listener: () => void) {
+    this.listener.add(listener);
+  }
+
+  public unobserveFinishPreload(listener: () => void) {
+    this.listener.delete(listener);
+  }
+
   public resolveRoute(pathname: string): null | FrouteMatch<any> {
     const realPathName = parseUrl(pathname).pathname!;
     let matched: FrouteMatch<any> | null = null;
@@ -137,5 +146,7 @@ export class RouterContext {
       matchedRoute.match.params,
       query
     );
+
+    this.listener.forEach((listener) => listener());
   }
 }

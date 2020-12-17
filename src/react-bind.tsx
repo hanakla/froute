@@ -7,6 +7,7 @@ import React, {
   useMemo,
   forwardRef,
   MouseEvent,
+  useReducer,
 } from "react";
 import { Action } from "history";
 import qs from "querystring";
@@ -115,19 +116,41 @@ export const Link = forwardRef<
   return <a ref={ref} {...props} onClick={handleClick} />;
 });
 
+export const ResponseStatus = ({
+  status,
+  children,
+}: {
+  status: number;
+  children: ReactNode;
+}) => {
+  const router = useRouter();
+
+  useMemo(() => {
+    router.setStatus(status);
+  }, []);
+
+  return children;
+};
+
 export const useRouter = () => {
-  const context = useContext(Context);
-  if (!context) {
+  const router = useContext(Context);
+  if (!router) {
     throw new Error("FrouteContext must be placed of top of useRouter");
   }
 
-  return context;
+  return router;
 };
 
 export const useRouteRender = () => {
-  const context = useRouter();
-  const match = context.getCurrentMatch();
+  const router = useRouter();
+  const match = router.getCurrentMatch();
   const PageComponent = match?.route.getActor()?.cachedComponent;
+  const [, rerender] = useReducer((s) => s + 1, 0);
+
+  useIsomorphicEffect(() => {
+    router.observeFinishPreload(rerender);
+    return () => router.unobserveFinishPreload(rerender);
+  }, [router, rerender]);
 
   return useMemo(() => ({ PageComponent }), [match]);
 };
