@@ -20,12 +20,12 @@ domready(async () => {
 
   ReactDOM.render(
     <FleurContext value={context}>
-      <FrouteContext context={router}>
+      <FrouteContext router={router}>
         <App />
       </FrouteContext>
     </FleurContext>,
     root
   );
 
-  console.log({ responseCode: router.status });
+  console.log({ responseCode: router.statusCode });
 });

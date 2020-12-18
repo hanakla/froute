@@ -9,7 +9,7 @@ export default () => {
   const { buildPath } = useUrlBuilder();
   const userIds = useStore((get) => get(UserStore).state.fetchedIds);
 
-  if (userIds.length === 0) {
+  if (!userIds.includes(params.id)) {
     return <ResponseCode status={404}>User not found</ResponseCode>;
   }
 
