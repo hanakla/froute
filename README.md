@@ -5,7 +5,7 @@ Can use with both Fleur / Redux (redux-thunk).
 
 ## Features
 
-See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/src/index.spec.ts)
+See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/src/index.spec.tsx)
 
 - Library independent
   - Works with Redux and Fleur
