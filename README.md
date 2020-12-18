@@ -84,7 +84,7 @@ export default () => {
     )
   }
 
-  if (!user.suspended) {
+  if (user.suspended) {
     return (
       <Redirect status={301} url='/'>
         This account is suspended.
