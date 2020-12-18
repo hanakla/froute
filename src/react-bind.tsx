@@ -170,7 +170,8 @@ export const useRouteComponent = () => {
   useIsomorphicEffect(() => {
     const unlisten = router.history.listen(({ action }) => {
       if (action === Action.Pop) {
-        rerender();
+        // TODO: Research dispatch timing
+        setTimeout(() => rerender());
       }
     });
     return () => unlisten();
