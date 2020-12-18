@@ -8,6 +8,7 @@ import {
   useNavigation,
   useParams,
   useRouteComponent,
+  useUrlBuilder,
 } from "./react-bind";
 import { routeBy } from "./RouteDefiner";
 import { createRouterContext, RouterContext } from "./RouterContext";
@@ -19,7 +20,7 @@ describe("react-bind", () => {
       .action({
         component: () => {
           const Component = () => {
-            const params = useParams();
+            const params = useParams(routes.usersShow);
             return <div>I am user {params.id}</div>;
           };
           return new Promise((resolve) =>
@@ -215,5 +216,17 @@ describe("react-bind", () => {
         `"<div>Here is Artwork 2 for user 1</div>"`
       );
     });
+  });
+
+  describe("useUrlBuilder", () => {
+    const router = createRouterContext(routes);
+
+    const { result } = renderHook(useUrlBuilder, {
+      wrapper: createWrapper(router),
+    });
+
+    expect(
+      result.current.buildPath(routes.usersShow, { id: "1" })
+    ).toMatchInlineSnapshot(`"/users/1"`);
   });
 });

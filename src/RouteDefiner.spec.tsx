@@ -6,12 +6,14 @@ describe("RouteDefiner", () => {
   it("it's run", () => {
     expect(() => {
       const routes = {
-        index: routeBy("/").action({
-          component: () => () => null,
-          preload: async (context: ExteranalContext) => {
-            console.log(context.hi);
-          },
-        }),
+        index: routeBy("/")
+          .param("id")
+          .action({
+            component: () => () => null,
+            preload: async (context, params, query) => {
+              console.log(context.hi);
+            },
+          }),
       };
     }).not.toThrow();
   });

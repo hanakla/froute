@@ -1,6 +1,14 @@
 import { ComponentType } from "react";
 import { match, Match } from "path-to-regexp";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error Params is type store
+export interface RouteDefinition<Params extends string> {
+  match(pathname: string): Match;
+  toPath(): string;
+  getActor(): Actor<any> | null;
+}
+
 export interface ActorDef<R extends RouteDefinition<any>> {
   component: () =>
     | Promise<{ default: ComponentType<any> } | ComponentType<any>>
@@ -13,17 +21,12 @@ export interface ActorDef<R extends RouteDefinition<any>> {
   [key: string]: any;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error Params is type store
-export interface RouteDefinition<Params extends string> {
-  match(pathname: string): Match;
-  toPath(): string;
-  getActor(): Actor<any> | null;
-}
-
-export type ParamsOfRoute<
-  T extends RouteDefinition<any>
-> = T extends RouteDefinition<infer P> ? { [K in P]: string } : never;
+// prettier-ignore
+export type ParamsOfRoute<T extends RouteDefinition<any>> =
+  T extends RouteDefiner<infer P> ? { [K in P]: string }
+  : T extends Readonly<RouteDefinition<infer P>> ? { [K in P]: string }
+  : T extends RouteDefinition<infer P> ? { [K in P]: string }
+  : never;
 
 class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
@@ -83,11 +86,11 @@ export class RouteDefiner<Params extends string>
     return this as any;
   }
 
-  public action<T extends ActorDef<any>>({
+  public action({
     component,
     preload,
     ...rest
-  }: T): Readonly<RouteDefinition<Params>> {
+  }: ActorDef<this>): Readonly<RouteDefinition<Params>> {
     this.actor = new Actor(component, preload);
     Object.assign(this.actor, rest);
     return this as any;
