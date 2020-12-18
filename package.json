@@ -58,6 +58,8 @@
   },
   "dependencies": {
     "history": "^5.0.0",
-    "path-to-regexp": "^6.1.0"
+    "path-to-regexp": "^6.1.0",
+    "querystring": "^0.2.0",
+    "url": "^0.11.0"
   }
 }
