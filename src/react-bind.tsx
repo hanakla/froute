@@ -13,7 +13,7 @@ import { Action } from "history";
 import qs from "querystring";
 import { canUseDOM } from "./utils";
 import { parse as parseUrl } from "url";
-import { IRoute, ParamsOfRoute } from "./RouteDefiner";
+import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { RouterContext } from "./RouterContext";
 import { useCallback } from "react";
 
@@ -156,7 +156,7 @@ export const useRouter = () => {
   return router;
 };
 
-export const useRouteRender = () => {
+export const useRouteComponent = () => {
   const router = useRouter();
   const match = router.getCurrentMatch();
   const PageComponent = match?.route.getActor()?.cachedComponent;
@@ -196,10 +196,12 @@ export const useLocation = () => {
 
 interface UseParams {
   (): { [param: string]: string | undefined };
-  <T extends IRoute<any>>(route: T): ParamsOfRoute<T>;
+  <T extends RouteDefinition<any>>(route: T): ParamsOfRoute<T>;
 }
 
-export const useParams: UseParams = <T extends IRoute<any> = IRoute<any>>(
+export const useParams: UseParams = <
+  T extends RouteDefinition<any> = RouteDefinition<any>
+>(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   route?: T

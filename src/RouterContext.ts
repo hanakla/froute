@@ -8,29 +8,65 @@ import { parse as parseUrl } from "url";
 import { MatchResult } from "path-to-regexp";
 import { parse as qsParse } from "querystring";
 import { canUseDOM } from "./utils";
-import { IRoute, ParamsOfRoute } from "./RouteDefiner";
+import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { buildPath } from "./builder";
 
 interface FrouteMatch<PK extends string> {
-  route: IRoute<PK>;
+  route: RouteDefinition<PK>;
   match: MatchResult<{ [K in PK]: string }>;
 }
 
-export interface RouterOptions {
-  resolver?: (
+interface RouteResolver {
+  (
     pathname: string,
     match: FrouteMatch<any> | null,
     context: RouterContext
-  ) => FrouteMatch<any> | null;
+  ): FrouteMatch<any> | null;
+}
+
+/**
+ * RouteResolver for combineRouteResolver.
+ * It returns `false`, skip to next resolver.
+ * If does not match any route expect to return `null`.
+ */
+interface CombinableResolver {
+  (pathname: string, match: FrouteMatch<any> | null, context: RouterContext):
+    | FrouteMatch<any>
+    | null
+    | false;
+}
+
+export interface RouterOptions {
+  resolver?: RouteResolver;
   preloadContext?: any;
   history?: History;
 }
 
 export const createRouterContext = (
-  routes: { [key: string]: IRoute<any> },
+  routes: { [key: string]: RouteDefinition<any> },
   options: RouterOptions = {}
 ) => {
   return new RouterContext(routes, options);
+};
+
+export const combineRouteResolver = (
+  ...resolvers: CombinableResolver[]
+): RouteResolver => {
+  return (pathname, match, context) => {
+    let prevMatch: FrouteMatch<any> | null = match;
+    let prevPath: string = pathname;
+
+    for (const resolver of resolvers) {
+      const result = resolver(prevPath, prevMatch, context);
+
+      if (result === false) continue;
+      if (result === null) return null;
+      prevMatch = result;
+      prevPath = result.match.path!;
+    }
+
+    return prevMatch;
+  };
 };
 
 export class RouterContext {
@@ -43,7 +79,7 @@ export class RouterContext {
   private listener: Set<() => void> = new Set();
 
   constructor(
-    public routes: { [key: string]: IRoute<any> },
+    public routes: { [key: string]: RouteDefinition<any> },
     private options: RouterOptions = {}
   ) {
     this.history =
@@ -76,7 +112,10 @@ export class RouterContext {
     }
   }
 
-  public buildPath<R extends IRoute<any>>(route: R, params: ParamsOfRoute<R>) {
+  public buildPath<R extends RouteDefinition<any>>(
+    route: R,
+    params: ParamsOfRoute<R>
+  ) {
     return buildPath(route, params);
   }
 
@@ -96,7 +135,7 @@ export class RouterContext {
     this.listener.delete(listener);
   }
 
-  public resolveRoute(pathname: string): null | FrouteMatch<any> {
+  public resolveRoute(pathname: string): FrouteMatch<any> | null {
     const realPathName = parseUrl(pathname).pathname!;
     let matched: FrouteMatch<any> | null = null;
 
@@ -119,7 +158,7 @@ export class RouterContext {
     return matched;
   }
 
-  public async preloadRoute<R extends IRoute<any>>(
+  public async preloadRoute<R extends RouteDefinition<any>>(
     route: R,
     params: ParamsOfRoute<R>,
     query: { [key: string]: string | string[] | undefined } = {}

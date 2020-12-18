@@ -1,8 +1,8 @@
 import { compile } from "path-to-regexp";
 import { stringify } from "querystring";
-import { IRoute, ParamsOfRoute } from "./RouteDefiner";
+import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 
-export const buildPath = <T extends IRoute<any>>(
+export const buildPath = <T extends RouteDefinition<any>>(
   def: T,
   params: ParamsOfRoute<T>,
   query?: { [key: string]: string }

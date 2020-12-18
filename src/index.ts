@@ -4,7 +4,7 @@ export {
   useLocation,
   useNavigation,
   useParams,
-  useRouteRender,
+  useRouteComponent,
   useUrlBuilder,
   Link,
   ResponseCode,

@@ -7,7 +7,7 @@ import {
   useLocation,
   useNavigation,
   useParams,
-  useRouteRender,
+  useRouteComponent,
 } from "./react-bind";
 import { routeBy } from "./RouteDefiner";
 import { createRouterContext, RouterContext } from "./RouterContext";
@@ -203,7 +203,7 @@ describe("react-bind", () => {
     });
   });
 
-  describe("useRouteRender", () => {
+  describe("useRouteComponent", () => {
     it("test", async () => {
       const router = createRouterContext(routes);
 
@@ -213,7 +213,7 @@ describe("react-bind", () => {
       });
 
       const App = () => {
-        const { PageComponent } = useRouteRender();
+        const { PageComponent } = useRouteComponent();
         return PageComponent ? <PageComponent /> : null;
       };
 

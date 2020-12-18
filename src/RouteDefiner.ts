@@ -1,7 +1,7 @@
 import { ComponentType } from "react";
 import { match, Match } from "path-to-regexp";
 
-export interface ActorDef<R extends IRoute<any>> {
+export interface ActorDef<R extends RouteDefinition<any>> {
   component: () =>
     | Promise<{ default: ComponentType<any> } | ComponentType<any>>
     | ComponentType<any>;
@@ -15,17 +15,17 @@ export interface ActorDef<R extends IRoute<any>> {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error Params is type store
-export interface IRoute<Params extends string> {
+export interface RouteDefinition<Params extends string> {
   match(pathname: string): Match;
   toPath(): string;
   getActor(): Actor<any> | null;
 }
 
-export type ParamsOfRoute<T extends IRoute<any>> = T extends IRoute<infer P>
-  ? { [K in P]: string }
-  : never;
+export type ParamsOfRoute<
+  T extends RouteDefinition<any>
+> = T extends RouteDefinition<infer P> ? { [K in P]: string } : never;
 
-class Actor<R extends IRoute<any>> implements ActorDef<R> {
+class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
   private cache: ComponentType<any> | null = null;
 
@@ -61,7 +61,8 @@ export const routeBy = (path: string): RouteDefiner<Exclude<"", "">> => {
 //   (path: string)
 // }
 
-export class RouteDefiner<Params extends string> implements IRoute<Params> {
+export class RouteDefiner<Params extends string>
+  implements RouteDefinition<Params> {
   private stack: string[] = [];
   private actor: Actor<this> | null = null;
 
@@ -86,7 +87,7 @@ export class RouteDefiner<Params extends string> implements IRoute<Params> {
     component,
     preload,
     ...rest
-  }: T): Readonly<IRoute<Params>> {
+  }: T): Readonly<RouteDefinition<Params>> {
     this.actor = new Actor(component, preload);
     Object.assign(this.actor, rest);
     return this as any;

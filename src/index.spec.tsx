@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import {
   createRouterContext,
   routeBy,
-  useRouteRender,
+  useRouteComponent,
   Link,
   FrouteContext,
   useUrlBuilder,
@@ -67,7 +67,7 @@ describe("Usage", () => {
 
     const App = () => {
       // Get preloaded Page component
-      const { PageComponent } = useRouteRender();
+      const { PageComponent } = useRouteComponent();
       return <div id="app">{PageComponent ? <PageComponent /> : null}</div>;
     };
 

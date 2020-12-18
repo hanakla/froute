@@ -21,7 +21,7 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - useLocation
 - useNavigation
 - useParams
-- useRouteRender
+- useRouteComponent
 - useUrlBuilder
 
 ### Components
@@ -48,10 +48,10 @@ export const routes = {
 
 App:
 ```tsx
-import { useRouteRender } from '@fleur/froute'
+import { useRouteComponent, ResponseCode } from '@fleur/froute'
 
 export const App = () => {
-  const { PageComponent } = useRouteRender()
+  const { PageComponent } = useRouteComponent()
 
   return (
     <div>
@@ -69,7 +69,7 @@ export const App = () => {
 
 User.tsx:
 ```tsx
-import { routes } from './routes'
+import { routes, ResponseCode, Redirect } from './routes'
 
 export default () => {
   const { userId } = useParams(/* optional */ routes.user)
@@ -124,6 +124,7 @@ server.get("*", async (req, res, next) => {
     </FrouteContext>
   )
 
+  // Handling redirect
   if (router.redirectTo) {
     res.redirect(router.statusCode, router.redirectTo)
   } else{

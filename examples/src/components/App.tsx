@@ -1,9 +1,9 @@
 import React from "react";
-import { useRouteRender, ResponseCode } from "@fleur/froute";
+import { useRouteComponent, ResponseCode } from "@fleur/froute";
 import {} from "../../../src";
 
 export const App = () => {
-  const { PageComponent } = useRouteRender();
+  const { PageComponent } = useRouteComponent();
   return (
     <div>
       {PageComponent ? (
