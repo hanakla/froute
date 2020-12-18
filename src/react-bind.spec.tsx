@@ -77,7 +77,7 @@ describe("react-bind", () => {
   });
 
   describe("useLocation", () => {
-    it("Should return parameters", () => {
+    it("Should correctry parsed complex url", () => {
       const router = createRouterContext(routes);
       router.navigate("/users/1?q=1#hash");
 
@@ -93,24 +93,6 @@ describe("react-bind", () => {
             "q": "1",
           },
           "search": "?q=1",
-        }
-      `);
-    });
-
-    it("Should return parameters", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users/1");
-
-      const result = renderHook(useLocation, {
-        wrapper: createWrapper(router),
-      });
-
-      expect(result.result.current).toMatchInlineSnapshot(`
-        Object {
-          "hash": "",
-          "pathname": "/users/1",
-          "query": Object {},
-          "search": "",
         }
       `);
     });

@@ -1,6 +1,5 @@
 import { routeBy } from "./RouteDefiner";
 import {
-  createRouterContext,
   combineRouteResolver,
   RouterContext,
   RouterOptions,
@@ -104,12 +103,15 @@ describe("Router", () => {
       ),
     };
 
-    it("Should alias path to real route", () => {
-      const router = new RouterContext(routes, options);
+    describe("Redirection", () => {
+      it("Should alias path to real route", () => {
+        const router = new RouterContext(routes, options);
 
-      router.navigate("/u/1");
-      expect(router.statusCode).toBe(302);
-      expect(router.redirectTo).toBe("/users/1");
+        router.navigate("/u/1");
+        expect(router.statusCode).toBe(302);
+        expect(router.redirectTo).toBe("/users/1");
+        expect(router.getCurrentMatch()).toBe(null);
+      });
     });
 
     describe("Language specified route", () => {
