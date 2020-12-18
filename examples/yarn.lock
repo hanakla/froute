@@ -871,10 +871,10 @@
     immer "^8.0.0"
     invariant "^2.2.4"
 
-"@fleur/froute@0.1.0-pre.8":
-  version "0.1.0-pre.8"
-  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0-pre.8.tgz#b3cc307dc60858929e36cab0037b73dc038fe11b"
-  integrity sha512-2Fs+j2cn0aTVGcFwFWRnW2NTxQ0yBvMQfUkqm0ML7Tg+8qSHtFr4++C9uHV2njlgc4P0dPzQ2Ik0N9tjg1E26A==
+"@fleur/froute@^0.1.0-pre.11":
+  version "0.1.0-pre.11"
+  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0-pre.11.tgz#1a2200042413c77ead6284c7c902eb8953d33208"
+  integrity sha512-jE/8JSyAKRfm0yEX9cpMgpNSvH8/4a3hngKUDPvf8Dd6mbzWhXbTYCbyaDqsnGtqqCMH2wyvrF/XX7Qx19CAFg==
   dependencies:
     history "^5.0.0"
     path-to-regexp "^6.1.0"
@@ -3386,8 +3386,8 @@ node-addon-api@^1.7.1:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-1.7.2.tgz#3df30b95720b53c24e59948b49532b662444f54d"
   integrity sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==
 
-node-forge@^0.10.0:
-  version "0.10.0"
+node-forge@^0.7.1:
+  version "0.7.6"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.6.tgz#fdf3b418aee1f94f0ef642cd63486c77ca9724ac"
   integrity sha512-sol30LUpz1jQFBjOKwbjxijiE3b6pjd74YwfD0fJOKPjF+fONKb2Yg8rYgS6+bK6VDl+/wfr4IYpC7jDzLUIfw==
 
