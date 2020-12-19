@@ -1,7 +1,11 @@
 # Froute
 
-Framework independent Router for React.
+Framework independent Router for React.  
 Can use with both Fleur / Redux (redux-thunk).
+
+```
+yarn add @fleur/froute
+```
 
 ## Features
 
