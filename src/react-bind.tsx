@@ -190,6 +190,7 @@ export const useLocation = () => {
       search: location?.search,
       query: qs.parse(location?.search.slice(1) ?? ""),
       hash: location?.hash,
+      state: location.state,
     }),
     [location?.pathname, location?.search, location?.search]
   );
