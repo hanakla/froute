@@ -5,17 +5,13 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
-  forwardRef,
-  MouseEvent,
   useReducer,
 } from "react";
 import { Action } from "history";
 import qs from "querystring";
 import { canUseDOM } from "./utils";
-import { parse as parseUrl } from "url";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { RouterContext } from "./RouterContext";
-import { useCallback } from "react";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -69,82 +65,6 @@ export const FrouteContext = ({
   }, []);
 
   return <Context.Provider value={router}>{children}</Context.Provider>;
-};
-
-const isRoutable = (href: string | undefined) => {
-  const parsed = parseUrl(href ?? "");
-  const current = parseUrl(location.href);
-
-  if (!href) return false;
-  if (href[0] === "#") return false;
-  if (parsed.protocol && parsed.protocol !== current.protocol) return false;
-  if (parsed.host && parsed.host !== location.host) return false;
-  return true;
-};
-
-const isModifiedEvent = (event: MouseEvent) =>
-  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-
-export const Link = forwardRef<
-  HTMLAnchorElement,
-  React.DetailedHTMLProps<
-    React.AnchorHTMLAttributes<HTMLAnchorElement>,
-    HTMLAnchorElement
-  >
->((props, ref) => {
-  const { push } = useNavigation();
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (props.onClick) props.onClick(e);
-      if (e.isDefaultPrevented()) return;
-      if (!props.href) return;
-      if (isModifiedEvent(e)) return;
-      if (!isRoutable(props.href)) return;
-
-      e.preventDefault();
-
-      const parsed = parseUrl(props.href);
-
-      push(
-        (parsed.pathname || "") + (parsed.query || "") + (parsed.hash || "")
-      );
-    },
-    [props.onClick, props.href]
-  );
-
-  return <a ref={ref} {...props} onClick={handleClick} />;
-});
-
-export const ResponseCode = ({
-  status,
-  children,
-}: {
-  status: number;
-  children: ReactNode;
-}) => {
-  const router = useRouter();
-
-  useMemo(() => {
-    router.statusCode = status;
-  }, []);
-
-  return <>{children}</>;
-};
-
-export const Redirect: React.FC<{ url: string; status?: number }> = ({
-  url,
-  status = 302,
-  children,
-}) => {
-  const router = useRouter();
-
-  useMemo(() => {
-    router.statusCode = status;
-    router.redirectTo = url;
-  }, []);
-
-  return <>{children}</>;
 };
 
 export const useRouter = () => {

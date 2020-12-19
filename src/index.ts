@@ -6,9 +6,9 @@ export {
   useParams,
   useRouteComponent,
   useUrlBuilder,
-  Link,
-  ResponseCode,
-  Redirect,
   FrouteContext,
 } from "./react-bind";
+export { Link } from "./components/Link";
+export { ResponseCode } from "./components/ResponseCode";
+export { Redirect } from "./components/Redirect";
 export { buildPath } from "./builder";
