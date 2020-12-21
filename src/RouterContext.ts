@@ -72,9 +72,10 @@ export class RouterContext {
 
   public buildPath = <R extends RouteDefinition<any>>(
     route: R,
-    params: ParamsOfRoute<R>
+    params: ParamsOfRoute<R>,
+    query?: { [key: string]: string | string[] }
   ) => {
-    return buildPath(route, params);
+    return buildPath(route, params, query);
   };
 
   public getCurrentMatch = () => {
