@@ -67,7 +67,7 @@ export const FrouteContext = ({
   return <Context.Provider value={router}>{children}</Context.Provider>;
 };
 
-export const useRouter = () => {
+export const useRouterContext = () => {
   const router = useContext(Context);
   if (!router) {
     throw new Error("FrouteContext must be placed of top of useRouter");
@@ -77,7 +77,7 @@ export const useRouter = () => {
 };
 
 export const useRouteComponent = () => {
-  const router = useRouter();
+  const router = useRouterContext();
   const match = router.getCurrentMatch();
   const PageComponent = match?.route.getActor()?.cachedComponent;
   const [, rerender] = useReducer((s) => s + 1, 0);
@@ -101,7 +101,7 @@ export const useRouteComponent = () => {
 };
 
 export const useLocation = () => {
-  const router = useRouter();
+  const router = useRouterContext();
   const location = router.getCurrentLocation();
 
   return useMemo(
@@ -128,7 +128,7 @@ export const useParams: UseParams = <
   // @ts-expect-error
   route?: T
 ) => {
-  const router = useRouter();
+  const router = useRouterContext();
   const location = router.getCurrentLocation();
   const match = location ? router.resolveRoute(location.pathname) : null;
 
@@ -136,7 +136,7 @@ export const useParams: UseParams = <
 };
 
 export const useNavigation = () => {
-  const router = useRouter();
+  const router = useRouterContext();
 
   return useMemo(
     () => ({
@@ -150,7 +150,7 @@ export const useNavigation = () => {
 };
 
 export const useUrlBuilder = () => {
-  const router = useRouter();
+  const router = useRouterContext();
   return useMemo(
     () => ({
       buildPath: router.buildPath,
