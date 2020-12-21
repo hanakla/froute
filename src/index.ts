@@ -1,5 +1,6 @@
 export { routeBy, routeOf } from "./RouteDefiner";
 export { createRouterContext, RouterOptions } from "./RouterContext";
+export { combineRouteResolver } from "./RouterUtils";
 export {
   useLocation,
   useNavigation,

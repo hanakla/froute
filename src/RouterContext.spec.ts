@@ -1,9 +1,6 @@
 import { routeBy } from "./RouteDefiner";
-import {
-  combineRouteResolver,
-  RouterContext,
-  RouterOptions,
-} from "./RouterContext";
+import { RouterContext, RouterOptions } from "./RouterContext";
+import { combineRouteResolver } from "./RouterUtils";
 
 describe("Router", () => {
   const routes = {

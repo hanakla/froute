@@ -4,9 +4,8 @@ import {
   History,
   Location,
 } from "history";
-import { parse as parseUrl } from "url";
-import { MatchResult } from "path-to-regexp";
 import { parse as qsParse } from "querystring";
+import { parse as urlParse } from "url";
 import { canUseDOM } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { buildPath } from "./builder";
@@ -24,17 +23,6 @@ interface RouteResolver {
   ): FrouteMatch<any> | null;
 }
 
-/**
- * RouteResolver for combineRouteResolver.
- * It returns `false`, skip to next resolver.
- * If does not match any route expect to return `null`.
- */
-interface CombinableResolver {
-  (pathname: string, match: FrouteMatch<any> | null, context: RouterContext):
-    | FrouteMatch<any>
-    | null
-    | false;
-}
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -49,25 +37,6 @@ export const createRouterContext = (
   return new RouterContext(routes, options);
 };
 
-export const combineRouteResolver = (
-  ...resolvers: CombinableResolver[]
-): RouteResolver => {
-  return (pathname, match, context) => {
-    let prevMatch: FrouteMatch<any> | null = match;
-    let prevPath: string = pathname;
-
-    for (const resolver of resolvers) {
-      const result = resolver(prevPath, prevMatch, context);
-
-      if (result === false) continue;
-      if (result === null) return null;
-      prevMatch = result;
-      prevPath = result.match.path!;
-    }
-
-    return prevMatch;
-  };
-};
 
 export class RouterContext {
   public statusCode = 200;
