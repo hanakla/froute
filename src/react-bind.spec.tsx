@@ -51,31 +51,6 @@ describe("react-bind", () => {
     );
   };
 
-  describe("Link", () => {
-    it("Click to move location", async () => {
-      const router = createRouterContext(routes);
-      const spy = jest.spyOn(router, "navigate");
-
-      const result = render(
-        <Link data-testid="link" href="/users/1">
-          Link
-        </Link>,
-        { wrapper: createWrapper(router) }
-      );
-
-      expect(location.href).toMatchInlineSnapshot(`"http://localhost/"`);
-
-      const link = await result.findByTestId("link");
-      link.click();
-
-      expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/1"`);
-      expect(spy.mock.calls.length).toBe(1);
-
-      link.click();
-      expect(spy.mock.calls.length).toBe(2);
-    });
-  });
-
   describe("useLocation", () => {
     it("Should correctry parsed complex url", () => {
       const router = createRouterContext(routes);
