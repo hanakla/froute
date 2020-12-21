@@ -130,7 +130,7 @@ describe("react-bind", () => {
       const router = createRouterContext(routes);
       router.navigate("/users/1");
 
-      const { result, rerender } = renderHook(useNavigation, {
+      const { result } = renderHook(useNavigation, {
         wrapper: createWrapper(router),
       });
 
