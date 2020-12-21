@@ -3,7 +3,6 @@ import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
-  Link,
   useLocation,
   useNavigation,
   useParams,
@@ -94,6 +93,7 @@ describe("react-bind", () => {
             "q": "1",
           },
           "search": "?q=1",
+          "state": null,
         }
       `);
     });
@@ -112,6 +112,7 @@ describe("react-bind", () => {
           "pathname": "/notfound",
           "query": Object {},
           "search": "",
+          "state": null,
         }
       `);
     });
