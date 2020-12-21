@@ -10,6 +10,7 @@ export {
   FrouteContext,
 } from "./react-bind";
 export { Link } from "./components/Link";
+export { FrouteLink } from "./components/FrouteLink";
 export { ResponseCode } from "./components/ResponseCode";
 export { Redirect } from "./components/Redirect";
 export { matchByRoutes, isMatchToRoute, FrouteMatch } from "./routing";
