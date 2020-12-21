@@ -1,4 +1,4 @@
-export { routeBy } from "./RouteDefiner";
+export { routeBy, routeOf } from "./RouteDefiner";
 export { createRouterContext, RouterOptions } from "./RouterContext";
 export {
   useLocation,

@@ -21,12 +21,37 @@ export interface ActorDef<R extends RouteDefinition<any>> {
   [key: string]: any;
 }
 
+type ParamsObject<Params extends string | OptionalParam<string>> =
+  { [K in Extract<Params, Extract<Params, OptionalParam<any>>>]: string }
+  & { [K in OptionalParamStringToConst<Extract<Params, OptionalParam<string>>>]?: string }
+
 // prettier-ignore
 export type ParamsOfRoute<T extends RouteDefinition<any>> =
-  T extends RouteDefiner<infer P> ? { [K in P]: string }
-  : T extends Readonly<RouteDefinition<infer P>> ? { [K in P]: string }
-  : T extends RouteDefinition<infer P> ? { [K in P]: string }
+  T extends RouteDefiner<infer P> ? ParamsObject<P>
+  : T extends Readonly<RouteDefinition<infer P>> ? ParamsObject<P>
+  : T extends RouteDefinition<infer P> ? ParamsObject<P>
   : never;
+
+type OptionalParam<S extends string> = S & { __OPTIONAL: true }
+type OptionalParamStringToConst<P extends OptionalParam<string>> = P extends OptionalParam<infer K> ? K : never
+
+type ParamFragment<T extends string> = T extends `:${infer R}?` ? OptionalParam<R> : T extends `:${infer R}` ? R : never
+type ParamsInPath<S extends string> = string extends S ? string
+  : S extends `${infer R}/${infer Rest}` ? ParamFragment<R> | ParamsInPath<Rest>
+    : ParamFragment<S>
+
+/**
+ * Define route by fragment chain
+ * @deprecated use `routeOf` instead
+ */
+export const routeBy = (path: string): RouteDefiner<Exclude<"", "">> => {
+  return new RouteDefiner(path);
+};
+
+/** Define route by pathname */
+export const routeOf = <S extends string>(path: S): RouteDefiner<ParamsInPath<S>> => {
+  return new RouteDefiner(path)
+}
 
 class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
@@ -49,20 +74,6 @@ class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
     return this.cache;
   }
 }
-
-export const routeBy = (path: string): RouteDefiner<Exclude<"", "">> => {
-  return new RouteDefiner(path);
-};
-
-// type ParamFragment<T extends string> = T extends `:${infer R}` ? R : never
-// type ParamsInPath<S extends string> = string extends S ? string
-//   : S extends `${infer R}/${infer Rest}`  ? ParamFragment<R> | ParamsInPath<Rest>
-//     : ParamFragment<S>
-
-// interface Route {
-//   <S extends string>(path: S): RouteDefiner<ParamInPath<S>>
-//   (path: string)
-// }
 
 export class RouteDefiner<Params extends string>
   implements RouteDefinition<Params> {
