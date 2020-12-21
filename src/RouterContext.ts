@@ -4,6 +4,7 @@ import {
   History,
   Location,
 } from "history";
+
 import { parse as qsParse } from "querystring";
 import { parse as urlParse } from "url";
 import { canUseDOM } from "./utils";
@@ -24,6 +25,10 @@ export const createRouterContext = (
   return new RouterContext(routes, options);
 };
 
+interface Navigate {
+  (location: Location): void;
+  (pathname: string): void;
+}
 export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
@@ -43,13 +48,11 @@ export class RouterContext {
         : createMemoryHistory({ initialEntries: [] });
   }
 
-  public navigate(location: Location): void;
-  public navigate(pathname: string): void;
-  public navigate(pathname: string | Location) {
+  public navigate: Navigate = (pathname: string | Location) => {
     if (typeof pathname === "string") {
       this.currentMatch = this.resolveRoute(pathname);
 
-      const parsed = parseUrl(pathname);
+      const parsed = urlParse(pathname);
       this.location = {
         key: "",
         pathname: parsed.pathname ?? "",
@@ -65,30 +68,34 @@ export class RouterContext {
         this.location = location;
       }
     }
-  }
+  };
 
-  public buildPath<R extends RouteDefinition<any>>(
+  public buildPath = <R extends RouteDefinition<any>>(
     route: R,
     params: ParamsOfRoute<R>
-  ) {
+  ) => {
     return buildPath(route, params);
-  }
+  };
 
-  public getCurrentMatch() {
+  public getCurrentMatch = () => {
     return this.currentMatch;
-  }
+  };
 
-  public getCurrentLocation() {
+  public getCurrentLocation = () => {
+    if (!this.location)
+      throw new Error(
+        "Froute: location is empty. Please call `.navigate` before get current location."
+      );
     return this.location;
-  }
+  };
 
-  public observeFinishPreload(listener: () => void) {
+  public observeFinishPreload = (listener: () => void) => {
     this.listener.add(listener);
-  }
+  };
 
-  public unobserveFinishPreload(listener: () => void) {
+  public unobserveFinishPreload = (listener: () => void) => {
     this.listener.delete(listener);
-  }
+  };
 
   public resolveRoute = (pathname: string): FrouteMatch<any> | null => {
     return matchByRoutes(pathname, this.routes, {
