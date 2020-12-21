@@ -9,20 +9,7 @@ import { parse as urlParse } from "url";
 import { canUseDOM } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { buildPath } from "./builder";
-
-interface FrouteMatch<PK extends string> {
-  route: RouteDefinition<PK>;
-  match: MatchResult<{ [K in PK]: string }>;
-}
-
-interface RouteResolver {
-  (
-    pathname: string,
-    match: FrouteMatch<any> | null,
-    context: RouterContext
-  ): FrouteMatch<any> | null;
-}
-
+import { FrouteMatch, RouteResolver, matchByRoutes } from "./routing";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -36,7 +23,6 @@ export const createRouterContext = (
 ) => {
   return new RouterContext(routes, options);
 };
-
 
 export class RouterContext {
   public statusCode = 200;
@@ -104,28 +90,12 @@ export class RouterContext {
     this.listener.delete(listener);
   }
 
-  public resolveRoute(pathname: string): FrouteMatch<any> | null {
-    const realPathName = parseUrl(pathname).pathname!;
-    let matched: FrouteMatch<any> | null = null;
-
-    for (const route of Object.values(this.routes)) {
-      const match = route.match(realPathName);
-      if (!match) continue;
-
-      matched = {
-        route,
-        match: match as MatchResult<ParamsOfRoute<typeof route>>,
-      };
-
-      break;
-    }
-
-    if (this.options.resolver) {
-      return this.options.resolver(realPathName, matched, this);
-    }
-
-    return matched;
-  }
+  public resolveRoute = (pathname: string): FrouteMatch<any> | null => {
+    return matchByRoutes(pathname, this.routes, {
+      resolver: this.options.resolver,
+      context: this,
+    });
+  };
 
   public async preloadRoute<R extends RouteDefinition<any>>(
     route: R,
