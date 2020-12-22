@@ -1,7 +1,7 @@
-import React, { forwardRef, useMemo, Ref, useRef, ReactElement } from "react";
+import React, { forwardRef, useMemo, Ref, ReactElement } from "react";
 import { useUrlBuilder } from "../react-bind";
 import { Link } from "./Link";
-import { ParamsOfRoute, RouteDefinition, routeOf } from "../RouteDefiner";
+import { ParamsOfRoute, RouteDefinition } from "../RouteDefiner";
 
 type NativeProps = Omit<
   React.DetailedHTMLProps<
@@ -18,13 +18,11 @@ type OwnProps<R extends RouteDefinition<any>> = {
   query?: { [key: string]: string | string[] };
 };
 
-type Props<R extends RouteDefinition<any>> =
-  // NativeProps &
-  OwnProps<R>;
+type Props<R extends RouteDefinition<any>> = NativeProps & OwnProps<R>;
 
 type FrouteLink = <R extends RouteDefinition<any>>(
   props: Props<R>
-) => ReactElement;
+) => ReactElement | null;
 
 export const FrouteLink: FrouteLink = forwardRef(
   ({ to, params, query, ...props }, ref) => {
