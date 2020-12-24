@@ -4,7 +4,7 @@ import {
   createRouterContext,
   routeOf,
   useRouteComponent,
-  Link,
+  FrouteLink,
   FrouteContext,
   useUrlBuilder,
   RouterOptions,
@@ -27,13 +27,13 @@ describe("Usage", () => {
     usersShow: routeOf("/users/:id").action({
       // Expecting dynamic import
       component: async () => () => {
-        const { buildPath } = useUrlBuilder();
-
         return (
           <div>
             Here is UserShow
             {/* 👇 froute's Link automatically use history navigation and fire preload */}
-            <Link href={buildPath(routes.usersShow, { id: "1" })}>A</Link>
+            <FrouteLink to={routes.usersShow} params={{ id: "1" }}>
+              A
+            </FrouteLink>
           </div>
         );
       },

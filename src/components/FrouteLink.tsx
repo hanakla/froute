@@ -1,5 +1,11 @@
-import React, { forwardRef, Ref, ReactElement, useCallback } from "react";
-import { useNavigation } from "../react-bind";
+import React, {
+  forwardRef,
+  useMemo,
+  Ref,
+  ReactElement,
+  useCallback,
+} from "react";
+import { useNavigation, useUrlBuilder } from "../react-bind";
 import { ParamsOfRoute, RouteDefinition } from "../RouteDefiner";
 
 type NativeProps = Omit<
@@ -40,6 +46,14 @@ const isModifiedEvent = (event: React.MouseEvent) =>
 export const FrouteLink: FrouteLink = forwardRef(
   ({ to, params, query, ...props }, ref) => {
     const { push } = useNavigation();
+    const { buildPath } = useUrlBuilder();
+
+    const href = useMemo(() => buildPath(to, params, query), [
+      buildPath,
+      to,
+      params,
+      query,
+    ]);
 
     const handleClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -54,6 +68,6 @@ export const FrouteLink: FrouteLink = forwardRef(
       [props.onClick, to, params, query]
     );
 
-    return <a ref={ref} {...props} onClick={handleClick} />;
+    return <a ref={ref} {...props} href={href} onClick={handleClick} />;
   }
 );

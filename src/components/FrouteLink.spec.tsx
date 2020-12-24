@@ -15,7 +15,7 @@ describe("FrouteLink", () => {
     const spy = jest.spyOn(router, "navigate");
 
     const result = render(
-      <FrouteLink data-testid="link" href="/users/1">
+      <FrouteLink data-testid="link" to={routes.users} params={{ id: "1" }}>
         Link
       </FrouteLink>,
       { wrapper: createComponentWrapper(router) }
