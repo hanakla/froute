@@ -1,4 +1,4 @@
-export { routeBy, routeOf } from "./RouteDefiner";
+export { routeBy, routeOf, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
 export { createRouterContext, RouterOptions } from "./RouterContext";
 export { combineRouteResolver } from "./RouterUtils";
 export {
