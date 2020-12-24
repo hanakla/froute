@@ -1,6 +1,11 @@
-import React, { forwardRef, useMemo, Ref, ReactElement } from "react";
-import { useUrlBuilder } from "../react-bind";
-import { Link } from "./Link";
+import React, {
+  forwardRef,
+  useMemo,
+  Ref,
+  ReactElement,
+  useCallback,
+} from "react";
+import { useNavigation, useUrlBuilder } from "../react-bind";
 import { ParamsOfRoute, RouteDefinition } from "../RouteDefiner";
 
 type NativeProps = Omit<
@@ -11,21 +16,36 @@ type NativeProps = Omit<
   "href"
 >;
 
-type OwnProps<R extends RouteDefinition<any>> = {
+type OwnProps<R extends RouteDefinition<any, any>> = {
   ref?: Ref<HTMLAnchorElement>;
   to: R;
   params: ParamsOfRoute<R>;
   query?: { [key: string]: string | string[] };
 };
 
-type Props<R extends RouteDefinition<any>> = NativeProps & OwnProps<R>;
+type Props<R extends RouteDefinition<any, any>> = NativeProps & OwnProps<R>;
 
-type FrouteLink = <R extends RouteDefinition<any>>(
+type FrouteLink = <R extends RouteDefinition<any, any>>(
   props: Props<R>
 ) => ReactElement | null;
 
+// const isRoutable = (href: string | undefined) => {
+//   const parsed = parseUrl(href ?? "");
+//   const current = parseUrl(location.href);
+
+//   if (!href) return false;
+//   if (href[0] === "#") return false;
+//   if (parsed.protocol && parsed.protocol !== current.protocol) return false;
+//   if (parsed.host && parsed.host !== location.host) return false;
+//   return true;
+// };
+
+const isModifiedEvent = (event: React.MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
 export const FrouteLink: FrouteLink = forwardRef(
   ({ to, params, query, ...props }, ref) => {
+    const { push } = useNavigation();
     const { buildPath } = useUrlBuilder();
 
     const href = useMemo(() => buildPath(to, params, query), [
@@ -34,6 +54,19 @@ export const FrouteLink: FrouteLink = forwardRef(
       query,
     ]);
 
-    return <Link ref={ref} {...props} href={href} />;
+    const handleClick = useCallback(
+      (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (props.onClick) props.onClick(e);
+        if (e.isDefaultPrevented()) return;
+        if (isModifiedEvent(e)) return;
+
+        e.preventDefault();
+
+        push(to, params, query);
+      },
+      [props.onClick, to, params, query]
+    );
+
+    return <a ref={ref} {...props} onClick={handleClick} />;
   }
 );

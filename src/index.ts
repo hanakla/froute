@@ -9,7 +9,6 @@ export {
   useUrlBuilder,
   FrouteContext,
 } from "./react-bind";
-export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";
 export { ResponseCode } from "./components/ResponseCode";
 export { Redirect } from "./components/Redirect";
