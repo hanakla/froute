@@ -72,9 +72,7 @@ export class RouterContext {
     this.history =
       options.history ?? canUseDOM()
         ? (createBrowserHistory({}) as BrowserHistory<FrouteHistoryState>)
-        : (createMemoryHistory({ initialEntries: [] }) as MemoryHistory<
-            FrouteHistoryState
-          >);
+        : (createMemoryHistory({}) as MemoryHistory<FrouteHistoryState>);
 
     this.disposeListener = this.history.listen(this.historyListener);
   }
