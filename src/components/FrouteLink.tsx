@@ -46,13 +46,6 @@ const isModifiedEvent = (event: React.MouseEvent) =>
 export const FrouteLink: FrouteLink = forwardRef(
   ({ to, params, query, ...props }, ref) => {
     const { push } = useNavigation();
-    const { buildPath } = useUrlBuilder();
-
-    const href = useMemo(() => buildPath(to, params, query), [
-      buildPath,
-      params,
-      query,
-    ]);
 
     const handleClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
