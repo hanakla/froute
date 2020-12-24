@@ -1,16 +1,24 @@
 import {
+  BrowserHistory,
   createBrowserHistory,
   createMemoryHistory,
   History,
+  Listener,
   Location,
+  MemoryHistory,
 } from "history";
 
 import { parse as qsParse } from "querystring";
 import { parse as urlParse } from "url";
-import { canUseDOM } from "./utils";
+import { canUseDOM, DeepReadonly } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { buildPath } from "./builder";
 import { FrouteMatch, RouteResolver, matchByRoutes } from "./routing";
+import {
+  createFrouteHistoryState,
+  FrouteHistoryState,
+  StateBase,
+} from "./FrouteHistoryState";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -19,58 +27,148 @@ export interface RouterOptions {
 }
 
 export const createRouterContext = (
-  routes: { [key: string]: RouteDefinition<any> },
+  routes: { [key: string]: RouteDefinition<any, any> },
   options: RouterOptions = {}
 ) => {
   return new RouterContext(routes, options);
 };
 
 interface Navigate {
-  (location: Location): void;
-  (pathname: string): void;
+  (
+    location: Omit<Location<FrouteHistoryState | null>, "key">,
+    options?: NavigateOption
+  ): Promise<void>;
+  (pathname: string, options?: NavigateOption): Promise<void>;
 }
+
+interface NavigateOption {
+  state?: StateBase;
+  action?: "PUSH" | "REPLACE";
+  __FROUTE_INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_GOT_CRASH?: FrouteHistoryState<
+    any
+  > | null;
+}
+
+export type NavigationListener = (
+  location: Location<FrouteHistoryState>
+) => void;
+
 export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
-  public history: History;
+  public readonly history: History<FrouteHistoryState>;
 
-  private location: Location | null = null;
+  private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
-  private listener: Set<() => void> = new Set();
+  private disposeListener: () => void;
+
+  /** Preload finish listeners */
+  private listeners: Set<NavigationListener> = new Set();
 
   constructor(
-    public routes: { [key: string]: RouteDefinition<any> },
+    public routes: { [key: string]: RouteDefinition<any, any> },
     private options: RouterOptions = {}
   ) {
     this.history =
       options.history ?? canUseDOM()
-        ? createBrowserHistory({})
-        : createMemoryHistory({ initialEntries: [] });
+        ? (createBrowserHistory({}) as BrowserHistory<FrouteHistoryState>)
+        : (createMemoryHistory({ initialEntries: [] }) as MemoryHistory<
+            FrouteHistoryState
+          >);
+
+    this.disposeListener = this.history.listen(this.historyListener);
   }
 
-  public navigate: Navigate = (pathname: string | Location) => {
-    if (typeof pathname === "string") {
-      this.currentMatch = this.resolveRoute(pathname);
+  public dispose() {
+    this.disposeListener();
+    this.listeners.clear();
+    this.location = null;
+    this.currentMatch = null;
+  }
 
-      const parsed = urlParse(pathname);
+  public historyListener: Listener<FrouteHistoryState | null> = ({
+    location,
+  }) => {
+    this.location = {
+      key: location.key,
+      pathname: location.pathname,
+      hash: location.hash,
+      search: location.search,
+      state: location.state ?? createFrouteHistoryState(),
+    };
+
+    this.listeners.forEach((listener) => listener(this.getCurrentLocation()));
+  };
+
+  public navigate: Navigate = async (
+    pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
+    { state, action = "PUSH" }: NavigateOption = {}
+  ) => {
+    const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
+    const userState = typeof pathname !== "string" ? pathname.state : state;
+
+    this.currentMatch = this.resolveRoute(loc.pathname ?? "");
+
+    if (!this.currentMatch) {
       this.location = {
         key: "",
-        pathname: parsed.pathname ?? "",
-        search: parsed.search ?? "",
-        hash: parsed.hash ?? "",
-        state: null,
+        pathname: loc.pathname ?? "",
+        hash: loc.hash ?? "",
+        search: loc.search ?? "",
+        state: createFrouteHistoryState(),
       };
-    } else {
-      const location = pathname;
-      this.currentMatch = this.resolveRoute(location.pathname);
+      return;
+    }
 
-      if (this.currentMatch) {
-        this.location = location;
-      }
+    this.location = {
+      key: "",
+      pathname: loc.pathname ?? "",
+      search: loc.search ?? "",
+      hash: loc.hash ?? "",
+      state: createFrouteHistoryState(
+        userState ?? this.currentMatch?.route.createState()
+      ),
+    };
+
+    if (action === "PUSH") {
+      this.history.push(this.location, this.location.state);
+      await this.preloadCurrent();
+      this.listeners.forEach((listener) => listener(this.getCurrentLocation()));
+    } else {
+      this.history.replace(this.location, this.location.state);
     }
   };
 
-  public buildPath = <R extends RouteDefinition<any>>(
+  public get internalHitoryState() {
+    return this.getCurrentLocation()?.state.__froute;
+  }
+
+  public set internalHistoryState(state: FrouteHistoryState["__froute"]) {
+    const nextState: FrouteHistoryState = {
+      __froute: state,
+      app: this.getCurrentLocation()?.state,
+    };
+
+    this.history.replace(this.getCurrentLocation(), nextState);
+  }
+
+  public getHistoryState = () => {
+    return this.getCurrentLocation().state?.app;
+  };
+
+  public setHistoryState = (nextState: FrouteHistoryState["app"]) => {
+    const location = this.getCurrentLocation();
+
+    const nextRawState: FrouteHistoryState = {
+      __froute: location.state.__froute,
+      app: nextState,
+    };
+
+    this.history.replace(location, nextRawState);
+    this.location = { ...location, state: nextRawState };
+  };
+
+  public buildPath = <R extends RouteDefinition<any, any>>(
     route: R,
     params: ParamsOfRoute<R>,
     query?: { [key: string]: string | string[] }
@@ -78,24 +176,28 @@ export class RouterContext {
     return buildPath(route, params, query);
   };
 
-  public getCurrentMatch = () => {
+  public getCurrentMatch = (): DeepReadonly<FrouteMatch<any>> | null => {
     return this.currentMatch;
   };
 
-  public getCurrentLocation = () => {
-    if (!this.location)
+  public getCurrentLocation = (): DeepReadonly<
+    Location<FrouteHistoryState>
+  > => {
+    if (!this.location) {
       throw new Error(
         "Froute: location is empty. Please call `.navigate` before get current location."
       );
+    }
+
     return this.location;
   };
 
-  public observeFinishPreload = (listener: () => void) => {
-    this.listener.add(listener);
+  public observeRouteChanged = (listener: NavigationListener) => {
+    this.listeners.add(listener);
   };
 
-  public unobserveFinishPreload = (listener: () => void) => {
-    this.listener.delete(listener);
+  public unobserveRouteChanged = (listener: NavigationListener) => {
+    this.listeners.delete(listener);
   };
 
   public resolveRoute = (pathname: string): FrouteMatch<any> | null => {
@@ -105,8 +207,8 @@ export class RouterContext {
     });
   };
 
-  public async preloadRoute<R extends RouteDefinition<any>>(
-    route: R,
+  public async preloadRoute<R extends RouteDefinition<any, any>>(
+    route: DeepReadonly<R>,
     params: ParamsOfRoute<R>,
     query: { [key: string]: string | string[] | undefined } = {}
   ) {
@@ -120,16 +222,16 @@ export class RouterContext {
   }
 
   public async preloadCurrent() {
-    const matchedRoute = this.currentMatch;
+    const matchedRoute = this.getCurrentMatch();
+    const location = this.getCurrentLocation();
+
     if (!matchedRoute) return;
 
-    const query = this.location ? qsParse(this.location.search.slice(1)) : {};
+    const query = location ? qsParse(location.search.slice(1)) : {};
     await this.preloadRoute(
       matchedRoute.route,
       matchedRoute.match.params,
       query
     );
-
-    this.listener.forEach((listener) => listener());
   }
 }

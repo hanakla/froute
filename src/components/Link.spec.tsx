@@ -1,13 +1,13 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { routeBy } from "../RouteDefiner";
+import { routeBy, routeOf } from "../RouteDefiner";
 import { createRouterContext } from "../RouterContext";
 import { Link } from "./Link";
-import { createComponentWrapper } from "../../spec/createComponentWrapper";
+import { createComponentWrapper, waitTick } from "../../spec/utils";
 
 describe("Link", () => {
   const routes = {
-    users: routeBy("/users").param("id"),
+    users: routeOf("/users/:id"),
   };
 
   it("Click to move location", async () => {
@@ -25,11 +25,13 @@ describe("Link", () => {
 
     const link = await result.findByTestId("link");
     link.click();
+    await waitTick();
 
     expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/1"`);
     expect(spy.mock.calls.length).toBe(1);
 
     link.click();
+    await waitTick();
     expect(spy.mock.calls.length).toBe(2);
   });
 });

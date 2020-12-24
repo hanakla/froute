@@ -19,7 +19,9 @@ describe("RouteDefiner", () => {
   });
 
   describe("routeOf", () => {
-    const route = routeOf("/user/:userId/artworks/:artworkId?");
+    const route = routeOf("/user/:userId/artworks/:artworkId?").state(() => ({
+      userId: "",
+    }));
 
     it("Should resolve path", () => {
       expect(route.match("/user/1/artworks")).not.toBe(false);

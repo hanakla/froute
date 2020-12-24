@@ -1,10 +1,14 @@
-import { routeBy } from "./RouteDefiner";
-import { RouterContext, RouterOptions } from "./RouterContext";
+import { routeOf } from "./RouteDefiner";
+import {
+  createRouterContext,
+  RouterContext,
+  RouterOptions,
+} from "./RouterContext";
 import { combineRouteResolver } from "./RouterUtils";
 
 describe("Router", () => {
   const routes = {
-    usersShow: routeBy("/users").param("id"),
+    usersShow: routeOf("/users/:id").state(() => ({ hist: "default" })),
   };
 
   describe("navigate", () => {
@@ -18,13 +22,14 @@ describe("Router", () => {
       if (!match) return;
 
       expect(match.route).toBe(routes.usersShow);
-      expect(context.getCurrentLocation()).toMatchInlineSnapshot(`
+      expect(context.getCurrentLocation()).toMatchObject({
+        hash: "#1",
+        pathname: "/users/1",
+        search: "?a=1",
+      });
+      expect(context.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
-          "hash": "#1",
-          "key": "",
-          "pathname": "/users/1",
-          "search": "?a=1",
-          "state": null,
+          "hist": "default",
         }
       `);
     });
@@ -37,7 +42,6 @@ describe("Router", () => {
         search: "?a=1",
         hash: "#1",
         state: null,
-        key: "1",
       });
 
       const match = context.getCurrentMatch();
@@ -46,15 +50,29 @@ describe("Router", () => {
       if (!match) return;
 
       expect(match.route).toBe(routes.usersShow);
-      expect(context.getCurrentLocation()).toMatchInlineSnapshot(`
+      expect(context.getCurrentLocation()).toMatchObject({
+        pathname: "/users/1",
+        search: "?a=1",
+        hash: "#1",
+      });
+      expect(context.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
-          "hash": "#1",
-          "key": "1",
-          "pathname": "/users/1",
-          "search": "?a=1",
-          "state": null,
+          "hist": "default",
         }
       `);
+    });
+  });
+
+  describe("History State", () => {
+    it("check", () => {
+      const context = createRouterContext(routes);
+      context.navigate("/users/1");
+      context.setHistoryState({ user1: "ok" });
+
+      expect(context.getHistoryState().user1).toBe("ok");
+
+      context.navigate("/users/2", { state: { user2: "ok" } });
+      expect(context.getHistoryState().user2).toBe("ok");
     });
   });
 

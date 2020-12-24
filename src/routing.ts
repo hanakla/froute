@@ -3,9 +3,9 @@ import { RouterContext } from "./RouterContext";
 import { parse as parseUrl } from "url";
 import { ParamsOfRoute, RouteDefinition } from "./RouteDefiner";
 
-export interface FrouteMatch<PK extends string> {
-  route: RouteDefinition<PK>;
-  match: MatchResult<{ [K in PK]: string }>;
+export interface FrouteMatch<P extends string> {
+  route: RouteDefinition<P, any>;
+  match: MatchResult<{ [K in P]: string }>;
 }
 
 export interface RoutingOnlyRouterContext {
@@ -26,7 +26,7 @@ export interface RouteResolver {
 export const matchByRoutes = (
   pathname: string,
   routes: {
-    [key: string]: RouteDefinition<any>;
+    [key: string]: RouteDefinition<any, any>;
   },
   {
     resolver,
@@ -35,8 +35,9 @@ export const matchByRoutes = (
 ) => {
   context = context ?? new RouterContext(routes, { resolver });
 
-  const realPathName = parseUrl(pathname).pathname!;
+  const realPathName = parseUrl(pathname).pathname;
   let matched: FrouteMatch<any> | null = null;
+  if (!realPathName) return null;
 
   for (const route of Object.values(routes)) {
     const match = route.match(realPathName);
@@ -59,7 +60,7 @@ export const matchByRoutes = (
 
 export const isMatchToRoute = (
   pathname: string,
-  route: RouteDefinition<any>,
+  route: RouteDefinition<any, any>,
   {
     resolver,
     context,

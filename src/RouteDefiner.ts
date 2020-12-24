@@ -1,15 +1,19 @@
+/* eslint-disable */
+
 import { ComponentType } from "react";
 import { match, Match } from "path-to-regexp";
+import { StateBase } from "./FrouteHistoryState";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error Params is type store
-export interface RouteDefinition<Params extends string> {
+export interface RouteDefinition<Params extends string, S extends StateBase> {
   match(pathname: string): Match;
   toPath(): string;
+  createState(): S | null;
   getActor(): Actor<any> | null;
 }
 
-export interface ActorDef<R extends RouteDefinition<any>> {
+export interface ActorDef<R extends RouteDefinition<any, StateBase>> {
   component: () =>
     | Promise<{ default: ComponentType<any> } | ComponentType<any>>
     | ComponentType<any>;
@@ -26,11 +30,13 @@ type ParamsObject<Params extends string | OptionalParam<string>> =
   & { [K in OptionalParamStringToConst<Extract<Params, OptionalParam<string>>>]?: string }
 
 // prettier-ignore
-export type ParamsOfRoute<T extends RouteDefinition<any>> =
+export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
   T extends RouteDefiner<infer P> ? ParamsObject<P>
-  : T extends Readonly<RouteDefinition<infer P>> ? ParamsObject<P>
-  : T extends RouteDefinition<infer P> ? ParamsObject<P>
+  : T extends Readonly<RouteDefinition<infer P, any>> ? ParamsObject<P>
+  : T extends RouteDefinition<infer P, any> ? ParamsObject<P>
   : never;
+
+export type StateOfRoute<R extends RouteDefinition<any, StateBase>> = R extends RouteDefinition<any, infer S> ? S : never
 
 type OptionalParam<S extends string> = S & { __OPTIONAL: true }
 type OptionalParamStringToConst<P extends OptionalParam<string>> = P extends OptionalParam<infer K> ? K : never
@@ -53,7 +59,7 @@ export const routeOf = <S extends string>(path: S): RouteDefiner<ParamsInPath<S>
   return new RouteDefiner(path)
 }
 
-class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
+class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
   private cache: ComponentType<any> | null = null;
 
@@ -75,33 +81,42 @@ class Actor<R extends RouteDefinition<any>> implements ActorDef<R> {
   }
 }
 
-export class RouteDefiner<Params extends string>
-  implements RouteDefinition<Params> {
+export class RouteDefiner<Params extends string, State extends StateBase = never>
+  implements RouteDefinition<Params, State> {
   private stack: string[] = [];
   private actor: Actor<this> | null = null;
+  private stateFactory: (() => State) | null = null;
 
   constructor(path: string) {
     this.stack.push(path.replace(/^\//, ""));
   }
 
   public param<P extends string, Params extends string>(
-    this: RouteDefiner<Params>,
+    this: RouteDefiner<Params, State>,
     paramName: P
-  ): RouteDefiner<Params | P> {
+  ): RouteDefiner<Params | P, State> {
     this.stack.push(`:${paramName}`);
     return this;
   }
 
-  public path(path: string): RouteDefiner<Params> {
+  public path(path: string): RouteDefiner<Params, State> {
     this.stack.push(path.replace(/^\//, ""));
     return this as any;
+  }
+
+  public state<S extends StateBase>(
+    this: RouteDefiner<Params, S>,
+    stateFactory: () => S
+  ): RouteDefiner<Params, S> {
+    this.stateFactory = stateFactory
+    return this as any
   }
 
   public action({
     component,
     preload,
     ...rest
-  }: ActorDef<this>): Readonly<RouteDefinition<Params>> {
+  }: ActorDef<this>): Readonly<RouteDefinition<Params, State>> {
     this.actor = new Actor(component, preload);
     Object.assign(this.actor, rest);
     return this as any;
@@ -111,8 +126,12 @@ export class RouteDefiner<Params extends string>
     return match(this.toPath())(pathname);
   }
 
-  public getActor<R extends RouteDefiner<any>>(this: R) {
+  public getActor<R extends RouteDefiner<any, any>>(this: R) {
     return this.actor;
+  }
+
+  public createState() {
+    return this.stateFactory?.() ?? null
   }
 
   public toPath() {

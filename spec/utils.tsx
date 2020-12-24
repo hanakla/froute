@@ -7,3 +7,5 @@ export const createComponentWrapper = (router: RouterContext): React.FC => {
     <FrouteContext router={router}>{children}</FrouteContext>
   );
 };
+
+export const waitTick = () => new Promise((resolve) => setTimeout(resolve));

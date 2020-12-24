@@ -7,11 +7,10 @@ import React, {
   useMemo,
   useReducer,
 } from "react";
-import { Action } from "history";
 import qs from "querystring";
-import { canUseDOM } from "./utils";
-import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
-import { RouterContext } from "./RouterContext";
+import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
+import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
+import { NavigationListener, RouterContext } from "./RouterContext";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -25,16 +24,17 @@ export const FrouteContext = ({
   router: RouterContext;
   children: ReactNode;
 }) => {
-  const { history } = useMemo(() => router, []);
-
   useIsomorphicEffect(() => {
-    const unlisten = history.listen(({ action, location }) => {
-      router.navigate(location);
-      if (action === Action.Push) router.preloadCurrent();
-    });
+    const observer: NavigationListener = async (location) => {
+      window.scrollTo({
+        left: location.state.__froute.scrollX,
+        top: location.state.__froute.scrollY,
+      });
+    };
 
-    return () => unlisten();
-  }, []);
+    router.observeRouteChanged(observer);
+    return () => router.unobserveRouteChanged(observer);
+  }, [router]);
 
   // Save scroll position
   useEffect(() => {
@@ -49,10 +49,10 @@ export const FrouteContext = ({
         const location = router.getCurrentLocation();
         if (!location) return;
 
-        history.replace(location, {
+        router.internalHistoryState = {
           scrollX: window.scrollX || window.pageXOffset,
           scrollY: window.scrollY || window.pageYOffset,
-        });
+        };
       }, 150) as any) as number;
     };
 
@@ -67,6 +67,11 @@ export const FrouteContext = ({
   return <Context.Provider value={router}>{children}</Context.Provider>;
 };
 
+/**
+ * Do not expose to public API. It's Froute internal only hooks.
+ * WHY: Protect direct router operating from Components.
+ * If allow it, Router status can changed by anywhere and becomes unpredictable.
+ */
 export const useRouterContext = () => {
   const router = useContext(Context);
   if (!router) {
@@ -83,46 +88,76 @@ export const useRouteComponent = () => {
   const [, rerender] = useReducer((s) => s + 1, 0);
 
   useIsomorphicEffect(() => {
-    router.observeFinishPreload(rerender);
-    return () => router.unobserveFinishPreload(rerender);
+    router.observeRouteChanged(rerender);
+    return () => router.unobserveRouteChanged(rerender);
   }, [router, rerender]);
 
   useIsomorphicEffect(() => {
-    const unlisten = router.history.listen(({ action }) => {
-      if (action === Action.Pop) {
-        // TODO: Research dispatch timing
-        setTimeout(() => rerender());
-      }
-    });
-    return () => unlisten();
+    router.observeRouteChanged(rerender);
+    return () => router.unobserveRouteChanged(rerender);
   }, []);
 
   return useMemo(() => ({ PageComponent }), [match]);
 };
 
-export const useLocation = () => {
+export const useLocation = <R extends RouteDefinition<any, any>>(
+  expectRoute?: R
+) => {
   const router = useRouterContext();
   const location = router.getCurrentLocation();
 
+  if (
+    isDevelopment &&
+    expectRoute &&
+    router.getCurrentMatch()?.route !== expectRoute
+  ) {
+    console.warn(
+      "Froute: Expected route and current route not matched in `useLocation`"
+    );
+  }
+
   return useMemo(
     () => ({
-      pathname: location?.pathname,
-      search: location?.search,
-      query: qs.parse(location?.search.slice(1) ?? ""),
-      hash: location?.hash,
-      state: location.state,
+      pathname: location.pathname,
+      search: location.search,
+      query: qs.parse(location.search.slice(1) ?? ""),
+      hash: location.hash,
+      state: location.state.app as StateOfRoute<R>,
     }),
-    [location?.pathname, location?.search, location?.search]
+    [location.pathname, location.search, location.search]
   );
+};
+
+export const useHistoryState = <
+  R extends RouteDefinition<any, any> = RouteDefinition<any, any>
+>(
+  expectRoute?: R
+): [
+  getHistoryState: () => DeepReadonly<StateOfRoute<R>>,
+  setHistoryState: (state: StateOfRoute<R>) => void
+] => {
+  const router = useRouterContext();
+
+  if (
+    isDevelopment &&
+    expectRoute &&
+    router.getCurrentMatch()?.route !== expectRoute
+  ) {
+    console.warn(
+      "Froute: Expected route and current route not matched in `useHistoryContext`"
+    );
+  }
+
+  return useMemo(() => [router.getHistoryState, router.setHistoryState], []);
 };
 
 interface UseParams {
   (): { [param: string]: string | undefined };
-  <T extends RouteDefinition<any>>(route: T): ParamsOfRoute<T>;
+  <T extends RouteDefinition<any, any>>(route: T): ParamsOfRoute<T>;
 }
 
 export const useParams: UseParams = <
-  T extends RouteDefinition<any> = RouteDefinition<any>
+  T extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -137,11 +172,46 @@ export const useParams: UseParams = <
 
 export const useNavigation = () => {
   const router = useRouterContext();
+  const { buildPath } = useUrlBuilder();
 
   return useMemo(
     () => ({
-      push: (path: string) => router.history.push(path),
-      replace: (path: string) => router.history.replace(path),
+      push: <R extends RouteDefinition<any, any>>(
+        route: R,
+        params: ParamsOfRoute<R>,
+        {
+          query,
+          hash = "",
+          state,
+        }: {
+          query?: { [key: string]: string | string[] };
+          hash?: string;
+          state?: StateOfRoute<R>;
+        } = {}
+      ) => {
+        router.navigate(buildPath(route, params, query) + hash, {
+          state,
+          action: "PUSH",
+        });
+      },
+      replace: <R extends RouteDefinition<any, any>>(
+        route: R,
+        params: ParamsOfRoute<R>,
+        {
+          query,
+          hash = "",
+          state,
+        }: {
+          query?: { [key: string]: string | string[] };
+          hash?: string;
+          state?: StateOfRoute<R>;
+        } = {}
+      ) => {
+        router.navigate(buildPath(route, params, query) + hash, {
+          state,
+          action: "REPLACE",
+        });
+      },
       back: () => router.history.back(),
       forward: () => router.history.forward(),
     }),

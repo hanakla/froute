@@ -3,19 +3,20 @@ import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
+  useHistoryState,
   useLocation,
   useNavigation,
   useParams,
   useRouteComponent,
   useUrlBuilder,
 } from "./react-bind";
-import { routeBy } from "./RouteDefiner";
+import { routeOf } from "./RouteDefiner";
 import { createRouterContext, RouterContext } from "./RouterContext";
 
 describe("react-bind", () => {
   const routes = {
-    usersShow: routeBy("/users")
-      .param("id")
+    usersShow: routeOf("/users/:id")
+      .state(() => ({ hist: 1 }))
       .action({
         component: () => {
           const Component = () => {
@@ -27,22 +28,18 @@ describe("react-bind", () => {
           );
         },
       }),
-    userArtworks: routeBy("/users")
-      .param("id")
-      .path("artworks")
-      .param("artworkId")
-      .action({
-        component: () => {
-          return () => {
-            const params = useParams();
-            return (
-              <div>
-                Here is Artwork {params.artworkId} for user {params.id}
-              </div>
-            );
-          };
-        },
-      }),
+    userArtworks: routeOf("/users/:id/artworks/:artworkId").action({
+      component: () => {
+        return () => {
+          const params = useParams();
+          return (
+            <div>
+              Here is Artwork {params.artworkId} for user {params.id}
+            </div>
+          );
+        };
+      },
+    }),
   };
 
   const createWrapper = (router: RouterContext): React.FC => {
@@ -56,7 +53,7 @@ describe("react-bind", () => {
       const router = createRouterContext(routes);
       router.navigate("/users/1?q=1#hash");
 
-      const result = renderHook(useLocation, {
+      const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
       });
 
@@ -68,7 +65,9 @@ describe("react-bind", () => {
             "q": "1",
           },
           "search": "?q=1",
-          "state": null,
+          "state": Object {
+            "hist": 1,
+          },
         }
       `);
     });
@@ -77,7 +76,7 @@ describe("react-bind", () => {
       const router = createRouterContext(routes);
       router.navigate("/notfound");
 
-      const result = renderHook(useLocation, {
+      const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
       });
 
@@ -90,6 +89,52 @@ describe("react-bind", () => {
           "state": null,
         }
       `);
+    });
+  });
+
+  describe("useHistoryState", () => {
+    it("get / set", () => {
+      const router = createRouterContext(routes);
+      router.navigate("/users");
+
+      const {
+        result: {
+          current: [get, set],
+        },
+        rerender,
+      } = renderHook(() => useHistoryState(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expect(get()).toMatchInlineSnapshot(`null`);
+
+      set({ hist: 1 });
+      rerender();
+
+      expect(get()).toMatchInlineSnapshot(`
+        Object {
+          "hist": 1,
+        }
+      `);
+    });
+
+    it("Logging if expected route isnt match", () => {
+      jest.mock("./utils", () => ({
+        isDevelopment: true,
+        canUseDom: () => true,
+      }));
+
+      const router = createRouterContext(routes);
+      router.navigate("/users");
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const { result } = renderHook(
+        () => useHistoryState(routes.userArtworks),
+        { wrapper: createWrapper(router) }
+      );
+
+      expect(spy.mock.calls.length).toBe(1);
     });
   });
 
@@ -134,26 +179,36 @@ describe("react-bind", () => {
         wrapper: createWrapper(router),
       });
 
-      result.current.push(router.buildPath(routes.usersShow, { id: "2" }));
+      result.current.push(routes.usersShow, { id: "2" });
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
         pathname: "/users/2",
         search: "",
-        state: null,
+        state: {
+          __froute: {
+            scrollX: 0,
+            scrollY: 0,
+          },
+          app: { hist: 1 },
+        },
       });
 
       expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/2"`);
 
-      result.current.push(
-        router.buildPath(routes.userArtworks, { id: "1", artworkId: "2" })
-      );
+      result.current.push(routes.userArtworks, { id: "1", artworkId: "2" });
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
         pathname: "/users/1/artworks/2",
         search: "",
-        state: null,
+        state: {
+          __froute: {
+            scrollX: 0,
+            scrollY: 0,
+          },
+          app: null,
+        },
       });
 
       expect(location.href).toMatchInlineSnapshot(
