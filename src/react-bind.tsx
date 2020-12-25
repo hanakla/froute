@@ -17,6 +17,18 @@ const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 const Context = createContext<RouterContext | null>(null);
 Context.displayName = "FrouteContext";
 
+const checkExpectedRoute = (
+  router: RouterContext,
+  expectRoute?: RouteDefinition<any, any>,
+  methodName?: string
+) => {
+  if (expectRoute && router.getCurrentMatch()?.route !== expectRoute) {
+    console.warn(
+      `Froute: Expected route and current route not matched in \`${methodName}\``
+    );
+  }
+};
+
 export const FrouteContext = ({
   router,
   children,
@@ -106,14 +118,8 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
   const router = useRouterContext();
   const location = router.getCurrentLocation();
 
-  if (
-    isDevelopment &&
-    expectRoute &&
-    router.getCurrentMatch()?.route !== expectRoute
-  ) {
-    console.warn(
-      "Froute: Expected route and current route not matched in `useLocation`"
-    );
+  if (isDevelopment) {
+    checkExpectedRoute(router, expectRoute, "useLocation");
   }
 
   return useMemo(
@@ -138,14 +144,8 @@ export const useHistoryState = <
 ] => {
   const router = useRouterContext();
 
-  if (
-    isDevelopment &&
-    expectRoute &&
-    router.getCurrentMatch()?.route !== expectRoute
-  ) {
-    console.warn(
-      "Froute: Expected route and current route not matched in `useHistoryContext`"
-    );
+  if (isDevelopment) {
+    checkExpectedRoute(router, expectRoute, "useHistoryState");
   }
 
   return useMemo(() => [router.getHistoryState, router.setHistoryState], []);
@@ -166,6 +166,10 @@ export const useParams: UseParams = <
   const router = useRouterContext();
   const location = router.getCurrentLocation();
   const match = location ? router.resolveRoute(location.pathname) : null;
+
+  if (isDevelopment) {
+    checkExpectedRoute(router, expectRoute, "useParams");
+  }
 
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
