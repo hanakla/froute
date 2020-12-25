@@ -170,15 +170,40 @@ export const useParams: UseParams = <
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
 
+interface FrouteNavigator {
+  push<R extends RouteDefinition<any, any>>(
+    route: R,
+    params: ParamsOfRoute<R>,
+    extra: {
+      query?: { [key: string]: string | string[] };
+      hash?: string;
+      state?: StateOfRoute<R>;
+    }
+  ): void;
+  push(pathname: string): void;
+  replace<R extends RouteDefinition<any, any>>(
+    route: R,
+    params: ParamsOfRoute<R>,
+    extra: {
+      query?: { [key: string]: string | string[] };
+      hash?: string;
+      state?: StateOfRoute<R>;
+    }
+  ): void;
+  replace(pathname: string): void;
+  back(): void;
+  forward(): void;
+}
+
 export const useNavigation = () => {
   const router = useRouterContext();
   const { buildPath } = useUrlBuilder();
 
-  return useMemo(
+  return useMemo<FrouteNavigator>(
     () => ({
       push: <R extends RouteDefinition<any, any>>(
-        route: R,
-        params: ParamsOfRoute<R>,
+        route: R | string,
+        params: ParamsOfRoute<R> = {} as any,
         {
           query,
           hash = "",
@@ -189,14 +214,17 @@ export const useNavigation = () => {
           state?: StateOfRoute<R>;
         } = {}
       ) => {
-        router.navigate(buildPath(route, params, query) + hash, {
+        const pathname =
+          typeof route === "string" ? route : buildPath(route, params, query);
+
+        router.navigate(pathname + hash, {
           state,
           action: "PUSH",
         });
       },
       replace: <R extends RouteDefinition<any, any>>(
-        route: R,
-        params: ParamsOfRoute<R>,
+        route: R | string,
+        params: ParamsOfRoute<R> = {} as any,
         {
           query,
           hash = "",
@@ -207,7 +235,10 @@ export const useNavigation = () => {
           state?: StateOfRoute<R>;
         } = {}
       ) => {
-        router.navigate(buildPath(route, params, query) + hash, {
+        const pathname =
+          typeof route === "string" ? route : buildPath(route, params, query);
+
+        router.navigate(pathname + hash, {
           state,
           action: "REPLACE",
         });
