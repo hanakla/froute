@@ -220,9 +220,17 @@ export const useNavigation = () => {
         const pathname =
           typeof route === "string" ? route : buildPath(route, params, query);
 
-        router.navigate(pathname + hash, {
-          state,
-          action: "PUSH",
+        const resolvedRoute =
+          typeof route !== "string"
+            ? route
+            : router.resolveRoute(pathname + hash)?.route;
+        if (!resolvedRoute) return;
+
+        router.preloadRoute(resolvedRoute, params, query).then(() => {
+          router.navigate(pathname + hash, {
+            state,
+            action: "PUSH",
+          });
         });
       },
       replace: <R extends RouteDefinition<any, any>>(

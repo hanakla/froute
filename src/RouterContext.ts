@@ -205,7 +205,7 @@ export class RouterContext {
     });
   };
 
-  private async preloadRoute<R extends RouteDefinition<any, any>>(
+  public async preloadRoute<R extends RouteDefinition<any, any>>(
     route: DeepReadonly<R>,
     params: ParamsOfRoute<R>,
     query: { [key: string]: string | string[] | undefined } = {},
