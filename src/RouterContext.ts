@@ -205,21 +205,28 @@ export class RouterContext {
     });
   };
 
-  public async preloadRoute<R extends RouteDefinition<any, any>>(
+  private async preloadRoute<R extends RouteDefinition<any, any>>(
     route: DeepReadonly<R>,
     params: ParamsOfRoute<R>,
-    query: { [key: string]: string | string[] | undefined } = {}
+    query: { [key: string]: string | string[] | undefined } = {},
+    { withoutPreload = false }: { withoutPreload?: boolean } = {}
   ) {
     const actor = route.getActor();
     if (!actor) return;
 
     await Promise.all([
       actor.loadComponent(),
-      actor.preload?.(this.options.preloadContext, params, query),
+      withoutPreload
+        ? null
+        : actor.preload?.(this.options.preloadContext, params, query),
     ]);
   }
 
-  public async preloadCurrent() {
+  public async preloadCurrent({
+    withoutPreload = false,
+  }: {
+    withoutPreload?: boolean;
+  } = {}) {
     const matchedRoute = this.getCurrentMatch();
     const location = this.getCurrentLocation();
 
@@ -229,7 +236,8 @@ export class RouterContext {
     await this.preloadRoute(
       matchedRoute.route,
       matchedRoute.match.params,
-      query
+      query,
+      { withoutPreload }
     );
   }
 }
