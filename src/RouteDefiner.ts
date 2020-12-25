@@ -65,7 +65,7 @@ class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
 
   constructor(
     public component: ActorDef<any>["component"],
-    public preload: ActorDef<any>["preload"]
+    public preload?: ActorDef<any>["preload"]
   ) {}
 
   public async loadComponent() {
