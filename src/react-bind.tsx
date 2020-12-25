@@ -160,8 +160,7 @@ export const useParams: UseParams = <
   T extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  route?: T
+  expectRoute?: T
 ) => {
   const router = useRouterContext();
   const location = router.getCurrentLocation();
