@@ -1,12 +1,18 @@
 import { MatchResult } from "path-to-regexp";
 import { RouterContext } from "./RouterContext";
 import { parse as parseUrl } from "url";
+import { parse as qsParse } from "querystring";
 import { ParamsOfRoute, RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {
   route: RouteDefinition<P, any>;
-  match: MatchResult<{ [K in P]: string }>;
+  match: MatchResult<{ [K in P]: string }> & {
+    query: ParsedQuery;
+    search: string;
+  };
 }
+
+export type ParsedQuery = { [K: string]: string | string[] | undefined };
 
 export interface RoutingOnlyRouterContext {
   statusCode: number;
@@ -35,24 +41,29 @@ export const matchByRoutes = (
 ) => {
   context = context ?? new RouterContext(routes, { resolver });
 
-  const realPathName = parseUrl(pathname).pathname;
+  const parsed = parseUrl(pathname);
+
   let matched: FrouteMatch<any> | null = null;
-  if (!realPathName) return null;
+  if (!parsed.pathname) return null;
 
   for (const route of Object.values(routes)) {
-    const match = route.match(realPathName);
+    const match = route.match(parsed.pathname);
     if (!match) continue;
 
     matched = {
       route,
-      match: match as MatchResult<ParamsOfRoute<typeof route>>,
+      match: {
+        ...(match as MatchResult<ParamsOfRoute<typeof route>>),
+        query: qsParse(parsed.search ?? ""),
+        search: parsed.search ?? "",
+      },
     };
 
     break;
   }
 
   if (resolver) {
-    return resolver(realPathName, matched, context);
+    return resolver(parsed.pathname, matched, context);
   }
 
   return matched;
@@ -68,20 +79,26 @@ export const isMatchToRoute = (
 ) => {
   context = context ?? new RouterContext({ route }, { resolver });
 
-  const realPathName = parseUrl(pathname).pathname!;
-  let matched: FrouteMatch<any> | null = null;
+  const parsed = parseUrl(pathname);
 
-  const match = route.match(realPathName);
+  let matched: FrouteMatch<any> | null = null;
+  if (!parsed.pathname) return null;
+
+  const match = route.match(parsed.pathname);
 
   matched = match
     ? {
         route,
-        match: match as MatchResult<ParamsOfRoute<typeof route>>,
+        match: {
+          ...(match as MatchResult<ParamsOfRoute<typeof route>>),
+          query: qsParse(parsed.search ?? ""),
+          search: parsed.search ?? "",
+        },
       }
     : null;
 
   if (resolver) {
-    return resolver(realPathName, matched, context);
+    return resolver(parsed.pathname, matched, context);
   }
 
   return matched;
