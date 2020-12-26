@@ -177,7 +177,7 @@ interface FrouteNavigator {
   push<R extends RouteDefinition<any, any>>(
     route: R,
     params: ParamsOfRoute<R>,
-    extra: {
+    extra?: {
       query?: { [key: string]: string | string[] };
       hash?: string;
       state?: StateOfRoute<R>;
@@ -187,7 +187,7 @@ interface FrouteNavigator {
   replace<R extends RouteDefinition<any, any>>(
     route: R,
     params: ParamsOfRoute<R>,
-    extra: {
+    extra?: {
       query?: { [key: string]: string | string[] };
       hash?: string;
       state?: StateOfRoute<R>;
