@@ -8,4 +8,5 @@ export const createComponentWrapper = (router: RouterContext): React.FC => {
   );
 };
 
-export const waitTick = () => new Promise((resolve) => setTimeout(resolve));
+export const waitTick = (ms?: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));

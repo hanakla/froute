@@ -12,6 +12,7 @@ import {
 } from "./react-bind";
 import { routeOf } from "./RouteDefiner";
 import { createRouterContext, RouterContext } from "./RouterContext";
+import { waitTick } from "../spec/utils";
 
 describe("react-bind", () => {
   const routes = {
@@ -171,7 +172,7 @@ describe("react-bind", () => {
   });
 
   describe("useNavigation", () => {
-    it("", () => {
+    it("", async () => {
       const router = createRouterContext(routes);
       router.navigate("/users/1");
 
@@ -180,6 +181,7 @@ describe("react-bind", () => {
       });
 
       result.current.push(routes.usersShow, { id: "2" });
+      await waitTick(200);
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
@@ -197,6 +199,7 @@ describe("react-bind", () => {
       expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/2"`);
 
       result.current.push(routes.userArtworks, { id: "1", artworkId: "2" });
+      await waitTick(200);
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
