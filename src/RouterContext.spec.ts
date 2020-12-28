@@ -19,9 +19,16 @@ describe("Router", () => {
       const match = context.getCurrentMatch();
 
       expect(match).not.toBe(false);
-      if (!match) return;
+      if (!match) return; // Type guard
 
       expect(match.route).toBe(routes.usersShow);
+      expect(match.match).toMatchObject({
+        params: { id: 1 },
+        path: "/users/1",
+        query: { a: "1" },
+        search: "?a=1",
+      });
+
       expect(context.getCurrentLocation()).toMatchObject({
         hash: "#1",
         pathname: "/users/1",

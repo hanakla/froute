@@ -50,7 +50,7 @@ interface NavigateOption {
 }
 
 export type NavigationListener = (
-  location: Location<FrouteHistoryState>
+  location: DeepReadonly<Location<FrouteHistoryState>>
 ) => void;
 
 export class RouterContext {
@@ -84,7 +84,7 @@ export class RouterContext {
     this.currentMatch = null;
   }
 
-  public historyListener: Listener<FrouteHistoryState | null> = ({
+  private historyListener: Listener<FrouteHistoryState | null> = ({
     location,
   }) => {
     this.location = {
@@ -95,7 +95,10 @@ export class RouterContext {
       state: location.state ?? createFrouteHistoryState(),
     };
 
-    this.listeners.forEach((listener) => listener(this.getCurrentLocation()));
+    this.currentMatch = this.resolveRoute(location.pathname);
+
+    const nextLocation = this.getCurrentLocation();
+    this.routeChangedListener.forEach((listener) => listener(nextLocation));
   };
 
   public navigate: Navigate = async (
