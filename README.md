@@ -210,7 +210,8 @@ domready(async () => {
     preloadContext: store,
   });
 
-  route.navigate(location.href)
+  router.navigate(location.href)
+  await router.preloadCurrent({ onlyComponentPreload: true })
 
   ReactDOM.render((
       <FrouteContext router={router}>
