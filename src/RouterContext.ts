@@ -116,7 +116,7 @@ export class RouterContext {
 
   public navigate: Navigate = async (
     pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
-    { state, action = "PUSH" }: NavigateOption = {}
+    { state, action }: NavigateOption = {}
   ) => {
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
