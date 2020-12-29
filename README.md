@@ -30,8 +30,11 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Compat API via `useRouter` or `withRouter`
   - Compatible features
     - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
-  - It's not type safe
+  - But it's not type safe
 - Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
+  - `<Link />` only href props compatible but behaviour in-compatible.
+    - Froute's Link has `<a />` element. Next.js is not.
+    - `as`, `passHref`, `prefetch`, `replace`, `scroll`, `shallow` is not supported currently.
   - `pathname` is return current `location.pathname`, not adjust to component file path base pathname.
   - `router.push()`, `router.replace()`
     - URL Object is does not support currentry
