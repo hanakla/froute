@@ -259,9 +259,9 @@ export class RouterContext {
   }
 
   public async preloadCurrent({
-    withoutPreload = false,
+    onlyComponentPreload = false,
   }: {
-    withoutPreload?: boolean;
+    onlyComponentPreload?: boolean;
   } = {}) {
     const matchedRoute = this.getCurrentMatch();
     const location = this.getCurrentLocation();
@@ -273,7 +273,7 @@ export class RouterContext {
       matchedRoute.route,
       matchedRoute.match.params,
       query,
-      { onlyComponentPreload: withoutPreload }
+      { onlyComponentPreload }
     );
   }
 }
