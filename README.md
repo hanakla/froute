@@ -4,7 +4,7 @@ Framework independent Router for React.
 Can use with both Fleur / Redux (redux-thunk).
 
 - [Features](#features)
-- [Next.js compat status](#next-js-compat-status)
+- [Next.js compat status](#nextjs-compat-status)
   - [How to type-safe useRoute](#how-to-type-safe-useroute)
 - [API Overview](#api-overview)
   - [Hooks](#hooks)
