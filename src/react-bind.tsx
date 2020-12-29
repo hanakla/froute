@@ -177,7 +177,7 @@ export const useParams: UseParams = <
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
 
-interface FrouteNavigator {
+export interface FrouteNavigator {
   push<R extends RouteDefinition<any, any>>(
     route: R,
     params: ParamsOfRoute<R>,

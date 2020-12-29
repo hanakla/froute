@@ -9,6 +9,7 @@ export {
   useUrlBuilder,
   useBeforeRouteChange,
   FrouteContext,
+  FrouteNavigator,
 } from "./react-bind";
 export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";
