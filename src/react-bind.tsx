@@ -10,7 +10,11 @@ import React, {
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
 import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
-import { NavigationListener, RouterContext } from "./RouterContext";
+import {
+  NavigationListener,
+  RouterContext,
+  BeforeRouteListener,
+} from "./RouterContext";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -269,4 +273,17 @@ export const useUrlBuilder = () => {
     }),
     [router]
   );
+};
+
+/** Handling */
+export const useBeforeRouteChange = (
+  /** Return Promise&lt;false&gt; | false to prevent route changing. This listener only one can be set at a time */
+  beforeRouteListener: BeforeRouteListener
+) => {
+  const router = useRouterContext();
+
+  useEffect(() => {
+    router.setBeforeRouteChangeListener(beforeRouteListener);
+    return () => router.clearBeforeRouteChangeListener();
+  }, []);
 };

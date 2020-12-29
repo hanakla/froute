@@ -7,6 +7,7 @@ export {
   useParams,
   useRouteComponent,
   useUrlBuilder,
+  useBeforeRouteChange,
   FrouteContext,
 } from "./react-bind";
 export { Link } from "./components/Link";
