@@ -96,12 +96,13 @@ const Users = () => {
 Route definition:
 ```tsx
 export const routes = {
-  index: routeBy('/').action({
+  index: routeOf('/').action({
     component: () => import('./pages/index'),
   }),
-  user: routeBy('/users').param('userId').action({
+  user: routeOf('/users/:userId').action({
     component: () => import('./pages/user'),
-    preload: (store: Store, param) => Promise.all([ store.dispatch(fetchUser(param.userId)) ]),
+    preload: (store: Store, params /* => inferred to { userId: string } */) =>
+      Promise.all([ store.dispatch(fetchUser(param.userId)) ]),
   })
 }
 ```

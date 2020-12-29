@@ -54,7 +54,13 @@ export const routeBy = (path: string): RouteDefiner<Exclude<"", "">> => {
   return new RouteDefiner(path);
 };
 
-/** Define route by pathname */
+/**
+ * Define route by pathname
+ *
+ * - `routeOf('/fragment')`
+ * - `routeOf('/fragment/:paramName')`
+ * - `routeOf('/fragment/:paramName?')`
+ */
 export const routeOf = <S extends string>(path: S): RouteDefiner<ParamsInPath<S>> => {
   return new RouteDefiner(path)
 }
