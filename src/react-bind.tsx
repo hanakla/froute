@@ -11,12 +11,7 @@ import React, {
 } from "react";
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
-import {
-  RouteDefinition,
-  ParamsOfRoute,
-  StateOfRoute,
-  routeOf,
-} from "./RouteDefiner";
+import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
 import {
   NavigationListener,
   RouterContext,
