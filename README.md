@@ -75,13 +75,14 @@ const Users = () => {
 
 ### Hooks
 
-- useRouteComponent
-- useLocation
-- useNavigation
-- useParams
-- useUrlBuilder(routeDefinition, params, query?): string
-- useBeforeRouteChange(listener: () => Promise&lt;boolean | void&gt; | boolean | void )
-  - It can prevent routing
+- `useRouteComponent`
+- `useLocation`
+- `useNavigation`
+- `useParams`
+- `useUrlBuilder`
+- `useBeforeRouteChange(listener: () => Promise&lt;boolean | void&gt; | boolean | void)`
+  - It can prevent routing returns `Promise&lt;false&gt; | false`
+- `useRouter` - **Next.js subset compat hooks**
 
 ### Components
 
