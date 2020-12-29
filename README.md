@@ -85,9 +85,10 @@ const Users = () => {
 
 ### Components
 
-- Link
-- ResponseCode
-- Redirect
+- `<Link href={string} />`
+- `<FrouteLink to={routeDef} params={object} query={object} />` - Type-safe routing
+- `<ResponseCode status={number} />`
+- `<Redirect url={string} status={number = 302}`
 
 ## Example
 
