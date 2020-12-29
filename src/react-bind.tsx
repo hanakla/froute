@@ -224,7 +224,7 @@ export const useHistoryState = <
 
 interface UseParams {
   (): { [param: string]: string | undefined };
-  <T extends RouteDefinition<any, any>>(route: T): ParamsOfRoute<T>;
+  <T extends RouteDefinition<any, any>>(expectRoute?: T): ParamsOfRoute<T>;
 }
 
 export const useParams: UseParams = <
