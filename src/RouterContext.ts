@@ -138,6 +138,7 @@ export class RouterContext {
       return;
     }
 
+    this.currentMatch = nextMatch;
     this.location = {
       key: "",
       pathname: loc.pathname ?? "",
