@@ -247,14 +247,14 @@ export class RouterContext {
     route: DeepReadonly<R>,
     params: ParamsOfRoute<R>,
     query: { [key: string]: string | string[] | undefined } = {},
-    { withoutPreload = false }: { withoutPreload?: boolean } = {}
+    { onlyComponentPreload = false }: { onlyComponentPreload?: boolean } = {}
   ) {
     const actor = route.getActor();
     if (!actor) return;
 
     await Promise.all([
       actor.loadComponent(),
-      withoutPreload
+      onlyComponentPreload
         ? null
         : actor.preload?.(this.options.preloadContext, params, query),
     ]);
@@ -275,7 +275,7 @@ export class RouterContext {
       matchedRoute.route,
       matchedRoute.match.params,
       query,
-      { withoutPreload }
+      { onlyComponentPreload: withoutPreload }
     );
   }
 }
