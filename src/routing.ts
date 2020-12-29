@@ -37,8 +37,11 @@ export const matchByRoutes = (
   {
     resolver,
     context,
-  }: { resolver?: RouteResolver; context?: RouterContext } = {}
-) => {
+  }: {
+    resolver?: RouteResolver;
+    context?: RouterContext;
+  } = {}
+): FrouteMatch<any> | null => {
   context = context ?? new RouterContext(routes, { resolver });
 
   const parsed = parseUrl(pathname);
@@ -65,7 +68,26 @@ export const matchByRoutes = (
   }
 
   if (resolver) {
-    return resolver(parsed.pathname, matched, context);
+    return resolver(parsed.pathname, matched, {
+      get redirectTo() {
+        return context!.redirectTo;
+      },
+      set redirectTo(url: string | null) {
+        context!.redirectTo = url;
+      },
+      get statusCode() {
+        return context!.statusCode;
+      },
+      set statusCode(code: number) {
+        context!.statusCode = code;
+      },
+      resolveRoute: (pathname) =>
+        matchByRoutes(pathname, routes, {
+          context,
+          /* skip resolver for guard from infinite loop */
+        }),
+      buildPath: context.buildPath,
+    });
   }
 
   return matched;
