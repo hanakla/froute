@@ -92,9 +92,7 @@ export class RouterContext {
 
     this.routeChangedListener.clear();
     (this as any).routeChangedListener = null;
-    this.beforeRouteChangeListener.clear();
-    (this as any).beforeRouteChangeListener = null;
-
+    this.beforeRouteChangeListener = null;
     this.location = null;
     this.currentMatch = null;
   }
