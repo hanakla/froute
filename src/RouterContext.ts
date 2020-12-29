@@ -148,15 +148,19 @@ export class RouterContext {
       ),
     };
 
+    if (action === "REPLACE") {
+      this.history.replace(this.location, this.location.state);
+      return;
+    }
+
     if (action === "PUSH") {
       this.history.push(this.location, this.location.state);
       await this.preloadCurrent();
-      this.routeChangedListener.forEach((listener) =>
-        listener(this.getCurrentLocation())
-      );
-    } else {
-      this.history.replace(this.location, this.location.state);
     }
+
+    this.routeChangedListener.forEach((listener) =>
+      listener(this.getCurrentLocation())
+    );
   };
 
   public clearBeforeRouteChangeListener() {
