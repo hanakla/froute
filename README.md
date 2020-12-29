@@ -5,7 +5,8 @@ Can use with both Fleur / Redux (redux-thunk).
 
 - [Features](#features)
 - [Next.js compat status](#next-js-compat-status)
-- API Overview
+  - [How to type-safe useRoute](#how-to-type-safe-useroute)
+- [API Overview](#api-overview)
   - [Hooks](#hooks)
   - [Components](#components)
 - [Example](#example)
@@ -24,18 +25,50 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Custom route resolution (for i18n support)
 - URL Builder
 
-### Next.js compat status
+## Next.js compat status
 
 - Compat API via `useRouter` or `withRouter`
   - Compatible features
     - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
+  - It's not type safe
 - Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
+  - `pathname` is return current `location.pathname`, not adjust to component file path base pathname.
   - `router.push()`, `router.replace()`
     - URL Object is does not support currentry
     - `as` argument is not supported
   - `router.beforePopState` is not supported
     - Use `useBeforeRouteChange()` hooks instead
   - All `router.events` not supported currently
+
+### How to type-safe useRoute
+
+Use this snippet in your app.
+(It's breaking to Type-level API compatibility from Next.js)
+
+```tsx
+// Copy it in-your-app/useRouter.ts
+import { useRouter as useNextCompatRouter } from '@fleur/froute'
+export const useRouter: UseRouter = useNextCompatRouter
+```
+
+Usage:
+
+```tsx
+// Route definition
+const routes = {
+  users: routeOf('/users/:id'),
+}
+
+// Component
+import { useRouter } from './useRouter'
+
+const Users = () => {
+  const router = useRouter<typeof routes.users>()
+  router.query.id // It infering to `string`.
+}
+```
+
+## API Overview
 
 ### Hooks
 

@@ -118,6 +118,18 @@ export const useRouteComponent = () => {
   return useMemo(() => ({ PageComponent }), [match]);
 };
 
+export interface UseRouter {
+  <R extends RouteDefinition<any, any> = any>(): {
+    pathname: string;
+    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
+    push: (url: string) => void;
+    replace: (url: string) => void;
+    prefetch: (url: string) => void;
+    back: FrouteNavigator["back"];
+    reload: () => void;
+  };
+}
+
 /**
  * Next.js subset-compat router
  *
@@ -126,7 +138,7 @@ export const useRouteComponent = () => {
  * - `beforePopState` is not supported
  * - router.events
  */
-export const useRouter = () => {
+export const useRouter: UseRouter = () => {
   const router = useRouterContext();
   const location = router.getCurrentLocation();
   const match = router.getCurrentMatch();
@@ -136,11 +148,11 @@ export const useRouter = () => {
     () => ({
       pathname: location.pathname,
       query: {
-        ...match?.match.query,
-        ...match?.match.params,
+        ...(match?.match.query as any),
+        ...(match?.match.params as any),
       },
-      push: nav.push,
-      replace: nav.replace,
+      push: (url: string) => nav.push(url),
+      replace: (url: string) => nav.replace(url),
       prefetch: (url: string) => {
         const match = router.resolveRoute(url);
 

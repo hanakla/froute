@@ -1,4 +1,10 @@
-export { routeBy, routeOf, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
+export {
+  routeBy,
+  routeOf,
+  ParamsOfRoute,
+  StateOfRoute,
+  RouteDefinition,
+} from "./RouteDefiner";
 export { createRouterContext, RouterOptions } from "./RouterContext";
 export { combineRouteResolver } from "./RouterUtils";
 export {
@@ -14,6 +20,7 @@ export {
   useRouter,
   withRouter,
   RouterProps,
+  UseRouter,
 } from "./react-bind";
 export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";
