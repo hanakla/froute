@@ -14,7 +14,10 @@
     "build:declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
     "build:esm": "bili",
     "build": "yarn build:declarations && yarn build:esm",
-    "prepublishOnly": "yarn clean-dist && yarn build"
+    "prepublishOnly": "yarn clean-dist && yarn build",
+    "watch": "bili -w",
+    "example:start": "cd examples && yarn start",
+    "example:update": "cd examples && yarn add @fleur/froute@dev"
   },
   "husky": {
     "hooks": {
