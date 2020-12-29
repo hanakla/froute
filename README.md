@@ -3,6 +3,13 @@
 Framework independent Router for React.
 Can use with both Fleur / Redux (redux-thunk).
 
+- [Features](#features)
+- [Next.js compat status](#next-js-compat-status)
+- API Overview
+  - [Hooks](#hooks)
+  - [Components](#components)
+- [Example](#example)
+
 ## Features
 
 See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/src/index.spec.tsx) or [examples](https://github.com/fleur-js/froute/tree/master/examples)
