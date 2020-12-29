@@ -9,6 +9,7 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 
 - Library independent
   - Works with Redux and Fleur
+- Next.js's Router subset compatiblity
 - Supports dynamic import without any code transformer
 - Supports Sever Side Rendering
   - Supports preload
@@ -16,20 +17,34 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Custom route resolution (for i18n support)
 - URL Builder
 
+### Next.js compat status
+
+- Compat API via `useRouter` or `withRouter`
+  - Compatible features
+    - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
+- Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
+  - `router.push()`, `router.replace()`
+    - URL Object is does not support currentry
+    - `as` argument is not supported
+  - `router.beforePopState` is not supported
+    - Use `useBeforeRouteChange()` hooks instead
+  - All `router.events` not supported currently
+
 ### Hooks
 
+- useRouteComponent
 - useLocation
 - useNavigation
 - useParams
-- useRouteComponent
-- useUrlBuilder
+- useUrlBuilder(routeDefinition, params, query?): string
+- useBeforeRouteChange(listener: () => Promise&lt;boolean | void&gt; | boolean | void )
+  - It can prevent routing
 
 ### Components
 
 - Link
 - ResponseCode
 - Redirect
-
 
 ## Example
 
@@ -72,7 +87,8 @@ User.tsx:
 import { routes, ResponseCode, Redirect } from './routes'
 
 export default () => {
-  const { userId } = useParams(/* optional */ routes.user)
+  // Use typeof to circular dependency free
+  const { userId } = useParams<typeof routes.user>()
   const { urlBuilder } = useUrlBuilder()
   const user = useSelector(getUser(userId))
 

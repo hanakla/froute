@@ -1,5 +1,7 @@
 import React, {
+  ComponentType,
   createContext,
+  forwardRef,
   ReactNode,
   useContext,
   useEffect,
@@ -9,7 +11,12 @@ import React, {
 } from "react";
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
-import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
+import {
+  RouteDefinition,
+  ParamsOfRoute,
+  StateOfRoute,
+  routeOf,
+} from "./RouteDefiner";
 import {
   NavigationListener,
   RouterContext,
@@ -114,6 +121,66 @@ export const useRouteComponent = () => {
   }, []);
 
   return useMemo(() => ({ PageComponent }), [match]);
+};
+
+/**
+ * Next.js subset-compat router
+ *
+ * - URL Object is not supported in `push`, `replace` currentry
+ * - `as` is not supported currentry
+ * - `beforePopState` is not supported
+ * - router.events
+ */
+export const useRouter = () => {
+  const router = useRouterContext();
+  const location = router.getCurrentLocation();
+  const match = router.getCurrentMatch();
+  const nav = useNavigation();
+
+  return useMemo(
+    () => ({
+      pathname: location.pathname,
+      query: {
+        ...match?.match.query,
+        ...match?.match.params,
+      },
+      push: nav.push,
+      replace: nav.replace,
+      prefetch: (url: string) => {
+        const match = router.resolveRoute(url);
+
+        if (match) {
+          router.preloadRoute(
+            match.route,
+            match.match.params,
+            match.match.query
+          );
+        }
+      },
+      back: nav.back,
+      reload: () => window.location.reload(),
+    }),
+    []
+  );
+};
+
+export type RouterProps = {
+  router: ReturnType<typeof useRouter>;
+};
+
+export const withRouter = <P extends RouterProps>(
+  Component: ComponentType<P>
+): ComponentType<Omit<P, "router">> => {
+  const WithRouter = forwardRef<any, any>((props, ref) => {
+    const router = useRouter();
+    return <Component {...props} ref={ref} router={router} />;
+  });
+
+  WithRouter.displayName = `WithRouter(${
+    Component.displayName ?? (Component as any).name
+  })`;
+
+  return WithRouter;
 };
 
 export const useLocation = <R extends RouteDefinition<any, any>>(

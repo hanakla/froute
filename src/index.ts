@@ -10,6 +10,10 @@ export {
   useBeforeRouteChange,
   FrouteContext,
   FrouteNavigator,
+  // Next.js compat
+  useRouter,
+  withRouter,
+  RouterProps,
 } from "./react-bind";
 export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";
