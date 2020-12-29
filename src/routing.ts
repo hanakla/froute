@@ -50,11 +50,13 @@ export const matchByRoutes = (
     const match = route.match(parsed.pathname);
     if (!match) continue;
 
+    const search = (parsed.search ?? "")?.slice(1);
+
     matched = {
       route,
       match: {
         ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-        query: qsParse(parsed.search ?? ""),
+        query: qsParse(search),
         search: parsed.search ?? "",
       },
     };
@@ -85,13 +87,14 @@ export const isMatchToRoute = (
   if (!parsed.pathname) return null;
 
   const match = route.match(parsed.pathname);
+  const search = (parsed.search ?? "")?.slice(1);
 
   matched = match
     ? {
         route,
         match: {
           ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-          query: qsParse(parsed.search ?? ""),
+          query: qsParse(search),
           search: parsed.search ?? "",
         },
       }
