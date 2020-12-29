@@ -128,6 +128,7 @@ export class RouterContext {
     if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
 
     if (!nextMatch) {
+      this.currentMatch = null;
       this.location = {
         key: "",
         pathname: loc.pathname ?? "",
