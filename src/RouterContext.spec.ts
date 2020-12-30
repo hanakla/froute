@@ -74,7 +74,7 @@ describe("Router", () => {
 
       expect(router.getHistoryState().user1).toBe("ok");
 
-      router.navigate("/users/2", { state: { user2: "ok" } });
+      await router.navigate("/users/2", { state: { user2: "ok" } });
       expect(router.getHistoryState().user2).toBe("ok");
     });
   });
