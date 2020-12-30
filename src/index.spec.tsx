@@ -56,13 +56,13 @@ describe("Usage", () => {
     const reqUrl = "/users/1";
     const router = createRouterContext(routes, routerOptions);
 
-    router.navigate(reqUrl);
+    await router.navigate(reqUrl);
     await router.preloadCurrent();
   });
 
   it("In React", async () => {
     const router = createRouterContext(routes, routerOptions);
-    router.navigate("/users/1");
+    await router.navigate("/users/1");
     await router.preloadCurrent();
 
     const App = () => {

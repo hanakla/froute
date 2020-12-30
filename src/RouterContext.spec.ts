@@ -126,10 +126,10 @@ describe("Router", () => {
     };
 
     describe("Redirection", () => {
-      it("Should alias path to real route", () => {
+      it("Should alias path to real route", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/u/1");
+        await router.navigate("/u/1");
         expect(router.statusCode).toBe(302);
         expect(router.redirectTo).toBe("/users/1");
         expect(router.getCurrentMatch()).toBe(null);
@@ -137,24 +137,24 @@ describe("Router", () => {
     });
 
     describe("Language specified route", () => {
-      it("Should resolve language specified pathname", () => {
+      it("Should resolve language specified pathname", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/ja/users/1");
+        await router.navigate("/ja/users/1");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/1"`
         );
 
-        router.navigate("/en/users/2");
+        await router.navigate("/en/users/2");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/2"`
         );
       });
 
-      it("Should ignore no language specified pathname", () => {
+      it("Should ignore no language specified pathname", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/users/2");
+        await router.navigate("/users/2");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/2"`
         );

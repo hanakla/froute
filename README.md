@@ -177,7 +177,7 @@ server.get("*", async (req, res, next) => {
     preloadContext: store
   })
 
-  router.navigate(req.url)
+  await router.navigate(req.url)
   await context.preloadCurrent();
 
   const content = ReactDOM.renderToString(

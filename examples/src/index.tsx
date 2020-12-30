@@ -15,7 +15,7 @@ domready(async () => {
     preloadContext: context,
   });
 
-  router.navigate(location.href);
+  await router.navigate(location.href);
   await router.preloadCurrent();
 
   ReactDOM.render(
