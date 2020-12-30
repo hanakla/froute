@@ -122,7 +122,7 @@ export class RouterContext {
     const userState = typeof pathname !== "string" ? pathname.state : state;
 
     const nextMatch = this.resolveRoute(
-      (loc.pathname ?? "") + (loc.search ?? "") + (loc.search ?? "")
+      (loc.pathname ?? "") + (loc.search ?? "")
     );
 
     if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
