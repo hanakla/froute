@@ -1,6 +1,6 @@
 import { compile } from "path-to-regexp";
 import { stringify } from "querystring";
-import { isEmptyObject } from "utils";
+import { isEmptyObject } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 
 export const buildPath = <T extends RouteDefinition<any, any>>(
