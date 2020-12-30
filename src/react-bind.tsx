@@ -304,11 +304,9 @@ export const useNavigation = () => {
             : router.resolveRoute(pathname + hash)?.route;
         if (!resolvedRoute) return;
 
-        router.preloadRoute(resolvedRoute, params, query).then(() => {
-          router.navigate(pathname + hash, {
-            state,
-            action: "PUSH",
-          });
+        router.navigate(pathname + hash, {
+          state,
+          action: "PUSH",
         });
       },
       replace: <R extends RouteDefinition<any, any>>(

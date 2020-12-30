@@ -156,8 +156,8 @@ export class RouterContext {
     }
 
     if (action === "PUSH") {
-      this.history.push(this.location, this.location.state);
       await this.preloadCurrent();
+      this.history.push(this.location, this.location.state);
     }
 
     this.routeChangedListener.forEach((listener) =>
