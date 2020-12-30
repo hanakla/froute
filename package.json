@@ -8,9 +8,6 @@
   "repository": "git@github.com:fleur-js/froute.git",
   "author": "Hanakla <ragg.devpr@gmail.com>",
   "license": "MIT",
-  "engines": {
-    "tsc": ">= 4.1.x"
-  },
   "scripts": {
     "test": "jest",
     "clean-dist": "rm -rf ./dist",
