@@ -19,7 +19,7 @@ describe("Router", () => {
 
       expect(match.route).toBe(routes.usersShow);
       expect(match.match).toMatchObject({
-        params: { id: 1 },
+        params: { id: "1" },
         path: "/users/1",
         query: { a: "1" },
         search: "?a=1",
