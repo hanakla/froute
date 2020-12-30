@@ -12,11 +12,11 @@ describe("Router", () => {
   };
 
   describe("navigate", () => {
-    it("Should route to usersShow by string URL", () => {
-      const context = new RouterContext(routes);
-      context.navigate("/users/1?a=1#1");
+    it("Should route to usersShow by string URL", async () => {
+      const router = new RouterContext(routes);
+      await router.navigate("/users/1?a=1#1");
 
-      const match = context.getCurrentMatch();
+      const match = router.getCurrentMatch();
 
       expect(match).not.toBe(false);
       if (!match) return; // Type guard
@@ -29,40 +29,40 @@ describe("Router", () => {
         search: "?a=1",
       });
 
-      expect(context.getCurrentLocation()).toMatchObject({
+      expect(router.getCurrentLocation()).toMatchObject({
         hash: "#1",
         pathname: "/users/1",
         search: "?a=1",
       });
-      expect(context.getCurrentLocation().state.app).toMatchInlineSnapshot(`
+      expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
           "hist": "default",
         }
       `);
     });
 
-    it("Should route to usersShow by location", () => {
-      const context = new RouterContext(routes);
+    it("Should route to usersShow by location", async () => {
+      const router = new RouterContext(routes);
 
-      context.navigate({
+      await router.navigate({
         pathname: "/users/1",
         search: "?a=1",
         hash: "#1",
         state: null,
       });
 
-      const match = context.getCurrentMatch();
+      const match = router.getCurrentMatch();
 
       expect(match).not.toBe(false);
       if (!match) return;
 
       expect(match.route).toBe(routes.usersShow);
-      expect(context.getCurrentLocation()).toMatchObject({
+      expect(router.getCurrentLocation()).toMatchObject({
         pathname: "/users/1",
         search: "?a=1",
         hash: "#1",
       });
-      expect(context.getCurrentLocation().state.app).toMatchInlineSnapshot(`
+      expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
           "hist": "default",
         }
@@ -71,15 +71,15 @@ describe("Router", () => {
   });
 
   describe("History State", () => {
-    it("check", () => {
-      const context = createRouterContext(routes);
-      context.navigate("/users/1");
-      context.setHistoryState({ user1: "ok" });
+    it("check", async () => {
+      const router = createRouterContext(routes);
+      await router.navigate("/users/1");
+      router.setHistoryState({ user1: "ok" });
 
-      expect(context.getHistoryState().user1).toBe("ok");
+      expect(router.getHistoryState().user1).toBe("ok");
 
-      context.navigate("/users/2", { state: { user2: "ok" } });
-      expect(context.getHistoryState().user2).toBe("ok");
+      router.navigate("/users/2", { state: { user2: "ok" } });
+      expect(router.getHistoryState().user2).toBe("ok");
     });
   });
 
