@@ -11,7 +11,7 @@ import {
   useUrlBuilder,
 } from "./react-bind";
 import { routeOf } from "./RouteDefiner";
-import { createRouterContext, RouterContext } from "./RouterContext";
+import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
 
 describe("react-bind", () => {
@@ -51,7 +51,7 @@ describe("react-bind", () => {
 
   describe("useLocation", () => {
     it("Should correctry parsed complex url", () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/users/1?q=1#hash");
 
       const result = renderHook(() => useLocation(), {
@@ -74,7 +74,7 @@ describe("react-bind", () => {
     });
 
     it("in 404, returns location and empty query", () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/notfound");
 
       const result = renderHook(() => useLocation(), {
@@ -95,7 +95,7 @@ describe("react-bind", () => {
 
   describe("useHistoryState", () => {
     it("get / set", () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/users");
 
       const {
@@ -125,7 +125,7 @@ describe("react-bind", () => {
         canUseDom: () => true,
       }));
 
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/users");
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -141,7 +141,7 @@ describe("react-bind", () => {
 
   describe("useParams", () => {
     it("test", () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
 
       await router.navigate("/users/1");
       const result = renderHook(
@@ -173,7 +173,7 @@ describe("react-bind", () => {
 
   describe("useNavigation", () => {
     it("", async () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/users/1");
 
       const { result } = renderHook(useNavigation, {
@@ -222,7 +222,7 @@ describe("react-bind", () => {
 
   describe("useRouteComponent", () => {
     it("test", async () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
 
       await act(async () => {
         await router.navigate("/users/1");
@@ -253,7 +253,7 @@ describe("react-bind", () => {
   });
 
   describe("useUrlBuilder", () => {
-    const router = createRouterContext(routes);
+    const router = createRouter(routes);
 
     const { result } = renderHook(useUrlBuilder, {
       wrapper: createWrapper(router),

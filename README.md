@@ -169,11 +169,11 @@ export default () => {
 
 Server side:
 ```tsx
-import { createRouterContext } from '@fleur/froute'
+import { createRouter } from '@fleur/froute'
 import { routes } from './routes'
 
 server.get("*", async (req, res, next) => {
-  const router = createRouterContext(routes, {
+  const router = createRouter(routes, {
     preloadContext: store
   })
 
@@ -203,10 +203,10 @@ server.get("*", async (req, res, next) => {
 
 Client side:
 ```tsx
-import { createRouterContext, FrouteContext } from '@fleur/froute'
+import { createRouter, FrouteContext } from '@fleur/froute'
 
 domready(async () => {
-  const router = createRouterContext(routes, {
+  const router = createRouter(routes, {
     preloadContext: store,
   });
 

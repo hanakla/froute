@@ -1,9 +1,5 @@
 import { routeOf } from "./RouteDefiner";
-import {
-  createRouterContext,
-  RouterContext,
-  RouterOptions,
-} from "./RouterContext";
+import { createRouter, RouterContext, RouterOptions } from "./RouterContext";
 import { combineRouteResolver } from "./RouterUtils";
 
 describe("Router", () => {
@@ -72,7 +68,7 @@ describe("Router", () => {
 
   describe("History State", () => {
     it("check", async () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
       await router.navigate("/users/1");
       router.setHistoryState({ user1: "ok" });
 

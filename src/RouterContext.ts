@@ -26,7 +26,7 @@ export interface RouterOptions {
   history?: History;
 }
 
-export const createRouterContext = (
+export const createRouter = (
   routes: { [key: string]: RouteDefinition<any, any> },
   options: RouterOptions = {}
 ) => {

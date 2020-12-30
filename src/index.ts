@@ -5,7 +5,7 @@ export {
   StateOfRoute,
   RouteDefinition,
 } from "./RouteDefiner";
-export { createRouterContext, RouterOptions } from "./RouterContext";
+export { createRouter, RouterOptions } from "./RouterContext";
 export { combineRouteResolver } from "./RouterUtils";
 export {
   useLocation,

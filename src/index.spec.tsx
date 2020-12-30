@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import {
-  createRouterContext,
+  createRouter,
   routeOf,
   useRouteComponent,
   FrouteLink,
@@ -54,14 +54,14 @@ describe("Usage", () => {
 
   it("Routing", async () => {
     const reqUrl = "/users/1";
-    const router = createRouterContext(routes, routerOptions);
+    const router = createRouter(routes, routerOptions);
 
     await router.navigate(reqUrl);
     await router.preloadCurrent();
   });
 
   it("In React", async () => {
-    const router = createRouterContext(routes, routerOptions);
+    const router = createRouter(routes, routerOptions);
     await router.navigate("/users/1");
     await router.preloadCurrent();
 
@@ -93,7 +93,7 @@ describe("Usage", () => {
   });
 
   it("Building URL", async () => {
-    const router = createRouterContext(routes, routerOptions);
+    const router = createRouter(routes, routerOptions);
     router.buildPath(routes.usersShow, { id: "1" });
   });
 });

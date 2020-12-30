@@ -2,7 +2,7 @@ import "regenerator-runtime";
 import domready from "domready";
 import React from "react";
 import ReactDOM from "react-dom";
-import { createRouterContext, FrouteContext } from "@fleur/froute";
+import { createRouter, FrouteContext } from "@fleur/froute";
 import { FleurContext } from "@fleur/react";
 import { App } from "./components/App";
 import { routes } from "./routes";
@@ -11,7 +11,7 @@ import { fleurApp } from "./domains";
 domready(async () => {
   const root = document.getElementById("root");
   const context = fleurApp.createContext();
-  const router = createRouterContext(routes, {
+  const router = createRouter(routes, {
     preloadContext: context,
   });
 
