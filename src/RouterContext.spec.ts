@@ -1,63 +1,81 @@
-import { routeBy } from "./RouteDefiner";
-import {
-  combineRouteResolver,
-  RouterContext,
-  RouterOptions,
-} from "./RouterContext";
+import { routeOf } from "./RouteDefiner";
+import { createRouter, RouterContext, RouterOptions } from "./RouterContext";
+import { combineRouteResolver } from "./RouterUtils";
 
 describe("Router", () => {
   const routes = {
-    usersShow: routeBy("/users").param("id"),
+    usersShow: routeOf("/users/:id").state(() => ({ hist: "default" })),
   };
 
   describe("navigate", () => {
-    it("Should route to usersShow by string URL", () => {
-      const context = new RouterContext(routes);
-      context.navigate("/users/1?a=1#1");
+    it("Should route to usersShow by string URL", async () => {
+      const router = new RouterContext(routes);
+      await router.navigate("/users/1?a=1#1");
 
-      const match = context.getCurrentMatch();
+      const match = router.getCurrentMatch();
 
       expect(match).not.toBe(false);
-      if (!match) return;
+      if (!match) return; // Type guard
 
       expect(match.route).toBe(routes.usersShow);
-      expect(context.getCurrentLocation()).toMatchInlineSnapshot(`
+      expect(match.match).toMatchObject({
+        params: { id: "1" },
+        path: "/users/1",
+        query: { a: "1" },
+        search: "?a=1",
+      });
+
+      expect(router.getCurrentLocation()).toMatchObject({
+        hash: "#1",
+        pathname: "/users/1",
+        search: "?a=1",
+      });
+      expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
-          "hash": "#1",
-          "key": "",
-          "pathname": "/users/1",
-          "search": "?a=1",
-          "state": null,
+          "hist": "default",
         }
       `);
     });
 
-    it("Should route to usersShow by location", () => {
-      const context = new RouterContext(routes);
+    it("Should route to usersShow by location", async () => {
+      const router = new RouterContext(routes);
 
-      context.navigate({
+      await router.navigate({
         pathname: "/users/1",
         search: "?a=1",
         hash: "#1",
         state: null,
-        key: "1",
       });
 
-      const match = context.getCurrentMatch();
+      const match = router.getCurrentMatch();
 
       expect(match).not.toBe(false);
       if (!match) return;
 
       expect(match.route).toBe(routes.usersShow);
-      expect(context.getCurrentLocation()).toMatchInlineSnapshot(`
+      expect(router.getCurrentLocation()).toMatchObject({
+        pathname: "/users/1",
+        search: "?a=1",
+        hash: "#1",
+      });
+      expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
         Object {
-          "hash": "#1",
-          "key": "1",
-          "pathname": "/users/1",
-          "search": "?a=1",
-          "state": null,
+          "hist": "default",
         }
       `);
+    });
+  });
+
+  describe("History State", () => {
+    it("check", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1");
+      router.setHistoryState({ user1: "ok" });
+
+      expect(router.getHistoryState().user1).toBe("ok");
+
+      await router.navigate("/users/2", { state: { user2: "ok" } });
+      expect(router.getHistoryState().user2).toBe("ok");
     });
   });
 
@@ -104,10 +122,10 @@ describe("Router", () => {
     };
 
     describe("Redirection", () => {
-      it("Should alias path to real route", () => {
+      it("Should alias path to real route", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/u/1");
+        await router.navigate("/u/1");
         expect(router.statusCode).toBe(302);
         expect(router.redirectTo).toBe("/users/1");
         expect(router.getCurrentMatch()).toBe(null);
@@ -115,24 +133,24 @@ describe("Router", () => {
     });
 
     describe("Language specified route", () => {
-      it("Should resolve language specified pathname", () => {
+      it("Should resolve language specified pathname", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/ja/users/1");
+        await router.navigate("/ja/users/1");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/1"`
         );
 
-        router.navigate("/en/users/2");
+        await router.navigate("/en/users/2");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/2"`
         );
       });
 
-      it("Should ignore no language specified pathname", () => {
+      it("Should ignore no language specified pathname", async () => {
         const router = new RouterContext(routes, options);
 
-        router.navigate("/users/2");
+        await router.navigate("/users/2");
         expect(router.getCurrentMatch()?.match.path).toMatchInlineSnapshot(
           `"/users/2"`
         );

@@ -3,20 +3,21 @@ import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
-  Link,
+  useHistoryState,
   useLocation,
   useNavigation,
   useParams,
   useRouteComponent,
   useUrlBuilder,
 } from "./react-bind";
-import { routeBy } from "./RouteDefiner";
-import { createRouterContext, RouterContext } from "./RouterContext";
+import { routeOf } from "./RouteDefiner";
+import { createRouter, RouterContext } from "./RouterContext";
+import { waitTick } from "../spec/utils";
 
 describe("react-bind", () => {
   const routes = {
-    usersShow: routeBy("/users")
-      .param("id")
+    usersShow: routeOf("/users/:id")
+      .state(() => ({ hist: 1 }))
       .action({
         component: () => {
           const Component = () => {
@@ -28,22 +29,18 @@ describe("react-bind", () => {
           );
         },
       }),
-    userArtworks: routeBy("/users")
-      .param("id")
-      .path("artworks")
-      .param("artworkId")
-      .action({
-        component: () => {
-          return () => {
-            const params = useParams();
-            return (
-              <div>
-                Here is Artwork {params.artworkId} for user {params.id}
-              </div>
-            );
-          };
-        },
-      }),
+    userArtworks: routeOf("/users/:id/artworks/:artworkId").action({
+      component: () => {
+        return () => {
+          const params = useParams();
+          return (
+            <div>
+              Here is Artwork {params.artworkId} for user {params.id}
+            </div>
+          );
+        };
+      },
+    }),
   };
 
   const createWrapper = (router: RouterContext): React.FC => {
@@ -52,37 +49,12 @@ describe("react-bind", () => {
     );
   };
 
-  describe("Link", () => {
-    it("Click to move location", async () => {
-      const router = createRouterContext(routes);
-      const spy = jest.spyOn(router, "navigate");
-
-      const result = render(
-        <Link data-testid="link" href="/users/1">
-          Link
-        </Link>,
-        { wrapper: createWrapper(router) }
-      );
-
-      expect(location.href).toMatchInlineSnapshot(`"http://localhost/"`);
-
-      const link = await result.findByTestId("link");
-      link.click();
-
-      expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/1"`);
-      expect(spy.mock.calls.length).toBe(1);
-
-      link.click();
-      expect(spy.mock.calls.length).toBe(2);
-    });
-  });
-
   describe("useLocation", () => {
-    it("Should correctry parsed complex url", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users/1?q=1#hash");
+    it("Should correctry parsed complex url", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1?q=1#hash");
 
-      const result = renderHook(useLocation, {
+      const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
       });
 
@@ -94,15 +66,18 @@ describe("react-bind", () => {
             "q": "1",
           },
           "search": "?q=1",
+          "state": Object {
+            "hist": 1,
+          },
         }
       `);
     });
 
-    it("in 404, returns location and empty query", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/notfound");
+    it("in 404, returns location and empty query", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/notfound");
 
-      const result = renderHook(useLocation, {
+      const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
       });
 
@@ -112,16 +87,63 @@ describe("react-bind", () => {
           "pathname": "/notfound",
           "query": Object {},
           "search": "",
+          "state": null,
         }
       `);
     });
   });
 
-  describe("useParams", () => {
-    it("test", () => {
-      const router = createRouterContext(routes);
+  describe("useHistoryState", () => {
+    it("get / set", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users");
 
-      router.navigate("/users/1");
+      const {
+        result: {
+          current: [get, set],
+        },
+        rerender,
+      } = renderHook(() => useHistoryState(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expect(get()).toMatchInlineSnapshot(`null`);
+
+      set({ hist: 1 });
+      rerender();
+
+      expect(get()).toMatchInlineSnapshot(`
+        Object {
+          "hist": 1,
+        }
+      `);
+    });
+
+    it("Logging if expected route isnt match", async () => {
+      jest.mock("./utils", () => ({
+        isDevelopment: true,
+        canUseDom: () => true,
+      }));
+
+      const router = createRouter(routes);
+      await router.navigate("/users");
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const { result } = renderHook(
+        () => useHistoryState(routes.userArtworks),
+        { wrapper: createWrapper(router) }
+      );
+
+      expect(spy.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe("useParams", () => {
+    it("test", async () => {
+      const router = createRouter(routes);
+
+      await router.navigate("/users/1");
       const result = renderHook(
         () => {
           return useParams(routes.usersShow);
@@ -137,7 +159,7 @@ describe("react-bind", () => {
         }
       `);
 
-      router.navigate("/users/1/artworks/1");
+      await router.navigate("/users/1/artworks/1");
       result.rerender();
 
       expect(result.result.current).toMatchInlineSnapshot(`
@@ -150,34 +172,46 @@ describe("react-bind", () => {
   });
 
   describe("useNavigation", () => {
-    it("", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users/1");
+    it("", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1");
 
-      const { result, rerender } = renderHook(useNavigation, {
+      const { result } = renderHook(useNavigation, {
         wrapper: createWrapper(router),
       });
 
-      result.current.push(router.buildPath(routes.usersShow, { id: "2" }));
+      result.current.push(routes.usersShow, { id: "2" });
+      await waitTick(200);
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
         pathname: "/users/2",
         search: "",
-        state: null,
+        state: {
+          __froute: {
+            scrollX: 0,
+            scrollY: 0,
+          },
+          app: { hist: 1 },
+        },
       });
 
       expect(location.href).toMatchInlineSnapshot(`"http://localhost/users/2"`);
 
-      result.current.push(
-        router.buildPath(routes.userArtworks, { id: "1", artworkId: "2" })
-      );
+      result.current.push(routes.userArtworks, { id: "1", artworkId: "2" });
+      await waitTick(200);
 
       expect(router.getCurrentLocation()).toMatchObject({
         hash: "",
         pathname: "/users/1/artworks/2",
         search: "",
-        state: null,
+        state: {
+          __froute: {
+            scrollX: 0,
+            scrollY: 0,
+          },
+          app: null,
+        },
       });
 
       expect(location.href).toMatchInlineSnapshot(
@@ -188,10 +222,10 @@ describe("react-bind", () => {
 
   describe("useRouteComponent", () => {
     it("test", async () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
 
       await act(async () => {
-        router.navigate("/users/1");
+        await router.navigate("/users/1");
         await router.preloadCurrent();
       });
 
@@ -206,7 +240,7 @@ describe("react-bind", () => {
       );
 
       await act(async () => {
-        router.navigate("/users/1/artworks/2");
+        await router.navigate("/users/1/artworks/2");
         await router.preloadCurrent();
       });
 
@@ -219,7 +253,7 @@ describe("react-bind", () => {
   });
 
   describe("useUrlBuilder", () => {
-    const router = createRouterContext(routes);
+    const router = createRouter(routes);
 
     const { result } = renderHook(useUrlBuilder, {
       wrapper: createWrapper(router),
