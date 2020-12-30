@@ -50,7 +50,7 @@ describe("react-bind", () => {
   };
 
   describe("useLocation", () => {
-    it("Should correctry parsed complex url", () => {
+    it("Should correctry parsed complex url", async () => {
       const router = createRouter(routes);
       await router.navigate("/users/1?q=1#hash");
 
@@ -73,7 +73,7 @@ describe("react-bind", () => {
       `);
     });
 
-    it("in 404, returns location and empty query", () => {
+    it("in 404, returns location and empty query", async () => {
       const router = createRouter(routes);
       await router.navigate("/notfound");
 
@@ -94,7 +94,7 @@ describe("react-bind", () => {
   });
 
   describe("useHistoryState", () => {
-    it("get / set", () => {
+    it("get / set", async () => {
       const router = createRouter(routes);
       await router.navigate("/users");
 
@@ -119,7 +119,7 @@ describe("react-bind", () => {
       `);
     });
 
-    it("Logging if expected route isnt match", () => {
+    it("Logging if expected route isnt match", async () => {
       jest.mock("./utils", () => ({
         isDevelopment: true,
         canUseDom: () => true,
@@ -140,7 +140,7 @@ describe("react-bind", () => {
   });
 
   describe("useParams", () => {
-    it("test", () => {
+    it("test", async () => {
       const router = createRouter(routes);
 
       await router.navigate("/users/1");
