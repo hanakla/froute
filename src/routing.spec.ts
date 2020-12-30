@@ -1,4 +1,4 @@
-import { routeBy, routeOf } from "./RouteDefiner";
+import { routeOf } from "./RouteDefiner";
 import { matchByRoutes } from "./routing";
 
 describe("routing", () => {

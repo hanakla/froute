@@ -26,7 +26,7 @@ export interface RouterOptions {
   history?: History;
 }
 
-export const createRouterContext = (
+export const createRouter = (
   routes: { [key: string]: RouteDefinition<any, any> },
   options: RouterOptions = {}
 ) => {
@@ -49,8 +49,16 @@ interface NavigateOption {
   > | null;
 }
 
+/** Return `false` to prevent routing */
+export interface BeforeRouteListener {
+  (nextMatch: FrouteMatch<any> | null):
+    | Promise<boolean | void>
+    | boolean
+    | void;
+}
+
 export type NavigationListener = (
-  location: Location<FrouteHistoryState>
+  location: DeepReadonly<Location<FrouteHistoryState>>
 ) => void;
 
 export class RouterContext {
@@ -60,10 +68,12 @@ export class RouterContext {
 
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
-  private disposeListener: () => void;
+  private disposeHistory: () => void;
+
+  private beforeRouteChangeListener: BeforeRouteListener | null = null;
 
   /** Preload finish listeners */
-  private listeners: Set<NavigationListener> = new Set();
+  private routeChangedListener: Set<NavigationListener> = new Set();
 
   constructor(
     public routes: { [key: string]: RouteDefinition<any, any> },
@@ -74,17 +84,20 @@ export class RouterContext {
         ? (createBrowserHistory({}) as BrowserHistory<FrouteHistoryState>)
         : (createMemoryHistory({}) as MemoryHistory<FrouteHistoryState>);
 
-    this.disposeListener = this.history.listen(this.historyListener);
+    this.disposeHistory = this.history.listen(this.historyListener);
   }
 
   public dispose() {
-    this.disposeListener();
-    this.listeners.clear();
+    this.disposeHistory();
+
+    this.routeChangedListener.clear();
+    (this as any).routeChangedListener = null;
+    this.beforeRouteChangeListener = null;
     this.location = null;
     this.currentMatch = null;
   }
 
-  public historyListener: Listener<FrouteHistoryState | null> = ({
+  private historyListener: Listener<FrouteHistoryState | null> = ({
     location,
   }) => {
     this.location = {
@@ -95,19 +108,27 @@ export class RouterContext {
       state: location.state ?? createFrouteHistoryState(),
     };
 
-    this.listeners.forEach((listener) => listener(this.getCurrentLocation()));
+    this.currentMatch = this.resolveRoute(location.pathname);
+
+    const nextLocation = this.getCurrentLocation();
+    this.routeChangedListener.forEach((listener) => listener(nextLocation));
   };
 
   public navigate: Navigate = async (
     pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
-    { state, action = "PUSH" }: NavigateOption = {}
+    { state, action }: NavigateOption = {}
   ) => {
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
 
-    this.currentMatch = this.resolveRoute(loc.pathname ?? "");
+    const nextMatch = this.resolveRoute(
+      (loc.pathname ?? "") + (loc.search ?? "")
+    );
 
-    if (!this.currentMatch) {
+    if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
+
+    if (!nextMatch) {
+      this.currentMatch = null;
       this.location = {
         key: "",
         pathname: loc.pathname ?? "",
@@ -118,24 +139,45 @@ export class RouterContext {
       return;
     }
 
+    this.currentMatch = nextMatch;
     this.location = {
       key: "",
       pathname: loc.pathname ?? "",
       search: loc.search ?? "",
       hash: loc.hash ?? "",
       state: createFrouteHistoryState(
-        userState ?? this.currentMatch?.route.createState()
+        userState ?? nextMatch.route.createState()
       ),
     };
 
-    if (action === "PUSH") {
-      this.history.push(this.location, this.location.state);
-      await this.preloadCurrent();
-      this.listeners.forEach((listener) => listener(this.getCurrentLocation()));
-    } else {
+    if (action === "REPLACE") {
       this.history.replace(this.location, this.location.state);
+      return;
     }
+
+    if (action === "PUSH") {
+      await this.preloadCurrent();
+      this.history.push(this.location, this.location.state);
+    }
+
+    this.routeChangedListener.forEach((listener) =>
+      listener(this.getCurrentLocation())
+    );
   };
+
+  public clearBeforeRouteChangeListener() {
+    this.beforeRouteChangeListener = null;
+  }
+
+  public setBeforeRouteChangeListener(listener: BeforeRouteListener) {
+    if (this.beforeRouteChangeListener) {
+      throw new Error(
+        "Froute: beforeRouteChangeListener already set, please set only current Page not in child components"
+      );
+    }
+
+    this.beforeRouteChangeListener = listener;
+  }
 
   public get internalHitoryState() {
     return this.getCurrentLocation()?.state.__froute;
@@ -191,11 +233,11 @@ export class RouterContext {
   };
 
   public observeRouteChanged = (listener: NavigationListener) => {
-    this.listeners.add(listener);
+    this.routeChangedListener.add(listener);
   };
 
   public unobserveRouteChanged = (listener: NavigationListener) => {
-    this.listeners.delete(listener);
+    this.routeChangedListener.delete(listener);
   };
 
   public resolveRoute = (pathname: string): FrouteMatch<any> | null => {
@@ -209,23 +251,23 @@ export class RouterContext {
     route: DeepReadonly<R>,
     params: ParamsOfRoute<R>,
     query: { [key: string]: string | string[] | undefined } = {},
-    { withoutPreload = false }: { withoutPreload?: boolean } = {}
+    { onlyComponentPreload = false }: { onlyComponentPreload?: boolean } = {}
   ) {
     const actor = route.getActor();
     if (!actor) return;
 
     await Promise.all([
       actor.loadComponent(),
-      withoutPreload
+      onlyComponentPreload
         ? null
         : actor.preload?.(this.options.preloadContext, params, query),
     ]);
   }
 
   public async preloadCurrent({
-    withoutPreload = false,
+    onlyComponentPreload = false,
   }: {
-    withoutPreload?: boolean;
+    onlyComponentPreload?: boolean;
   } = {}) {
     const matchedRoute = this.getCurrentMatch();
     const location = this.getCurrentLocation();
@@ -237,7 +279,7 @@ export class RouterContext {
       matchedRoute.route,
       matchedRoute.match.params,
       query,
-      { withoutPreload }
+      { onlyComponentPreload }
     );
   }
 }

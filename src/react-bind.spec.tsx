@@ -11,7 +11,7 @@ import {
   useUrlBuilder,
 } from "./react-bind";
 import { routeOf } from "./RouteDefiner";
-import { createRouterContext, RouterContext } from "./RouterContext";
+import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
 
 describe("react-bind", () => {
@@ -50,9 +50,9 @@ describe("react-bind", () => {
   };
 
   describe("useLocation", () => {
-    it("Should correctry parsed complex url", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users/1?q=1#hash");
+    it("Should correctry parsed complex url", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1?q=1#hash");
 
       const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
@@ -73,9 +73,9 @@ describe("react-bind", () => {
       `);
     });
 
-    it("in 404, returns location and empty query", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/notfound");
+    it("in 404, returns location and empty query", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/notfound");
 
       const result = renderHook(() => useLocation(), {
         wrapper: createWrapper(router),
@@ -94,9 +94,9 @@ describe("react-bind", () => {
   });
 
   describe("useHistoryState", () => {
-    it("get / set", () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users");
+    it("get / set", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users");
 
       const {
         result: {
@@ -119,14 +119,14 @@ describe("react-bind", () => {
       `);
     });
 
-    it("Logging if expected route isnt match", () => {
+    it("Logging if expected route isnt match", async () => {
       jest.mock("./utils", () => ({
         isDevelopment: true,
         canUseDom: () => true,
       }));
 
-      const router = createRouterContext(routes);
-      router.navigate("/users");
+      const router = createRouter(routes);
+      await router.navigate("/users");
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
@@ -140,10 +140,10 @@ describe("react-bind", () => {
   });
 
   describe("useParams", () => {
-    it("test", () => {
-      const router = createRouterContext(routes);
+    it("test", async () => {
+      const router = createRouter(routes);
 
-      router.navigate("/users/1");
+      await router.navigate("/users/1");
       const result = renderHook(
         () => {
           return useParams(routes.usersShow);
@@ -159,7 +159,7 @@ describe("react-bind", () => {
         }
       `);
 
-      router.navigate("/users/1/artworks/1");
+      await router.navigate("/users/1/artworks/1");
       result.rerender();
 
       expect(result.result.current).toMatchInlineSnapshot(`
@@ -173,8 +173,8 @@ describe("react-bind", () => {
 
   describe("useNavigation", () => {
     it("", async () => {
-      const router = createRouterContext(routes);
-      router.navigate("/users/1");
+      const router = createRouter(routes);
+      await router.navigate("/users/1");
 
       const { result } = renderHook(useNavigation, {
         wrapper: createWrapper(router),
@@ -222,10 +222,10 @@ describe("react-bind", () => {
 
   describe("useRouteComponent", () => {
     it("test", async () => {
-      const router = createRouterContext(routes);
+      const router = createRouter(routes);
 
       await act(async () => {
-        router.navigate("/users/1");
+        await router.navigate("/users/1");
         await router.preloadCurrent();
       });
 
@@ -240,7 +240,7 @@ describe("react-bind", () => {
       );
 
       await act(async () => {
-        router.navigate("/users/1/artworks/2");
+        await router.navigate("/users/1/artworks/2");
         await router.preloadCurrent();
       });
 
@@ -253,7 +253,7 @@ describe("react-bind", () => {
   });
 
   describe("useUrlBuilder", () => {
-    const router = createRouterContext(routes);
+    const router = createRouter(routes);
 
     const { result } = renderHook(useUrlBuilder, {
       wrapper: createWrapper(router),

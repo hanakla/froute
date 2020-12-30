@@ -6,6 +6,17 @@ export const isDevelopment =
       process.env?.NODE_ENV === "test"
     : false;
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const isEmptyObject = (t: object) => {
+  for (const k in t) {
+    if (hasOwnProperty.call(t, k)) return false;
+  }
+
+  return true;
+};
+
 // prettier-ignore
 export type DeepReadonly<T> =
   T extends () => any | boolean | number | string | null | undefined ? T

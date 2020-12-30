@@ -13,6 +13,9 @@ export default () => {
         Go to not found user
       </Link>
       <br />
+      <Link href={buildPath(routes.beforeUnload, { id: "404" })}>
+        Go to beforeunload check
+      </Link>
     </div>
   );
 };

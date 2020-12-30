@@ -871,13 +871,14 @@
     immer "^8.0.0"
     invariant "^2.2.4"
 
-"@fleur/froute@^0.1.0-pre.12":
-  version "0.1.0-pre.12"
-  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0-pre.12.tgz#3cf3aa22aced17369b4c3e4b2ac9753703c1c323"
-  integrity sha512-+Rko/MKEKx+66O58w8xyQQPtcJqxQc4eX6vIEF6eIdmrgtm0IryeWPyJBhJ1eCVXKgCd2wisYZbDEr1slOMpQA==
+"@fleur/froute@^0.2.0-dev.9":
+  version "0.2.0-dev.9"
+  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.2.0-dev.9.tgz#8d3fac4dfb9567e0425c4cbb87170e980d9542b0"
+  integrity sha512-qtZTRxQ/M51ThFKvcHyA8DRF9I59tInKnAzL8aOJVjhu/5nIQG7+WlzUV4q46ZT4/OBBO/pTuLa20k0/9v4z9A==
   dependencies:
     history "^5.0.0"
     path-to-regexp "^6.1.0"
+    rollup "^2.16.1"
 
 "@fleur/react@^4.0.1":
   version "4.0.1"
@@ -2440,6 +2441,11 @@ fsevents@^1.2.7:
   dependencies:
     bindings "^1.5.0"
     nan "^2.12.1"
+
+fsevents@~2.1.2:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.1.3.tgz#fb738703ae8d2f9fe900c33836ddebee8b97f23e"
+  integrity sha512-Auw9a4AxqWpa9GUfj370BMPzzyncfBABW8Mab7BGWBYDj4Isgq+cDKtx0i6u9jcX9pQDnswsaaOTgTmA5pEjuQ==
 
 function-bind@^1.1.1:
   version "1.1.1"
@@ -4477,6 +4483,13 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
   dependencies:
     hash-base "^3.0.0"
     inherits "^2.0.1"
+
+rollup@^2.16.1:
+  version "2.35.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.35.1.tgz#e6bc8d10893556a638066f89e8c97f422d03968c"
+  integrity sha512-q5KxEyWpprAIcainhVy6HfRttD9kutQpHbeqDTWnqAFNJotiojetK6uqmcydNMymBEtC4I8bCYR+J3mTMqeaUA==
+  optionalDependencies:
+    fsevents "~2.1.2"
 
 safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@^5.2.0, safe-buffer@~5.2.0:
   version "5.2.1"

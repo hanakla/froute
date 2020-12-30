@@ -1,9 +1,9 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { routeBy, routeOf } from "../RouteDefiner";
-import { createRouterContext } from "../RouterContext";
-import { FrouteLink } from "./FrouteLink";
+import { routeOf } from "../RouteDefiner";
+import { createRouter } from "../RouterContext";
 import { createComponentWrapper, waitTick } from "../../spec/utils";
+import { FrouteLink } from "./FrouteLink";
 
 describe("FrouteLink", () => {
   const routes = {
@@ -11,7 +11,7 @@ describe("FrouteLink", () => {
   };
 
   it("Click to move location", async () => {
-    const router = createRouterContext(routes);
+    const router = createRouter(routes);
     const spy = jest.spyOn(router, "navigate");
 
     const result = render(

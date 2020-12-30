@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { routeBy, routeOf } from "../RouteDefiner";
-import { createRouterContext } from "../RouterContext";
+import { routeOf } from "../RouteDefiner";
+import { createRouter } from "../RouterContext";
 import { Link } from "./Link";
 import { createComponentWrapper, waitTick } from "../../spec/utils";
 
@@ -11,7 +11,7 @@ describe("Link", () => {
   };
 
   it("Click to move location", async () => {
-    const router = createRouterContext(routes);
+    const router = createRouter(routes);
     const spy = jest.spyOn(router, "navigate");
 
     const result = render(

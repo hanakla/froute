@@ -1,5 +1,11 @@
-export { routeBy, routeOf, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
-export { createRouterContext, RouterOptions } from "./RouterContext";
+export {
+  routeBy,
+  routeOf,
+  ParamsOfRoute,
+  StateOfRoute,
+  RouteDefinition,
+} from "./RouteDefiner";
+export { createRouter, RouterOptions } from "./RouterContext";
 export { combineRouteResolver } from "./RouterUtils";
 export {
   useLocation,
@@ -7,7 +13,14 @@ export {
   useParams,
   useRouteComponent,
   useUrlBuilder,
+  useBeforeRouteChange,
   FrouteContext,
+  FrouteNavigator,
+  // Next.js compat
+  useRouter,
+  withRouter,
+  RouterProps,
+  UseRouter,
 } from "./react-bind";
 export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";

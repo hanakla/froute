@@ -1,5 +1,7 @@
 import React, {
+  ComponentType,
   createContext,
+  forwardRef,
   ReactNode,
   useContext,
   useEffect,
@@ -10,7 +12,11 @@ import React, {
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
 import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
-import { NavigationListener, RouterContext } from "./RouterContext";
+import {
+  NavigationListener,
+  RouterContext,
+  BeforeRouteListener,
+} from "./RouterContext";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -133,6 +139,78 @@ export const useRouteComponent = () => {
   return useMemo(() => ({ PageComponent }), [match]);
 };
 
+export interface UseRouter {
+  <R extends RouteDefinition<any, any> = any>(): {
+    pathname: string;
+    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
+    push: (url: string) => void;
+    replace: (url: string) => void;
+    prefetch: (url: string) => void;
+    back: FrouteNavigator["back"];
+    reload: () => void;
+  };
+}
+
+/**
+ * Next.js subset-compat router
+ *
+ * - URL Object is not supported in `push`, `replace` currentry
+ * - `as` is not supported currentry
+ * - `beforePopState` is not supported
+ * - router.events
+ */
+export const useRouter: UseRouter = () => {
+  const router = useRouterContext();
+  const location = router.getCurrentLocation();
+  const match = router.getCurrentMatch();
+  const nav = useNavigation();
+
+  return useMemo(
+    () => ({
+      pathname: location.pathname,
+      query: {
+        ...(match?.match.query as any),
+        ...(match?.match.params as any),
+      },
+      push: (url: string) => nav.push(url),
+      replace: (url: string) => nav.replace(url),
+      prefetch: (url: string) => {
+        const match = router.resolveRoute(url);
+
+        if (match) {
+          router.preloadRoute(
+            match.route,
+            match.match.params,
+            match.match.query
+          );
+        }
+      },
+      back: nav.back,
+      reload: () => window.location.reload(),
+    }),
+    []
+  );
+};
+
+export type RouterProps = {
+  router: ReturnType<typeof useRouter>;
+};
+
+export const withRouter = <P extends RouterProps>(
+  Component: ComponentType<P>
+): ComponentType<Omit<P, "router">> => {
+  const WithRouter = forwardRef<any, any>((props, ref) => {
+    const router = useRouter();
+    return <Component {...props} ref={ref} router={router} />;
+  });
+
+  WithRouter.displayName = `WithRouter(${
+    Component.displayName ?? (Component as any).name
+  })`;
+
+  return WithRouter;
+};
+
 export const useLocation = <R extends RouteDefinition<any, any>>(
   expectRoute?: R
 ) => {
@@ -174,7 +252,7 @@ export const useHistoryState = <
 
 interface UseParams {
   (): { [param: string]: string | undefined };
-  <T extends RouteDefinition<any, any>>(route: T): ParamsOfRoute<T>;
+  <T extends RouteDefinition<any, any>>(expectRoute?: T): ParamsOfRoute<T>;
 }
 
 export const useParams: UseParams = <
@@ -194,7 +272,7 @@ export const useParams: UseParams = <
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
 
-interface FrouteNavigator {
+export interface FrouteNavigator {
   push<R extends RouteDefinition<any, any>>(
     route: R,
     params: ParamsOfRoute<R>,
@@ -247,11 +325,9 @@ export const useNavigation = () => {
             : router.resolveRoute(pathname + hash)?.route;
         if (!resolvedRoute) return;
 
-        router.preloadRoute(resolvedRoute, params, query).then(() => {
-          router.navigate(pathname + hash, {
-            state,
-            action: "PUSH",
-          });
+        router.navigate(pathname + hash, {
+          state,
+          action: "PUSH",
         });
       },
       replace: <R extends RouteDefinition<any, any>>(
@@ -290,4 +366,17 @@ export const useUrlBuilder = () => {
     }),
     [router]
   );
+};
+
+/** Handling */
+export const useBeforeRouteChange = (
+  /** Return Promise&lt;false&gt; | false to prevent route changing. This listener only one can be set at a time */
+  beforeRouteListener: BeforeRouteListener
+) => {
+  const router = useRouterContext();
+
+  useEffect(() => {
+    router.setBeforeRouteChangeListener(beforeRouteListener);
+    return () => router.clearBeforeRouteChangeListener();
+  }, []);
 };
