@@ -158,6 +158,8 @@ export class RouterContext {
       } else {
         this.history.push(nextLocation, nextLocation.state);
       }
+
+      this.routeChangedListener.forEach((listener) => listener(nextLocation));
     } finally {
       // Restore listener
       this.disposeHistory = this.history.listen(this.historyListener);
