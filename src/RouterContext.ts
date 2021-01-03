@@ -151,14 +151,23 @@ export class RouterContext {
 
     if (action === "REPLACE") {
       this.history.replace(nextLocation, nextLocation.state);
+      this.currentMatch = nextMatch;
+      this.location = nextLocation;
       return;
     } else if (action === "PUSH") {
-      await this.preloadCurrent();
-      this.history.push(nextLocation, nextLocation.state);
-    }
+      await this.preloadRoute(
+        nextMatch.route,
+        nextMatch.match.params,
+        nextMatch.match.query
+      );
 
-    this.currentMatch = nextMatch;
-    this.location = nextLocation;
+      this.history.push(nextLocation, nextLocation.state);
+      this.currentMatch = nextMatch;
+      this.location = nextLocation;
+    } else {
+      this.currentMatch = nextMatch;
+      this.location = nextLocation;
+    }
 
     this.routeChangedListener.forEach((listener) =>
       listener(this.getCurrentLocation())
