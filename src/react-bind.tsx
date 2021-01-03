@@ -99,27 +99,6 @@ export const useRouterContext = () => {
   return router;
 };
 
-// Next.js compat router
-export const useRouter = () => {
-  const router = useRouterContext();
-  const nav = useNavigation();
-  const match = router.getCurrentMatch();
-
-  return useMemo(
-    () => ({
-      pathname: match?.match.path,
-      /** Query string parsed object & url fragment matched params */
-      query: { ...match?.match.query, ...match?.match.params },
-      push: nav.push,
-      prefetch: (url: string) => {
-        const match = router.resolveRoute(url);
-        if (match) router.preloadRoute(match.route, match.match.params);
-      },
-    }),
-    [match, nav]
-  );
-};
-
 export const useRouteComponent = () => {
   const router = useRouterContext();
   const match = router.getCurrentMatch();
