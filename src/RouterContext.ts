@@ -139,8 +139,7 @@ export class RouterContext {
       return;
     }
 
-    this.currentMatch = nextMatch;
-    this.location = {
+    const nextLocation = {
       key: "",
       pathname: loc.pathname ?? "",
       search: loc.search ?? "",
@@ -151,14 +150,15 @@ export class RouterContext {
     };
 
     if (action === "REPLACE") {
-      this.history.replace(this.location, this.location.state);
+      this.history.replace(nextLocation, nextLocation.state);
       return;
+    } else if (action === "PUSH") {
+      await this.preloadCurrent();
+      this.history.push(nextLocation, nextLocation.state);
     }
 
-    if (action === "PUSH") {
-      await this.preloadCurrent();
-      this.history.push(this.location, this.location.state);
-    }
+    this.currentMatch = nextMatch;
+    this.location = nextLocation;
 
     this.routeChangedListener.forEach((listener) =>
       listener(this.getCurrentLocation())
