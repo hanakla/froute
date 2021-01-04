@@ -18,7 +18,6 @@ export interface RoutingOnlyRouterContext {
   statusCode: number;
   redirectTo: string | null;
   resolveRoute: RouterContext["resolveRoute"];
-  buildPath: RouterContext["buildPath"];
 }
 
 export interface RouteResolver {
@@ -39,10 +38,18 @@ export const matchByRoutes = (
     context,
   }: {
     resolver?: RouteResolver;
-    context?: RouterContext;
+    context?: RoutingOnlyRouterContext;
   } = {}
 ): FrouteMatch<any> | null => {
-  context = context ?? new RouterContext(routes, { resolver });
+  const usingContext: RoutingOnlyRouterContext = context ?? {
+    redirectTo: null as string | null,
+    statusCode: 200,
+    resolveRoute: (pathname) =>
+      matchByRoutes(pathname, routes, {
+        /* skip resolver: for guard from infinite loop */
+        context: usingContext,
+      }),
+  };
 
   const parsed = parseUrl(pathname);
 
@@ -70,23 +77,18 @@ export const matchByRoutes = (
   if (resolver) {
     return resolver(parsed.pathname, matched, {
       get redirectTo() {
-        return context!.redirectTo;
+        return usingContext.redirectTo;
       },
       set redirectTo(url: string | null) {
-        context!.redirectTo = url;
+        usingContext.redirectTo = url;
       },
       get statusCode() {
-        return context!.statusCode;
+        return usingContext.statusCode;
       },
       set statusCode(code: number) {
-        context!.statusCode = code;
+        usingContext.statusCode = code;
       },
-      resolveRoute: (pathname) =>
-        matchByRoutes(pathname, routes, {
-          context,
-          /* skip resolver for guard from infinite loop */
-        }),
-      buildPath: context.buildPath,
+      resolveRoute: usingContext.resolveRoute,
     });
   }
 

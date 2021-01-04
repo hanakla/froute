@@ -1,3 +1,4 @@
+import { buildPath } from "./builder";
 import { routeOf } from "./RouteDefiner";
 import { createRouter, RouterContext, RouterOptions } from "./RouterContext";
 import { combineRouteResolver } from "./RouterUtils";
@@ -108,7 +109,7 @@ describe("Router", () => {
 
           if (uid) {
             context.statusCode = 302;
-            context.redirectTo = context.buildPath(routes.usersShow, {
+            context.redirectTo = buildPath(routes.usersShow, {
               id: uid,
             });
 
