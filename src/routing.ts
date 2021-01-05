@@ -6,11 +6,15 @@ import { ParamsOfRoute, RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {
   route: RouteDefinition<P, any>;
-  match: MatchResult<{ [K in P]: string }> & {
-    query: ParsedQuery;
-    search: string;
-  };
+  match: FrouteMatchResult<P>;
 }
+
+export type FrouteMatchResult<P extends string> = MatchResult<
+  { [K in P]: string }
+> & {
+  query: ParsedQuery;
+  search: string;
+};
 
 export type ParsedQuery = { [K: string]: string | string[] | undefined };
 
@@ -84,30 +88,21 @@ export const matchByRoutes = (
   const usingContext = createRoutingOnlyContext(context, routes);
 
   const parsed = parseUrl(pathname);
+  const afterHostUrl =
+    (parsed.pathname ?? "") + (parsed.search ?? "") + (parsed.hash ?? "");
 
   let matched: FrouteMatch<any> | null = null;
-  if (!parsed.pathname) return null;
 
   for (const route of Object.values(routes)) {
-    const match = route.match(parsed.pathname);
+    const match = route.match(afterHostUrl);
     if (!match) continue;
 
-    const search = (parsed.search ?? "")?.slice(1);
-
-    matched = {
-      route,
-      match: {
-        ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-        query: qsParse(search),
-        search: parsed.search ?? "",
-      },
-    };
-
+    matched = { route, match };
     break;
   }
 
   if (resolver) {
-    return resolver(parsed.pathname, matched, {
+    return resolver(afterHostUrl, matched, {
       get redirectTo() {
         return usingContext.redirectTo;
       },
@@ -138,26 +133,17 @@ export const isMatchToRoute = (
   context = context ?? new RouterContext({ route }, { resolver });
 
   const parsed = parseUrl(pathname);
+  const afterHostUrl =
+    (parsed.pathname ?? "") + (parsed.search ?? "") + (parsed.hash ?? "");
 
   let matched: FrouteMatch<any> | null = null;
-  if (!parsed.pathname) return null;
 
-  const match = route.match(parsed.pathname);
-  const search = (parsed.search ?? "")?.slice(1);
+  const match = route.match(afterHostUrl);
 
-  matched = match
-    ? {
-        route,
-        match: {
-          ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-          query: qsParse(search),
-          search: parsed.search ?? "",
-        },
-      }
-    : null;
+  matched = match ? { route, match } : null;
 
   if (resolver) {
-    return resolver(parsed.pathname, matched, context);
+    return resolver(afterHostUrl, matched, context);
   }
 
   return matched;

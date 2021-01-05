@@ -1,13 +1,15 @@
 /* eslint-disable */
 
 import { ComponentType } from "react";
-import { match, Match } from "path-to-regexp";
+import { match } from "path-to-regexp";
 import { StateBase } from "./FrouteHistoryState";
+import { parse as parseUrl } from "url";
+import { parse as qsParse } from "querystring";
+import { FrouteMatchResult } from "./routing";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error Params is type store
 export interface RouteDefinition<Params extends string, S extends StateBase> {
-  match(pathname: string): Match;
+  match(pathname: string): FrouteMatchResult<Params> | null;
   toPath(): string;
   createState(): S | null;
   getActor(): Actor<any> | null;
@@ -102,7 +104,7 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
     paramName: P
   ): RouteDefiner<Params | P, State> {
     this.stack.push(`:${paramName}`);
-    return this;
+    return this as any;
   }
 
   public path(path: string): RouteDefiner<Params, State> {
@@ -128,8 +130,15 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
     return this as any;
   }
 
-  public match(pathname: string) {
-    return match(this.toPath())(pathname);
+  public match(pathname: string): FrouteMatchResult<Params> | null {
+    const parsed = parseUrl(pathname);
+    const result = match<Record<Params, string>>(this.toPath())(parsed.pathname!);
+
+    return result ? {
+      ...result,
+        query: qsParse(parsed.query ?? ""),
+        search: parsed.search ?? "",
+    } : null
   }
 
   public getActor<R extends RouteDefiner<any, any>>(this: R) {
