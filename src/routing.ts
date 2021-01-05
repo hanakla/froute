@@ -1,8 +1,7 @@
 import { MatchResult } from "path-to-regexp";
 import { RouterContext } from "./RouterContext";
 import { parse as parseUrl } from "url";
-import { parse as qsParse } from "querystring";
-import { ParamsOfRoute, RouteDefinition } from "./RouteDefiner";
+import { RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {
   route: RouteDefinition<P, any>;
