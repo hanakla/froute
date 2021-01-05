@@ -99,18 +99,23 @@ export class RouterContext {
 
   private historyListener: Listener<FrouteHistoryState | null> = ({
     location,
+    action,
   }) => {
-    this.location = {
+    const nextMatch = this.resolveRoute(location.pathname);
+    const nextLocation = {
       key: location.key,
       pathname: location.pathname,
       hash: location.hash,
       search: location.search,
-      state: location.state ?? createFrouteHistoryState(),
+      state:
+        action === "PUSH"
+          ? createFrouteHistoryState(nextMatch?.route.createState())
+          : location.state ?? createFrouteHistoryState(),
     };
 
-    this.currentMatch = this.resolveRoute(location.pathname);
+    this.currentMatch = nextMatch;
+    this.location = nextLocation;
 
-    const nextLocation = this.getCurrentLocation();
     this.routeChangedListener.forEach((listener) => listener(nextLocation));
   };
 
