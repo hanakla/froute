@@ -3,14 +3,12 @@ module.exports = {
   transform: {
     "^.+\\.tsx?$": "ts-jest",
   },
-  setupFiles: [
-    '<rootDir>/spec/setup.ts',
-  ],
+  setupFiles: ["<rootDir>/spec/setup.ts"],
   testRegex: "src/.*\\.spec\\.tsx?$",
   moduleFileExtensions: ["ts", "tsx", "js"],
   globals: {
     "ts-jest": {
-      tsConfig: "tsconfig.test.json",
+      tsconfig: "tsconfig.test.json",
       isolatedModules: true,
     },
   },
