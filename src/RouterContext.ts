@@ -147,9 +147,6 @@ export class RouterContext {
         ),
       };
 
-      this.currentMatch = nextMatch;
-      this.location = nextLocation;
-
       if (action === "REPLACE") {
         this.history.replace(nextLocation, nextLocation.state);
       } else if (action === "PUSH" && nextMatch) {
@@ -163,6 +160,9 @@ export class RouterContext {
       } else {
         this.history.push(nextLocation, nextLocation.state);
       }
+
+      this.currentMatch = nextMatch;
+      this.location = nextLocation;
 
       this.routeChangedListener.forEach((listener) => listener(nextLocation));
     } finally {
