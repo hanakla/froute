@@ -30,59 +30,6 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Custom route resolution (for i18n support)
 - URL Builder
 
-## Next.js compat status
-
-- Compat API via `useRouter` or `withRouter`
-  - Compatible features
-    - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
-  - But it's not type safe
-- Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
-  - `<Link />` only href props compatible but behaviour in-compatible.
-    - Froute's Link has `<a />` element. Next.js is not.
-    - `as`, `passHref`, `prefetch`, `replace`, `scroll`, `shallow` is not supported currently.
-  - `pathname` is return current `location.pathname`, not adjust to component file path base pathname.
-  - `router.push()`, `router.replace()`
-    - URL Object is does not support currentry
-    - `as` argument is not supported
-  - `router.beforePopState` is not supported
-    - Use `useBeforeRouteChange()` hooks instead
-  - All `router.events` not supported currently
- 
- 
-### Why froute provides Next.js compat hooks?
-
-It aims to migrate to Next.js from react-router or another router.
-
-Froute's `useRouter` aims to provide a `useRouter` that is partially compatible with the Next.js `useRouter`, thereby guaranteeing an intermediate step in the migration of existing React Router-based applications to Next.js.
-
-
-### How to type-safe useRoute
-
-Use this snippet in your app.
-(It's breaking to Type-level API compatibility from Next.js)
-
-```tsx
-// Copy it in-your-app/useRouter.ts
-import { useRouter as useNextCompatRouter, UseRouter } from '@fleur/froute'
-export const useRouter: UseRouter = useNextCompatRouter
-```
-
-Usage:
-
-```tsx
-// Route definition
-const routes = {
-  users: routeOf('/users/:id'),
-}
-
-// Component
-import { useRouter } from './useRouter'
-
-const Users = () => {
-  const router = useRouter<typeof routes.users>()
-  router.query.id // It infering to `string`.
-}
-```
 
 ## API Overview
 
@@ -234,4 +181,58 @@ domready(async () => {
     document.getElementById('root')
   )
 })
+```
+
+## Next.js compat status
+
+- Compat API via `useRouter` or `withRouter`
+  - Compatible features
+    - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
+  - But it's not type safe
+- Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
+  - `<Link />` only href props compatible but behaviour in-compatible.
+    - Froute's Link has `<a />` element. Next.js is not.
+    - `as`, `passHref`, `prefetch`, `replace`, `scroll`, `shallow` is not supported currently.
+  - `pathname` is return current `location.pathname`, not adjust to component file path base pathname.
+  - `router.push()`, `router.replace()`
+    - URL Object is does not support currentry
+    - `as` argument is not supported
+  - `router.beforePopState` is not supported
+    - Use `useBeforeRouteChange()` hooks instead
+  - All `router.events` not supported currently
+ 
+ 
+### Why froute provides Next.js compat hooks?
+
+It aims to migrate to Next.js from react-router or another router.
+
+Froute's `useRouter` aims to provide a `useRouter` that is partially compatible with the Next.js `useRouter`, thereby guaranteeing an intermediate step in the migration of existing React Router-based applications to Next.js.
+
+
+### How to type-safe useRoute
+
+Use this snippet in your app.
+(It's breaking to Type-level API compatibility from Next.js)
+
+```tsx
+// Copy it in-your-app/useRouter.ts
+import { useRouter as useNextCompatRouter, UseRouter } from '@fleur/froute'
+export const useRouter: UseRouter = useNextCompatRouter
+```
+
+Usage:
+
+```tsx
+// Route definition
+const routes = {
+  users: routeOf('/users/:id'),
+}
+
+// Component
+import { useRouter } from './useRouter'
+
+const Users = () => {
+  const router = useRouter<typeof routes.users>()
+  router.query.id // It infering to `string`.
+}
 ```
