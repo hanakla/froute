@@ -63,7 +63,7 @@ Use this snippet in your app.
 
 ```tsx
 // Copy it in-your-app/useRouter.ts
-import { useRouter as useNextCompatRouter } from '@fleur/froute'
+import { useRouter as useNextCompatRouter, UseRouter } from '@fleur/froute'
 export const useRouter: UseRouter = useNextCompatRouter
 ```
 
