@@ -47,6 +47,14 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
   - `router.beforePopState` is not supported
     - Use `useBeforeRouteChange()` hooks instead
   - All `router.events` not supported currently
+ 
+ 
+### Why froute provides Next.js compat hooks?
+
+It aims to migrate to Next.js from react-router or another router.
+
+Froute's `useRouter` aims to provide a `useRouter` that is partially compatible with the Next.js `useRouter`, thereby guaranteeing an intermediate step in the migration of existing React Router-based applications to Next.js.
+
 
 ### How to type-safe useRoute
 
