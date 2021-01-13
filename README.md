@@ -35,7 +35,7 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Compat API via `useRouter` or `withRouter`
   - Compatible features
     - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
-  - But it's not type safe
+  - But it's not type safe in Next.js
 - Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
   - `<Link />` only href props compatible but behaviour in-compatible.
     - Froute's Link has `<a />` element. Next.js is not.
@@ -47,6 +47,11 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
   - `router.beforePopState` is not supported
     - Use `useBeforeRouteChange()` hooks instead
   - All `router.events` not supported currently
+  - `router.events`
+    - Partially supported: `routeChangeStart`, `routeChangeComplete`, `routeChangeError`
+      - Only `url` or `err` arguments.
+      - Not implemented: `err.cancelled` and `{ shallow }` flag.
+    - Not implemented: `beforeHistoryChange`, `hashChangeStart`, `hashChangeComplete`
 
 ### How to type-safe useRoute
 

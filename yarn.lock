@@ -935,6 +935,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@hanakla/rescue@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@hanakla/rescue/-/rescue-1.0.3.tgz#49b9bcf1043ec66fc7de78b6a76db8a61c55820d"
+  integrity sha512-srPZb3+POxWCnGeXZzWV1Xpq+KtRVVtboxMRx4UgHCuDC3tH1VxpptkIjXR9bB9YTnghSSt88SNgDUY1e9kteQ==
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"

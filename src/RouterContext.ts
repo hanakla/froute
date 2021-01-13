@@ -7,7 +7,6 @@ import {
   Location,
   MemoryHistory,
 } from "history";
-
 import { parse as qsParse } from "querystring";
 import { parse as urlParse } from "url";
 import { canUseDOM, DeepReadonly } from "./utils";
@@ -19,6 +18,7 @@ import {
   FrouteHistoryState,
   StateBase,
 } from "./FrouteHistoryState";
+import { RouterEvents } from "./RouterEvents";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -65,6 +65,7 @@ export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
   public readonly history: History<FrouteHistoryState>;
+  public events = new RouterEvents();
 
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
@@ -136,6 +137,8 @@ export class RouterContext {
     // (Present next URL before preload for better UX)
     this.disposeHistory();
 
+    this.events.emit("routeChangeStart", [loc.pathname ?? ""]);
+
     try {
       const nextLocation = {
         key: "",
@@ -165,10 +168,15 @@ export class RouterContext {
       this.location = nextLocation;
 
       this.routeChangedListener.forEach((listener) => listener(nextLocation));
+    } catch (e) {
+      this.events.emit("routeChangeError", [e, loc.pathname ?? ""]);
+      throw e;
     } finally {
       // Restore listener
       this.disposeHistory = this.history.listen(this.historyListener);
     }
+
+    this.events.emit("routeChangeComplete", [loc.pathname ?? ""]);
   };
 
   public clearBeforeRouteChangeListener() {

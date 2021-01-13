@@ -8,11 +8,13 @@ import {
   useNavigation,
   useParams,
   useRouteComponent,
+  useRouter,
   useUrlBuilder,
 } from "./react-bind";
 import { routeOf } from "./RouteDefiner";
 import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
+import { rescue } from "@hanakla/rescue";
 
 describe("react-bind", () => {
   const routes = {
@@ -48,6 +50,65 @@ describe("react-bind", () => {
       <FrouteContext router={router}>{children}</FrouteContext>
     );
   };
+
+  describe("useRouter", () => {
+    it("Should emit events", async () => {
+      const router = createRouter({
+        users: routeOf("/users/:id").action({
+          component: () => () => null,
+          preload: () => waitTick(500),
+        }),
+      });
+
+      await router.navigate("/users/1");
+
+      const { result } = renderHook(() => useRouter(), {
+        wrapper: createWrapper(router),
+      });
+
+      const startSpy = jest.fn();
+      result.current.events.on("routeChangeStart", startSpy);
+
+      const completeSpy = jest.fn();
+      result.current.events.on("routeChangeComplete", completeSpy);
+
+      const promise = router.navigate("/users/2", { action: "PUSH" });
+      await waitTick();
+      expect(startSpy).toBeCalled();
+      expect(completeSpy).not.toBeCalled();
+
+      await promise;
+      expect(completeSpy).toBeCalled();
+    });
+
+    it("Should capture error and emit event", async () => {
+      const router = createRouter({
+        error: routeOf("/error").action({
+          component: () => () => null,
+          preload: () => {
+            throw new Error("ok");
+          },
+        }),
+      });
+
+      await router.navigate("/");
+
+      const { result } = renderHook(() => useRouter(), {
+        wrapper: createWrapper(router),
+      });
+
+      const errorSpy = jest.fn();
+      result.current.events.on("routeChangeError", errorSpy);
+
+      const [, error] = await rescue(() => {
+        return router.navigate("/error", { action: "PUSH" });
+      });
+
+      expect(error).not.toEqual(null);
+      expect(errorSpy).toBeCalled();
+      expect(errorSpy.mock.calls[0][0]).toMatchObject({ message: "ok" });
+    });
+  });
 
   describe("useLocation", () => {
     it("Should correctry parsed complex url", async () => {
