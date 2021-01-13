@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:fleur-js/froute.git",
+  "homepage": "https://github.com/fleur-js/froute",
   "author": "Hanakla <ragg.devpr@gmail.com>",
   "license": "MIT",
   "scripts": {
