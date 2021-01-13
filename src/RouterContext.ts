@@ -43,6 +43,7 @@ interface Navigate {
 
 interface NavigateOption {
   state?: StateBase;
+  /** undefined only used at client side rehydration */
   action?: "PUSH" | "REPLACE";
   __FROUTE_INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_GOT_CRASH?: FrouteHistoryState<
     any
