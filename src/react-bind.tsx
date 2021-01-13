@@ -162,7 +162,8 @@ export const useRouter: UseRouter = () => {
           router.preloadRoute(
             match.route,
             match.match.params,
-            match.match.query
+            match.match.query,
+            { onlyComponentPreload: true }
           );
         }
       },
