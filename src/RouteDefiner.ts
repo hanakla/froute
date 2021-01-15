@@ -132,11 +132,13 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
 
   public match(pathname: string): FrouteMatchResult<Params> | null {
     const parsed = parseUrl(pathname);
-    const result = match<Record<Params, string>>(this.toPath())(parsed.pathname!);
+    const result = match<Record<Params, string>>(this.toPath(), {
+      decode: decodeURIComponent
+    })(parsed.pathname!);
 
     return result ? {
       ...result,
-        query: qsParse(parsed.query ?? ""),
+        query: qsParse(parsed.query ?? '', void 0, void 0, {decodeURIComponent}),
         search: parsed.search ?? "",
     } : null
   }
