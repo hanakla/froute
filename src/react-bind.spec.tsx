@@ -191,10 +191,9 @@ describe("react-bind", () => {
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
-      const { result } = renderHook(
-        () => useHistoryState(routes.userArtworks),
-        { wrapper: createWrapper(router) }
-      );
+      renderHook(() => useHistoryState(routes.userArtworks), {
+        wrapper: createWrapper(router),
+      });
 
       expect(spy.mock.calls.length).toBe(1);
     });

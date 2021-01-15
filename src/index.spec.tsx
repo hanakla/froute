@@ -6,7 +6,6 @@ import {
   useRouteComponent,
   FrouteLink,
   FrouteContext,
-  useUrlBuilder,
   RouterOptions,
 } from "./";
 import { ResponseCode } from "./components/ResponseCode";
@@ -15,8 +14,10 @@ import { useHistoryState } from "./react-bind";
 describe("Usage", () => {
   // Mock of external context likes fleur context or redux store
   const externalContext = {
-    foo: async (message: string) => {
+    foo: async (message: string, word: string) => {
       // fetch API
+      message;
+      word;
     },
   };
 
@@ -42,7 +43,7 @@ describe("Usage", () => {
       preload: async ({ store }: PreloadContext, params, query) =>
         Promise.all([
           new Promise((resolve) => setTimeout(resolve, 100)),
-          store.foo(params.id),
+          store.foo(params.id, query.word as string),
         ]),
     }),
   };

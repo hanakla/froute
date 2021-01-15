@@ -85,6 +85,9 @@ describe("Router", () => {
       it("dotdot", () => {
         const router = new RouterContext(routes);
         const result = router.resolveRoute("/users/../");
+
+        expect(result.match).toBe(null);
+        expect(result.route).toBe(null);
       });
     });
   });
