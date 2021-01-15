@@ -30,6 +30,28 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Custom route resolution (for i18n support)
 - URL Builder
 
+## API Overview
+
+### Hooks
+
+- `useRouter` - **Next.js subset compat hooks**
+- `useFrouteRouter` - `useRouter` superset (not compatible to Next.js's `useRouter`)
+- `useRouteComponent`
+- `useParams`　
+- `useBeforeRouteChange(listener: () => Promise<boolean | void> | boolean | void)`
+  - It can prevent routing returns `Promise<false> | false`
+- The following hooks are deprecated. These features are available from `useFrouteRouter`.
+  - `useLocation`
+  - `useNavigation`
+  - `useUrlBuilder`
+
+### Components
+
+- `<Link href={string} />`
+- `<FrouteLink to={routeDef} params={object} query={object} />` - Type-safe routing
+- `<ResponseCode status={number} />`
+- `<Redirect url={string} status={number = 302}`
+
 ## Next.js compat status
 
 - Compat API via `useRouter` or `withRouter`
@@ -81,26 +103,6 @@ const Users = () => {
 }
 ```
 
-## API Overview
-
-### Hooks
-
-- `useRouteComponent`
-- `useLocation`
-- `useNavigation`
-- `useParams`
-- `useUrlBuilder`
-- `useBeforeRouteChange(listener: () => Promise<boolean | void> | boolean | void)`
-  - It can prevent routing returns `Promise<false> | false`
-- `useRouter` - **Next.js subset compat hooks**
-
-### Components
-
-- `<Link href={string} />`
-- `<FrouteLink to={routeDef} params={object} query={object} />` - Type-safe routing
-- `<ResponseCode status={number} />`
-- `<Redirect url={string} status={number = 302}`
-
 ## Example
 
 Route definition:
@@ -143,9 +145,7 @@ User.tsx:
 import { routes, ResponseCode, Redirect } from './routes'
 
 export default () => {
-  // Use typeof to circular dependency free
-  const { userId } = useParams<typeof routes.user>()
-  const { urlBuilder } = useUrlBuilder()
+  const { buildPath, query: { userId } } = useFrouteRouter(routes.user)
   const user = useSelector(getUser(userId))
 
   if (!user) {
@@ -168,7 +168,7 @@ export default () => {
     <div>
       Hello, {user.name}!
       <br />
-      <Link href={urlBuilder(routes.user, { userId: '2' })}>
+      <Link href={buildPath(routes.user, { userId: '2' })}>
         Show latest update friend
       </Link>
     </div>
