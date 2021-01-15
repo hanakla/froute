@@ -1,8 +1,10 @@
 import React from "react";
+import { expectType } from "tsd";
 import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
+  useFrouteRouter,
   useHistoryState,
   useLocation,
   useNavigation,
@@ -107,6 +109,22 @@ describe("react-bind", () => {
       expect(error).not.toEqual(null);
       expect(errorSpy).toBeCalled();
       expect(errorSpy.mock.calls[0][0]).toMatchObject({ message: "ok" });
+    });
+  });
+
+  describe("useFrouteRouter", () => {
+    it("Type inference check", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/:id");
+
+      const {
+        result: { current },
+      } = renderHook(() => useFrouteRouter(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expectType<{ id: string }>(current.query);
+      expectType<string | string[]>(current.query.some_query);
     });
   });
 

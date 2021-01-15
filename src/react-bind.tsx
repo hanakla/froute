@@ -194,6 +194,52 @@ export const withRouter = <P extends RouterProps>(
   return WithRouter;
 };
 
+export interface UseFrouteRouter {
+  <R extends RouteDefinition<any, any> = any>(r?: R): {
+    pathname: string;
+    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
+    push: (url: string) => void;
+    replace: (url: string) => void;
+    prefetch: (url: string) => void;
+    back: FrouteNavigator["back"];
+    reload: () => void;
+    events: RouterEvents;
+    historyState: {
+      get: RouterContext["getHistoryState"];
+      set: RouterContext["setHistoryState"];
+    };
+  };
+}
+
+export const useFrouteRouter: UseFrouteRouter = <
+  R extends RouteDefinition<any, any>
+>(
+  r?: R
+) => {
+  const router = useRouterContext();
+  const nextCompatRouter = useRouter<R>();
+  const location = useLocation();
+  const { buildPath } = useUrlBuilder();
+
+  if (isDevelopment) {
+    checkExpectedRoute(router, r, "useLocation");
+  }
+
+  return useMemo(
+    () => ({
+      ...nextCompatRouter,
+      location,
+      buildPath,
+      historyState: {
+        get: router.getHistoryState,
+        set: router.setHistoryState,
+      },
+    }),
+    [location, buildPath]
+  );
+};
+
+/** @deprecated Use `useFrouteRouter` instead */
 export const useLocation = <R extends RouteDefinition<any, any>>(
   expectRoute?: R
 ) => {
@@ -216,6 +262,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
   );
 };
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useHistoryState = <
   R extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
@@ -280,6 +327,7 @@ export interface FrouteNavigator {
   forward(): void;
 }
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useNavigation = () => {
   const router = useRouterContext();
   const { buildPath } = useUrlBuilder();
@@ -341,6 +389,7 @@ export const useNavigation = () => {
   );
 };
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useUrlBuilder = () => {
   const router = useRouterContext();
   return useMemo(
