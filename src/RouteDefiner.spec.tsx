@@ -2,6 +2,8 @@ import { buildPath } from "./builder";
 import { routeBy, routeOf } from "./RouteDefiner";
 
 describe("RouteDefiner", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   type ExteranalContext = { hi: "hi" };
 
   describe("routeBy", () => {

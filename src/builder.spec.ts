@@ -5,10 +5,9 @@ import { routeOf } from "./RouteDefiner";
 describe("index", () => {
   describe("buildPath", () => {
     it("Should build path", () => {
-      const def = routeOf("/users/:id").action({ component: () => null });
-
+      const def = routeOf("/users/:id").action({ component: () => () => null });
       const def2 = routeOf("/users/:id/comments/:commentId").action({
-        component: () => null,
+        component: () => () => null,
       });
 
       expect(buildPath(def, { id: "1" })).toBe("/users/1");
