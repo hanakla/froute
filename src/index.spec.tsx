@@ -1,3 +1,5 @@
+// @ts-ignore TS6133 This is usage example file. ignore unused vars
+
 import React from "react";
 import { render } from "@testing-library/react";
 import {
@@ -16,8 +18,6 @@ describe("Usage", () => {
   const externalContext = {
     foo: async (message: string, word: string) => {
       // fetch API
-      message;
-      word;
     },
   };
 
