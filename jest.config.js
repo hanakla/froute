@@ -9,6 +9,9 @@ module.exports = {
   globals: {
     "ts-jest": {
       tsconfig: "tsconfig.test.json",
+      diagnostics: {
+        ignoreCodes: [/* ignore unused vars */ 6133],
+      },
     },
   },
   testURL: "http://localhost/",
