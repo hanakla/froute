@@ -1,16 +1,19 @@
 import { MatchResult } from "path-to-regexp";
 import { RouterContext } from "./RouterContext";
 import { parse as parseUrl } from "url";
-import { parse as qsParse } from "querystring";
-import { ParamsOfRoute, RouteDefinition } from "./RouteDefiner";
+import { RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {
   route: RouteDefinition<P, any>;
-  match: MatchResult<{ [K in P]: string }> & {
-    query: ParsedQuery;
-    search: string;
-  };
+  match: FrouteMatchResult<P>;
 }
+
+export type FrouteMatchResult<P extends string> = MatchResult<
+  { [K in P]: string }
+> & {
+  query: ParsedQuery;
+  search: string;
+};
 
 export type ParsedQuery = { [K: string]: string | string[] | undefined };
 
@@ -18,7 +21,6 @@ export interface RoutingOnlyRouterContext {
   statusCode: number;
   redirectTo: string | null;
   resolveRoute: RouterContext["resolveRoute"];
-  buildPath: RouterContext["buildPath"];
 }
 
 export interface RouteResolver {
@@ -29,64 +31,90 @@ export interface RouteResolver {
   ): FrouteMatch<any> | null;
 }
 
-export const matchByRoutes = (
-  pathname: string,
-  routes: {
-    [key: string]: RouteDefinition<any, any>;
-  },
-  {
-    resolver,
-    context,
-  }: {
-    resolver?: RouteResolver;
-    context?: RouterContext;
-  } = {}
-): FrouteMatch<any> | null => {
-  context = context ?? new RouterContext(routes, { resolver });
+type RoutesObject = {
+  [key: string]: RouteDefinition<any, any>;
+};
 
-  const parsed = parseUrl(pathname);
-
-  let matched: FrouteMatch<any> | null = null;
-  if (!parsed.pathname) return null;
-
-  for (const route of Object.values(routes)) {
-    const match = route.match(parsed.pathname);
-    if (!match) continue;
-
-    const search = (parsed.search ?? "")?.slice(1);
-
-    matched = {
-      route,
-      match: {
-        ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-        query: qsParse(search),
-        search: parsed.search ?? "",
+const createRoutingOnlyContext = (
+  context: RouterContext | RoutingOnlyRouterContext | undefined,
+  routes: RoutesObject
+): RoutingOnlyRouterContext => {
+  if (context) {
+    const ctx: RoutingOnlyRouterContext = {
+      get statusCode() {
+        return context!.statusCode;
       },
-    };
-
-    break;
-  }
-
-  if (resolver) {
-    return resolver(parsed.pathname, matched, {
+      set statusCode(status: number) {
+        context!.statusCode = status;
+      },
       get redirectTo() {
         return context!.redirectTo;
       },
       set redirectTo(url: string | null) {
         context!.redirectTo = url;
       },
+      resolveRoute: (pathname) =>
+        matchByRoutes(pathname, routes, { context: ctx }),
+    };
+
+    return ctx;
+  }
+
+  const stabCtx: RoutingOnlyRouterContext = {
+    statusCode: 200,
+    redirectTo: null,
+    resolveRoute: (pathname) =>
+      matchByRoutes(pathname, routes, {
+        /* skip resolver: for guard from infinite loop */
+        context: stabCtx,
+      }),
+  };
+
+  return stabCtx;
+};
+
+export const matchByRoutes = (
+  pathname: string,
+  routes: RoutesObject,
+  {
+    resolver,
+    context,
+  }: {
+    resolver?: RouteResolver;
+    context?: RoutingOnlyRouterContext;
+  } = {}
+): FrouteMatch<any> | null => {
+  const usingContext = createRoutingOnlyContext(context, routes);
+
+  const parsed = parseUrl(pathname);
+  const afterHostUrl =
+    (parsed.pathname ?? "") + (parsed.search ?? "") + (parsed.hash ?? "");
+
+  let matched: FrouteMatch<any> | null = null;
+
+  for (const route of Object.values(routes)) {
+    const match = route.match(afterHostUrl);
+    if (!match) continue;
+
+    matched = { route, match };
+    break;
+  }
+
+  if (resolver) {
+    return resolver(afterHostUrl, matched, {
+      get redirectTo() {
+        return usingContext.redirectTo;
+      },
+      set redirectTo(url: string | null) {
+        usingContext.redirectTo = url;
+      },
       get statusCode() {
-        return context!.statusCode;
+        return usingContext.statusCode;
       },
       set statusCode(code: number) {
-        context!.statusCode = code;
+        usingContext.statusCode = code;
       },
-      resolveRoute: (pathname) =>
-        matchByRoutes(pathname, routes, {
-          context,
-          /* skip resolver for guard from infinite loop */
-        }),
-      buildPath: context.buildPath,
+      resolveRoute: usingContext.resolveRoute,
     });
   }
 
@@ -104,26 +132,17 @@ export const isMatchToRoute = (
   context = context ?? new RouterContext({ route }, { resolver });
 
   const parsed = parseUrl(pathname);
+  const afterHostUrl =
+    (parsed.pathname ?? "") + (parsed.search ?? "") + (parsed.hash ?? "");
 
   let matched: FrouteMatch<any> | null = null;
-  if (!parsed.pathname) return null;
 
-  const match = route.match(parsed.pathname);
-  const search = (parsed.search ?? "")?.slice(1);
+  const match = route.match(afterHostUrl);
 
-  matched = match
-    ? {
-        route,
-        match: {
-          ...(match as MatchResult<ParamsOfRoute<typeof route>>),
-          query: qsParse(search),
-          search: parsed.search ?? "",
-        },
-      }
-    : null;
+  matched = match ? { route, match } : null;
 
   if (resolver) {
-    return resolver(parsed.pathname, matched, context);
+    return resolver(afterHostUrl, matched, context);
   }
 
   return matched;

@@ -17,6 +17,7 @@ import {
   RouterContext,
   BeforeRouteListener,
 } from "./RouterContext";
+import { RouterEvents } from "./RouterEvents";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -127,6 +128,7 @@ export interface UseRouter {
     prefetch: (url: string) => void;
     back: FrouteNavigator["back"];
     reload: () => void;
+    events: RouterEvents;
   };
 }
 
@@ -160,14 +162,16 @@ export const useRouter: UseRouter = () => {
           router.preloadRoute(
             match.route,
             match.match.params,
-            match.match.query
+            match.match.query,
+            { onlyComponentPreload: true }
           );
         }
       },
       back: nav.back,
       reload: () => window.location.reload(),
+      events: router.events,
     }),
-    []
+    [location, match]
   );
 };
 

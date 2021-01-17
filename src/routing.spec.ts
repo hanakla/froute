@@ -11,5 +11,10 @@ describe("routing", () => {
       const match = matchByRoutes("/users/1", routes);
       expect(match).not.toBe(null);
     });
+
+    it("Should match complex url", () => {
+      const match = matchByRoutes("/users/1?a=1#a", routes);
+      expect(match).not.toBe(null);
+    });
   });
 });

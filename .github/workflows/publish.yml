@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   build:
@@ -24,16 +25,50 @@ jobs:
       - name: Testing
         run: yarn test
 
-  publish-gpr:
+  publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: 14
-          registry-url: https://npm.pkg.github.com/
-      - run: yarn
-      - run: yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          node-version: 15
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Check can publish to npm
+        id: check-publishable
+        result-encoding: string
+        run: |
+          npx can-npm-publish
+          if [ $? -eq 1 ] ; then
+            echo "::set-output name=publishable::false"
+          else
+            echo "::set-output name=publishable::true"
+          fi
+
+      # - name: "Publishing"
+      #   if: steps.check-publishable.outputs.publishable == 'true'
+      #   env:
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     NODE_AUTH_TOKEN=$NPM_TOKEN yarn publish
+      #     NODE_AUTH_TOKEN=$GITHUB_TOKEN yarn publish
+
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{ (github.ref == 'refs/heads/dev' && 'dev') || 'latest' }}
+
+      - name: package-version
+        run: node -p -e '`PACKAGE_VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
+      - name: package-version-to-git-tag
+        uses: pkgdeps/git-tag-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_repo: ${{ github.repository }}
+          version: ${{ env.PACKAGE_VERSION }}
+          git_commit_sha: ${{ github.sha }}
+          git_tag_prefix: "v"

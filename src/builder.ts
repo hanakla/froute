@@ -11,6 +11,7 @@ export const buildPath = <T extends RouteDefinition<any, any>>(
   const pathname = compile(def.toPath(), { encode: encodeURIComponent })(
     params
   );
+
   return query
     ? `${pathname}${isEmptyObject(query) ? "" : "?" + stringify(query)}`
     : pathname;

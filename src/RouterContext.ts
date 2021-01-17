@@ -7,7 +7,6 @@ import {
   Location,
   MemoryHistory,
 } from "history";
-
 import { parse as qsParse } from "querystring";
 import { parse as urlParse } from "url";
 import { canUseDOM, DeepReadonly } from "./utils";
@@ -19,6 +18,7 @@ import {
   FrouteHistoryState,
   StateBase,
 } from "./FrouteHistoryState";
+import { RouterEvents } from "./RouterEvents";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -43,6 +43,7 @@ interface Navigate {
 
 interface NavigateOption {
   state?: StateBase;
+  /** undefined only used at client side rehydration */
   action?: "PUSH" | "REPLACE";
   __FROUTE_INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_GOT_CRASH?: FrouteHistoryState<
     any
@@ -65,6 +66,7 @@ export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
   public readonly history: History<FrouteHistoryState>;
+  public events = new RouterEvents();
 
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
@@ -99,18 +101,23 @@ export class RouterContext {
 
   private historyListener: Listener<FrouteHistoryState | null> = ({
     location,
+    action,
   }) => {
-    this.location = {
+    const nextMatch = this.resolveRoute(location.pathname);
+    const nextLocation = {
       key: location.key,
       pathname: location.pathname,
       hash: location.hash,
       search: location.search,
-      state: location.state ?? createFrouteHistoryState(),
+      state:
+        action === "PUSH"
+          ? createFrouteHistoryState(nextMatch?.route.createState())
+          : location.state ?? createFrouteHistoryState(),
     };
 
-    this.currentMatch = this.resolveRoute(location.pathname);
+    this.currentMatch = nextMatch;
+    this.location = nextLocation;
 
-    const nextLocation = this.getCurrentLocation();
     this.routeChangedListener.forEach((listener) => listener(nextLocation));
   };
 
@@ -122,47 +129,55 @@ export class RouterContext {
     const userState = typeof pathname !== "string" ? pathname.state : state;
 
     const nextMatch = this.resolveRoute(
-      (loc.pathname ?? "") + (loc.search ?? "")
+      (loc.pathname ?? "") + (loc.search ?? "") + (loc.hash ?? "")
     );
 
     if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
 
-    if (!nextMatch) {
-      this.currentMatch = null;
-      this.location = {
+    // Dispose listener for prevent duplicate route handling
+    // (Present next URL before preload for better UX)
+    this.disposeHistory();
+
+    this.events.emit("routeChangeStart", [loc.pathname ?? ""]);
+
+    try {
+      const nextLocation = {
         key: "",
         pathname: loc.pathname ?? "",
-        hash: loc.hash ?? "",
         search: loc.search ?? "",
-        state: createFrouteHistoryState(),
+        hash: loc.hash ?? "",
+        state: createFrouteHistoryState(
+          userState ?? nextMatch?.route.createState()
+        ),
       };
-      return;
+
+      if (action === "REPLACE") {
+        this.history.replace(nextLocation, nextLocation.state);
+      } else if (action === "PUSH" && nextMatch) {
+        this.history.push(nextLocation, nextLocation.state);
+
+        await this.preloadRoute(
+          nextMatch.route,
+          nextMatch.match.params,
+          nextMatch.match.query
+        );
+      } else {
+        this.history.push(nextLocation, nextLocation.state);
+      }
+
+      this.currentMatch = nextMatch;
+      this.location = nextLocation;
+
+      this.routeChangedListener.forEach((listener) => listener(nextLocation));
+    } catch (e) {
+      this.events.emit("routeChangeError", [e, loc.pathname ?? ""]);
+      throw e;
+    } finally {
+      // Restore listener
+      this.disposeHistory = this.history.listen(this.historyListener);
     }
 
-    this.currentMatch = nextMatch;
-    this.location = {
-      key: "",
-      pathname: loc.pathname ?? "",
-      search: loc.search ?? "",
-      hash: loc.hash ?? "",
-      state: createFrouteHistoryState(
-        userState ?? nextMatch.route.createState()
-      ),
-    };
-
-    if (action === "REPLACE") {
-      this.history.replace(this.location, this.location.state);
-      return;
-    }
-
-    if (action === "PUSH") {
-      await this.preloadCurrent();
-      this.history.push(this.location, this.location.state);
-    }
-
-    this.routeChangedListener.forEach((listener) =>
-      listener(this.getCurrentLocation())
-    );
+    this.events.emit("routeChangeComplete", [loc.pathname ?? ""]);
   };
 
   public clearBeforeRouteChangeListener() {

@@ -3,17 +3,19 @@
 Framework independent Router for React.  
 Can use with both Fleur / Redux (redux-thunk).
 
+With provides Next.js subset `useRouter`
+
 ```
 yarn add @fleur/froute
 ```
 
 - [Features](#features)
-- [Next.js compat status](#nextjs-compat-status)
-  - [How to type-safe useRoute](#how-to-type-safe-useroute)
 - [API Overview](#api-overview)
   - [Hooks](#hooks)
   - [Components](#components)
 - [Example](#example)
+- [Next.js compat status](#nextjs-compat-status)
+  - [How to type-safe useRoute](#how-to-type-safe-useroute)
 
 
 ## Features
@@ -22,7 +24,7 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 
 - Library independent
   - Works with Redux and Fleur
-- Next.js's Router subset compatiblity
+- Next.js's Router subset compatiblity (`useRouter`, `withRouter`)
 - Supports dynamic import without any code transformer
 - Supports Sever Side Rendering
   - Supports preload
@@ -30,19 +32,20 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 - Custom route resolution (for i18n support)
 - URL Builder
 
-
 ## API Overview
 
 ### Hooks
 
+- `useRouter` - **Next.js subset compat hooks**
+- `useFrouteRouter` - `useRouter` superset (not compatible to Next.js's `useRouter`)
 - `useRouteComponent`
-- `useLocation`
-- `useNavigation`
-- `useParams`
-- `useUrlBuilder`
+- `useParams`　
 - `useBeforeRouteChange(listener: () => Promise<boolean | void> | boolean | void)`
   - It can prevent routing returns `Promise<false> | false`
-- `useRouter` - **Next.js subset compat hooks**
+- The following hooks are deprecated. These features are available from `useFrouteRouter`.
+  - `useLocation`
+  - `useNavigation`
+  - `useUrlBuilder`
 
 ### Components
 
@@ -93,9 +96,7 @@ User.tsx:
 import { routes, ResponseCode, Redirect } from './routes'
 
 export default () => {
-  // Use typeof to circular dependency free
-  const { userId } = useParams<typeof routes.user>()
-  const { urlBuilder } = useUrlBuilder()
+  const { buildPath, query: { userId } } = useFrouteRouter(routes.user)
   const user = useSelector(getUser(userId))
 
   if (!user) {
@@ -118,7 +119,7 @@ export default () => {
     <div>
       Hello, {user.name}!
       <br />
-      <Link href={urlBuilder(routes.user, { userId: '2' })}>
+      <Link href={buildPath(routes.user, { userId: '2' })}>
         Show latest update friend
       </Link>
     </div>
@@ -187,8 +188,9 @@ domready(async () => {
 
 - Compat API via `useRouter` or `withRouter`
   - Compatible features
-    - `pathname`, `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
-  - But it's not type safe
+    - `query`, `push()`, `replace()`, `prefetch()`, `back()`, `reload()`
+    - `pathname` is provided, but Froute's pathname is not adjust to file system route.
+  - Any type check not provided from Next.js (Froute is provided, it's compat breaking)
 - Next.js specific functions not supported likes `asPath`, `isFallback`, `basePath`, `locale`, `locales` and `defaultLocale`
   - `<Link />` only href props compatible but behaviour in-compatible.
     - Froute's Link has `<a />` element. Next.js is not.
@@ -199,7 +201,11 @@ domready(async () => {
     - `as` argument is not supported
   - `router.beforePopState` is not supported
     - Use `useBeforeRouteChange()` hooks instead
-  - All `router.events` not supported currently
+  - `router.events`
+    - Partially supported: `routeChangeStart`, `routeChangeComplete`, `routeChangeError`
+      - Only `url` or `err` arguments.
+      - Not implemented: `err.cancelled` and `{ shallow }` flag.
+    - Not implemented: `beforeHistoryChange`, `hashChangeStart`, `hashChangeComplete`
  
  
 ### Why froute provides Next.js compat hooks?
@@ -216,7 +222,7 @@ Use this snippet in your app.
 
 ```tsx
 // Copy it in-your-app/useRouter.ts
-import { useRouter as useNextCompatRouter, UseRouter } from '@fleur/froute'
+import { useRouter as useNextCompatRouter } from '@fleur/froute'
 export const useRouter: UseRouter = useNextCompatRouter
 ```
 
@@ -228,11 +234,15 @@ const routes = {
   users: routeOf('/users/:id'),
 }
 
+// Typeing to `Routes`, it's free from circular dependency
+export type Routes = typeof routes
+
 // Component
 import { useRouter } from './useRouter'
+import { Routes } from './your-routes'
 
 const Users = () => {
-  const router = useRouter<typeof routes.users>()
+  const router = useRouter<typeof Routes['users']>()
   router.query.id // It infering to `string`.
 }
 ```
