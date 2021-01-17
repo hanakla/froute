@@ -1,6 +1,7 @@
 import React, {
   ComponentType,
   createContext,
+  DependencyList,
   forwardRef,
   ReactNode,
   useContext,
@@ -406,12 +407,13 @@ export const useUrlBuilder = () => {
 /** Handling route change */
 export const useBeforeRouteChange = (
   /** Return Promise&lt;false&gt; | false to prevent route changing. This listener only one can be set at a time */
-  beforeRouteListener: BeforeRouteListener
+  beforeRouteListener: BeforeRouteListener,
+  deps: DependencyList
 ) => {
   const router = useRouterContext();
 
   useEffect(() => {
     router.setBeforeRouteChangeListener(beforeRouteListener);
     return () => router.clearBeforeRouteChangeListener();
-  }, []);
+  }, deps);
 };
