@@ -131,7 +131,11 @@ export class RouterContext {
       (loc.pathname ?? "") + (loc.search ?? "") + (loc.hash ?? "")
     );
 
-    if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
+    if (
+      action === "PUSH" &&
+      (await this.beforeRouteChangeListener?.(nextMatch)) === false
+    )
+      return;
 
     // Dispose listener for prevent duplicate route handling
     this.disposeHistory();
