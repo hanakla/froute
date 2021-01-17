@@ -101,6 +101,30 @@ describe("Router", () => {
     });
   });
 
+  describe("preload", () => {
+    it("should receive params correctly", async () => {
+      const preloadSpy = jest.fn();
+
+      const routes = {
+        users: routeOf("/users/:id").action({
+          component: () => () => null,
+          preload: preloadSpy,
+        }),
+      };
+
+      const router = new RouterContext(routes, { preloadContext: "hello" });
+      await router.navigate("/users/1?q1=aaa", { action: "PUSH" });
+
+      expect(preloadSpy).toBeCalledWith(
+        "hello",
+        expect.objectContaining({
+          id: "1",
+        }),
+        expect.objectContaining({ query: { q1: "aaa" }, search: "?q1=aaa" })
+      );
+    });
+  });
+
   describe("Custom route resolution", () => {
     const options: RouterOptions = {
       resolver: combineRouteResolver(

@@ -40,7 +40,7 @@ describe("Usage", () => {
       },
 
       // Expecting API call
-      preload: async ({ store }: PreloadContext, params, query) =>
+      preload: async ({ store }: PreloadContext, params, { query }) =>
         Promise.all([
           new Promise((resolve) => setTimeout(resolve, 100)),
           store.foo(params.id, query.word as string),

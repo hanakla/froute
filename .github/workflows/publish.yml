@@ -37,15 +37,15 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Check can publish to npm
-        id: check-publishable
-        run: |
-          npx can-npm-publish
-          if [ $? -eq 1 ] ; then
-            echo "::set-output name=publishable::false"
-          else
-            echo "::set-output name=publishable::true"
-          fi
+      # - name: Check can publish to npm
+      #   id: check-publishable
+      #   run: |
+      #     npx can-npm-publish
+      #     if [ $? -eq 1 ] ; then
+      #       echo "::set-output name=publishable::false"
+      #     else
+      #       echo "::set-output name=publishable::true"
+      #     fi
 
       # - name: "Publishing"
       #   if: steps.check-publishable.outputs.publishable == 'true'
