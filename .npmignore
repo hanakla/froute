@@ -2,7 +2,12 @@
 /.vscode
 /.github
 /src
+/spec
 yarn-error.log
+.browserslistrc
+.editorconfig
+.eslintrc
+.prettierignore
 /*.ts
 /*.js
 /*.json
