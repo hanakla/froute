@@ -89,6 +89,7 @@ describe("Router", () => {
         // Basically, the browser will take care of it.
         expect(result!.match.params.id).toBe("..");
         expect(result!.route).toBe(routes.usersShow);
+      });
 
       it("# in fragment", () => {
         const router = new RouterContext(routes);
