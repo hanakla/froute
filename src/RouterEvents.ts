@@ -4,29 +4,30 @@ interface Events {
   routeChangeError: [err: Error, url: string];
 }
 
-export class RouterEvents {
-  private listeners: Record<string, ((...args: any) => void)[]> = Object.create(
+export type RouterEvents = ReturnType<typeof routerEvents>;
+
+export const routerEvents = () => {
+  const listeners: Record<string, ((...args: any) => void)[]> = Object.create(
     null
   );
 
-  public on<K extends keyof Events>(
-    event: K,
-    callback: (...args: Events[K]) => void
-  ) {
-    const e = (this.listeners[event] = this.listeners[event] ?? []);
-    e.push(callback);
-  }
-
-  public off<K extends keyof Events>(
-    event: K,
-    callback: (...args: Events[K]) => void
-  ) {
-    this.listeners[event] = (this.listeners[event] ?? []).filter(
-      (listener) => listener !== callback
-    );
-  }
-
-  public emit<K extends keyof Events>(event: K, args: Events[K]) {
-    (this.listeners[event] ?? []).forEach((listener) => listener(...args));
-  }
-}
+  return {
+    on<K extends keyof Events>(
+      event: K,
+      callback: (...args: Events[K]) => void
+    ) {
+      (listeners[event] = listeners[event] ?? []).push(callback);
+    },
+    off<K extends keyof Events>(
+      event: K,
+      callback: (...args: Events[K]) => void
+    ) {
+      listeners[event] = (listeners[event] ?? []).filter(
+        (listener) => listener !== callback
+      );
+    },
+    emit<K extends keyof Events>(event: K, args: Events[K]) {
+      (listeners[event] ?? []).forEach((listener) => listener(...args));
+    },
+  };
+};
