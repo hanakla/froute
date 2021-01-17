@@ -205,8 +205,7 @@ describe("react-bind", () => {
       );
 
       await act(async () => {
-        await router.navigate("/users/1/artworks/2");
-        await router.preloadCurrent();
+        await router.navigate("/users/1/artworks/2", { action: "PUSH" });
       });
 
       result.rerender(<App />);
