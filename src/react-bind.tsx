@@ -239,7 +239,7 @@ export const useFrouteRouter: UseFrouteRouter = <
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().location` instead */
 export const useLocation = <R extends RouteDefinition<any, any>>(
   expectRoute?: R
 ) => {
@@ -263,7 +263,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().historyState` instead */
 export const useHistoryState = <
   R extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
@@ -304,6 +304,7 @@ export const useParams: UseParams = <
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
 
+/** @deprecated Use `useFrouteRouter().{push,replace,...}` instead */
 export interface FrouteNavigator {
   push<R extends RouteDefinition<any, any>>(
     route: R,
@@ -329,7 +330,7 @@ export interface FrouteNavigator {
   forward(): void;
 }
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().{push,replace,...}` and `buildPath()` instead */
 export const useNavigation = () => {
   const router = useRouterContext();
   const { buildPath } = useUrlBuilder();
@@ -391,7 +392,7 @@ export const useNavigation = () => {
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().buildPath` instead */
 export const useUrlBuilder = () => {
   const router = useRouterContext();
   return useMemo(
@@ -402,7 +403,7 @@ export const useUrlBuilder = () => {
   );
 };
 
-/** Handling */
+/** Handling route change */
 export const useBeforeRouteChange = (
   /** Return Promise&lt;false&gt; | false to prevent route changing. This listener only one can be set at a time */
   beforeRouteListener: BeforeRouteListener
