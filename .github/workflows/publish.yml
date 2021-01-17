@@ -24,7 +24,7 @@ jobs:
       - name: Testing
         run: yarn test
 
-  publish-gpr:
+  publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +33,26 @@ jobs:
         with:
           node-version: 14
           registry-url: https://npm.pkg.github.com/
-      - run: yarn
-      - run: yarn publish
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Check can publish to npm
+        id: check-publishable
+        result-encoding: string
+        run: |
+          npx can-npm-publish
+          if [ $? -eq 1 ] ; then
+            echo "::set-output name=publishable::false"
+          else
+            echo "::set-output name=publishable::true"
+          fi
+
+      - name: "Publishing"
+        if: steps.check-publishable.outputs.publishable == 'true'
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NODE_AUTH_TOKEN=$NPM_TOKEN yarn publish
+          NODE_AUTH_TOKEN=$GITHUB_TOKEN yarn publish
