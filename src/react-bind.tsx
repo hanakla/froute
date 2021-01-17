@@ -204,7 +204,7 @@ export interface UseFrouteRouter {
 
 interface FrouteRouter<R extends RouteDefinition<any, any>>
   extends NextCompatRouter<R> {
-  location: Location<StateOfRoute<R>>;
+  location: DeepReadonly<Location<StateOfRoute<R>>>;
   buildPath: BuildPath;
   historyState: {
     get: RouterContext["getHistoryState"];
@@ -219,7 +219,7 @@ export const useFrouteRouter: UseFrouteRouter = <
 ): FrouteRouter<R> => {
   const router = useRouterContext();
   const nextCompatRouter = useRouter<R>();
-  const location = useLocation<R>();
+  const location = router.getCurrentLocation();
 
   if (isDevelopment) {
     checkExpectedRoute(router, r, "useLocation");
@@ -228,7 +228,7 @@ export const useFrouteRouter: UseFrouteRouter = <
   return useMemo(
     () => ({
       ...nextCompatRouter,
-      location,
+      location: { ...location, state: location.state.app },
       buildPath,
       historyState: {
         get: router.getHistoryState,
