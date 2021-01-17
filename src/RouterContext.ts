@@ -112,7 +112,7 @@ export class RouterContext {
       action === "POP" &&
       (await this.beforeRouteChangeListener?.(nextMatch)) === false
     ) {
-      await this.navigate(this.getCurrentLocation());
+      this.history.forward();
       return;
     }
 
