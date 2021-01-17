@@ -98,11 +98,24 @@ export class RouterContext {
     this.currentMatch = null;
   }
 
-  private historyListener: Listener<FrouteHistoryState | null> = ({
+  private historyListener: Listener<FrouteHistoryState | null> = async ({
     location,
     action,
   }) => {
-    const nextMatch = this.resolveRoute(location.pathname);
+    const nextMatch = this.resolveRoute(
+      (location.pathname ?? "") +
+        (location.search ?? "") +
+        (location.hash ?? "")
+    );
+
+    if (
+      action === "POP" &&
+      (await this.beforeRouteChangeListener?.(nextMatch)) === false
+    ) {
+      await this.navigate(this.getCurrentLocation());
+      return;
+    }
+
     const nextLocation = {
       key: location.key,
       pathname: location.pathname,
