@@ -19,7 +19,7 @@ import {
 } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
-import { buildPath, BuildPath } from "builder";
+import { buildPath, BuildPath } from "./builder";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
