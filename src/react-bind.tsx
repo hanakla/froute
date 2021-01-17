@@ -19,6 +19,7 @@ import {
 } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
+import { buildPath, BuildPath } from "builder";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -234,7 +235,7 @@ export const useFrouteRouter: UseFrouteRouter = <
         set: router.setHistoryState,
       },
     }),
-    [location, buildPath]
+    [location]
   );
 };
 
