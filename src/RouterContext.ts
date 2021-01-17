@@ -57,6 +57,8 @@ export interface BeforeRouteListener {
     | void;
 }
 
+const createKey = () => Math.random().toString(36).substr(2, 8);
+
 export type NavigationListener = (
   location: DeepReadonly<Location<FrouteHistoryState>>
 ) => void;
@@ -157,7 +159,7 @@ export class RouterContext {
 
     try {
       const nextLocation = {
-        key: "",
+        key: createKey(),
         pathname: loc.pathname ?? "",
         search: loc.search ?? "",
         hash: loc.hash ?? "",
