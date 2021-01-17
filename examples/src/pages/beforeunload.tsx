@@ -1,13 +1,10 @@
-import { FrouteLink } from "@fleur/froute";
-import { useEffect } from "react";
+import { FrouteLink, useBeforeRouteChange } from "@fleur/froute";
 import { routes } from "../routes";
 
 export default () => {
-  useEffect(() => {
-    window.addEventListener("beforeunload", () => {
-      return confirm("Really back?");
-    });
-  }, []);
+  useBeforeRouteChange(() => {
+    return confirm("Really back?");
+  });
 
   return (
     <div>
