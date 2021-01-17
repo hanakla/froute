@@ -3,17 +3,19 @@
 Framework independent Router for React.  
 Can use with both Fleur / Redux (redux-thunk).
 
+With provides Next.js subset `useRouter`
+
 ```
 yarn add @fleur/froute
 ```
 
 - [Features](#features)
-- [Next.js compat status](#nextjs-compat-status)
-  - [How to type-safe useRoute](#how-to-type-safe-useroute)
 - [API Overview](#api-overview)
   - [Hooks](#hooks)
   - [Components](#components)
 - [Example](#example)
+- [Next.js compat status](#nextjs-compat-status)
+  - [How to type-safe useRoute](#how-to-type-safe-useroute)
 
 
 ## Features
