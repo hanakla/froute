@@ -235,7 +235,7 @@ export const useFrouteRouter: UseFrouteRouter = <
         set: router.setHistoryState,
       },
     }),
-    [location]
+    [location, nextCompatRouter.pathname, nextCompatRouter.query]
   );
 };
 
