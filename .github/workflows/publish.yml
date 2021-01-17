@@ -55,7 +55,7 @@ jobs:
 
       - name: "Check: package version has corrosponding git tag"
         id: tagged
-        run: git show-ref --tags --verify --quiet -- "refs/tags/v${{ steps.package-version.outputs.version }}" && echo "::set-output name=tagged::1" || echo "::set-output name=tagged::0"
+        run: git show-ref --tags --verify --quiet -- "refs/tags/v${{ steps.package-version.outputs.version }}" && echo "::set-output name=tagged::0" || echo "::set-output name=tagged::1"
 
       - env:
           TAGGED: ${{ steps.tagged.outputs.tagged }}
