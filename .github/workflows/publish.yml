@@ -61,9 +61,14 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ (github.ref == 'refs/heads/dev' && 'dev') || 'latest' }}
 
+      - name: "Check: package version has corrosponding git tag"
+        id: tagged
+        run: git show-ref --tags --verify --quiet -- "refs/tags/v${{ steps.package.outputs.version }}" && echo "::set-output name=tagged::1" || echo "::set-output name=tagged::0"
+
       - name: package-version
         run: node -p -e '`PACKAGE_VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
       - name: package-version-to-git-tag
+        if: steps.tagged.outputs.tagged == 0
         uses: pkgdeps/git-tag-action@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
