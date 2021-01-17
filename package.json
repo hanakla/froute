@@ -1,6 +1,6 @@
 {
   "name": "@fleur/froute",
-  "version": "1.0.0-dev.6",
+  "version": "1.0.0-dev.7",
   "description": "Type safe and flexible router for React",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
