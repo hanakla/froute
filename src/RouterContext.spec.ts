@@ -86,9 +86,42 @@ describe("Router", () => {
         const router = new RouterContext(routes);
         const result = router.resolveRoute("/users/../");
 
-        expect(result!.match).toBe(null);
-        expect(result!.route).toBe(null);
+        // Basically, the browser will take care of it.
+        expect(result!.match.params.id).toBe("..");
+        expect(result!.route).toBe(routes.usersShow);
       });
+
+      it("# in fragment", () => {
+        const router = new RouterContext(routes);
+        const result = router.resolveRoute("/users/%23sharp");
+
+        expect(result!.match.params.id).toBe("#sharp");
+        expect(result!.route).toBe(routes.usersShow);
+      });
+    });
+  });
+
+  describe("preload", () => {
+    it("should receive params correctly", async () => {
+      const preloadSpy = jest.fn();
+
+      const routes = {
+        users: routeOf("/users/:id").action({
+          component: () => () => null,
+          preload: preloadSpy,
+        }),
+      };
+
+      const router = new RouterContext(routes, { preloadContext: "hello" });
+      await router.navigate("/users/1?q1=aaa", { action: "PUSH" });
+
+      expect(preloadSpy).toBeCalledWith(
+        "hello",
+        expect.objectContaining({
+          id: "1",
+        }),
+        expect.objectContaining({ query: { q1: "aaa" }, search: "?q1=aaa" })
+      );
     });
   });
 
