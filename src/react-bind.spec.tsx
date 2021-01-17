@@ -4,6 +4,7 @@ import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
+  useBeforeRouteChange,
   useFrouteRouter,
   useHistoryState,
   useLocation,
@@ -213,6 +214,39 @@ describe("react-bind", () => {
       expect(result.container.innerHTML).toMatchInlineSnapshot(
         `"<div>Here is Artwork 2 for user 1</div>"`
       );
+    });
+  });
+
+  describe("useBeforeRouteChange", () => {
+    it("", async () => {
+      const routable = { current: () => false };
+
+      const routes = {
+        unloadHook: routeOf("/unloadhook").action({
+          component: () => () => {
+            useBeforeRouteChange(() => routable.current(), []);
+            return null;
+          },
+        }),
+      };
+
+      const router = createRouter(routes);
+      await router.navigate("/unloadhook", { action: "PUSH" });
+
+      const App = () => {
+        const { PageComponent } = useRouteComponent();
+        return PageComponent ? <PageComponent /> : null;
+      };
+
+      render(<App />, { wrapper: createWrapper(router) });
+
+      routable.current = () => false;
+      await act(() => router.navigate("/", { action: "PUSH" }));
+      expect(router.getCurrentLocation().pathname).toBe("/unloadhook");
+
+      routable.current = () => true;
+      await act(() => router.navigate("/", { action: "PUSH" }));
+      expect(router.getCurrentLocation().pathname).toBe("/");
     });
   });
 
