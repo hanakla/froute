@@ -45,5 +45,17 @@ describe("index", () => {
         buildPath(def, { userId: "1" }, { q: ["a", "b"] })
       ).toMatchInlineSnapshot(`"/users/1?q=a&q=b"`);
     });
+
+    it("should accept raw query string", () => {
+      const def = routeOf("/users/:userId");
+
+      expect(
+        buildPath(def, { userId: "1" }, "hello-query-string")
+      ).toMatchInlineSnapshot(`"/users/1?hello-query-string"`);
+
+      expect(buildPath(def, { userId: "1" }, "")).toMatchInlineSnapshot(
+        `"/users/1"`
+      );
+    });
   });
 });

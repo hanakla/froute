@@ -6,7 +6,8 @@ import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 export type BuildPath = <T extends RouteDefinition<any, any>>(
   def: T,
   params: ParamsOfRoute<T>,
-  query?: { [key: string]: string | string[] }
+  /** Object (encode unnecessory) or query string without `?` prefix */
+  query?: { [key: string]: string | string[] } | string
 ) => string;
 
 export const buildPath: BuildPath = (def, params, query?) => {
@@ -14,7 +15,15 @@ export const buildPath: BuildPath = (def, params, query?) => {
     params
   );
 
-  return query
-    ? `${pathname}${isEmptyObject(query) ? "" : "?" + stringify(query)}`
-    : pathname;
+  let queryPart: string;
+
+  if (query == null) {
+    queryPart = "";
+  } else if (typeof query === "string") {
+    queryPart = query.length > 0 ? `?${query}` : "";
+  } else {
+    queryPart = isEmptyObject(query) ? "" : "?" + stringify(query);
+  }
+
+  return query ? `${pathname}${queryPart}` : pathname;
 };
