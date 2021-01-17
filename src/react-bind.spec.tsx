@@ -113,6 +113,36 @@ describe("react-bind", () => {
   });
 
   describe("useFrouteRouter", () => {
+    it("location is passed correctly", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1?a=1#1");
+
+      const {
+        result: { current },
+      } = renderHook(() => useFrouteRouter(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expect(current.location.pathname).toBe("/users/1");
+      expect(current.location.search).toBe("?a=1");
+      expect(current.location.hash).toBe("#1");
+    });
+
+    it("location is buildPath correctly", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1?a=1#1");
+
+      const {
+        result: {
+          current: { buildPath },
+        },
+      } = renderHook(() => useFrouteRouter(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expect(buildPath(routes.usersShow, { id: "1" })).toBe("/users/1");
+    });
+
     it("Type inference check", async () => {
       const router = createRouter(routes);
       await router.navigate("/users/:id");
@@ -140,6 +170,7 @@ describe("react-bind", () => {
       expect(result.result.current).toMatchInlineSnapshot(`
         Object {
           "hash": "#hash",
+          "key": "",
           "pathname": "/users/1",
           "query": Object {
             "q": "1",
@@ -163,6 +194,7 @@ describe("react-bind", () => {
       expect(result.result.current).toMatchInlineSnapshot(`
         Object {
           "hash": "",
+          "key": "",
           "pathname": "/notfound",
           "query": Object {},
           "search": "",

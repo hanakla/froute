@@ -18,6 +18,7 @@ import {
   BeforeRouteListener,
 } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
+import { Location } from "history";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -120,16 +121,18 @@ export const useRouteComponent = () => {
 };
 
 export interface UseRouter {
-  <R extends RouteDefinition<any, any> = any>(): {
-    pathname: string;
-    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
-    push: (url: string) => void;
-    replace: (url: string) => void;
-    prefetch: (url: string) => void;
-    back: FrouteNavigator["back"];
-    reload: () => void;
-    events: RouterEvents;
-  };
+  <R extends RouteDefinition<any, any> = any>(): NextCompatRouter<R>;
+}
+
+interface NextCompatRouter<R extends RouteDefinition<any, any>> {
+  pathname: string;
+  query: ParamsOfRoute<R> & { [key: string]: string | string[] };
+  push: (url: string) => void;
+  replace: (url: string) => void;
+  prefetch: (url: string) => void;
+  back: FrouteNavigator["back"];
+  reload: () => void;
+  events: RouterEvents;
 }
 
 /**
@@ -195,19 +198,16 @@ export const withRouter = <P extends RouterProps>(
 };
 
 export interface UseFrouteRouter {
-  <R extends RouteDefinition<any, any> = any>(r?: R): {
-    pathname: string;
-    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
-    push: (url: string) => void;
-    replace: (url: string) => void;
-    prefetch: (url: string) => void;
-    back: FrouteNavigator["back"];
-    reload: () => void;
-    events: RouterEvents;
-    historyState: {
-      get: RouterContext["getHistoryState"];
-      set: RouterContext["setHistoryState"];
-    };
+  <R extends RouteDefinition<any, any> = any>(r?: R): FrouteRouter<R>;
+}
+
+interface FrouteRouter<R extends RouteDefinition<any, any>>
+  extends NextCompatRouter<R> {
+  location: Location<StateOfRoute<R>>;
+  buildPath: BuildPath;
+  historyState: {
+    get: RouterContext["getHistoryState"];
+    set: RouterContext["setHistoryState"];
   };
 }
 
@@ -215,11 +215,10 @@ export const useFrouteRouter: UseFrouteRouter = <
   R extends RouteDefinition<any, any>
 >(
   r?: R
-) => {
+): FrouteRouter<R> => {
   const router = useRouterContext();
   const nextCompatRouter = useRouter<R>();
-  const location = useLocation();
-  const { buildPath } = useUrlBuilder();
+  const location = useLocation<R>();
 
   if (isDevelopment) {
     checkExpectedRoute(router, r, "useLocation");
@@ -252,6 +251,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
 
   return useMemo(
     () => ({
+      key: location.key,
       pathname: location.pathname,
       search: location.search,
       query: qs.parse(location.search.slice(1) ?? ""),
