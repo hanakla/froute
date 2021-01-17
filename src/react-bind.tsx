@@ -179,8 +179,9 @@ export const useRouter: UseRouter = () => {
   );
 };
 
-export type RouterProps = {
-  router: ReturnType<typeof useRouter>;
+// use `any` as default type to compat Next.js
+export type RouterProps<R extends RouteDefinition<any, any> = any> = {
+  router: NextCompatRouter<R>;
 };
 
 export const withRouter = <P extends RouterProps>(
