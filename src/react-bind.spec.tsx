@@ -13,7 +13,7 @@ import {
   useRouter,
   useUrlBuilder,
 } from "./react-bind";
-import { routeOf } from "./RouteDefiner";
+import { RouteDefinition, routeOf } from "./RouteDefiner";
 import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
 import { rescue } from "@hanakla/rescue";
@@ -51,6 +51,18 @@ describe("react-bind", () => {
     return ({ children }) => (
       <FrouteContext router={router}>{children}</FrouteContext>
     );
+  };
+
+  const createAndRenderRouter = async (
+    url: string,
+    expectRoute: RouteDefinition<any, any>
+  ) => {
+    const router = createRouter(routes);
+    await router.navigate(url);
+
+    return renderHook(() => useFrouteRouter(expectRoute), {
+      wrapper: createWrapper(router),
+    });
   };
 
   describe("useRouter", () => {
@@ -114,14 +126,9 @@ describe("react-bind", () => {
 
   describe("useFrouteRouter", () => {
     it("location is passed correctly", async () => {
-      const router = createRouter(routes);
-      await router.navigate("/users/1?a=1#1");
-
       const {
         result: { current },
-      } = renderHook(() => useFrouteRouter(routes.usersShow), {
-        wrapper: createWrapper(router),
-      });
+      } = await createAndRenderRouter("/users/1?a=1#1", routes.usersShow);
 
       expect(current.location.pathname).toBe("/users/1");
       expect(current.location.search).toBe("?a=1");
@@ -129,34 +136,27 @@ describe("react-bind", () => {
     });
 
     it("searchQuery passed correctly", async () => {
-      const router = createRouter(routes);
-      await router.navigate("/users/1?a=1&b=2&b=3#1");
-
       const {
         result: { current },
-      } = renderHook(() => useFrouteRouter(routes.usersShow), {
-        wrapper: createWrapper(router),
-      });
+      } = await createAndRenderRouter(
+        "/users/1?a=1&b=2&b=3#1",
+        routes.usersShow
+      );
 
       expect(current.searchQuery).toMatchObject({ a: "1", b: ["2", "3"] });
     });
 
     it("buildPath passed correctly", async () => {
-      const router = createRouter(routes);
-      await router.navigate("/users/1?a=1#1");
-
       const {
         result: { current },
-      } = renderHook(() => useFrouteRouter(routes.usersShow), {
-        wrapper: createWrapper(router),
-      });
+      } = await createAndRenderRouter("/users/1?a=1#1", routes.usersShow);
 
       expect(current.buildPath(routes.usersShow, { id: "1" })).toBe("/users/1");
     });
 
     it("Type inference check", async () => {
       const router = createRouter(routes);
-      await router.navigate("/users/:id");
+      await router.navigate("/users/1");
 
       const {
         result: { current },
