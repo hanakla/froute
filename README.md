@@ -37,15 +37,22 @@ See all examples in [this spec](https://github.com/fleur-js/froute/blob/master/s
 ### Hooks
 
 - `useRouter` - **Next.js subset compat hooks**
+  - `withRouter` available
 - `useFrouteRouter` - `useRouter` superset (not compatible to Next.js's `useRouter`)
 - `useRouteComponent`
-- `useParams`　
 - `useBeforeRouteChange(listener: () => Promise<boolean | void> | boolean | void)`
   - It can prevent routing returns `Promise<false> | false`
-- The following hooks are deprecated. These features are available from `useFrouteRouter`.
-  - `useLocation`
-  - `useNavigation`
-  - `useUrlBuilder`
+
+<details>
+<summary>Deprecated APIs</summary>
+
+The following hooks are deprecated. These features are available from `useFrouteRouter`.
+
+- `useParams`
+- `useLocation`
+- `useNavigation`
+- `useUrlBuilder`
+</details>
 
 ### Components
 
