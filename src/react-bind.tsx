@@ -209,8 +209,8 @@ interface FrouteRouter<R extends RouteDefinition<any, any>>
   location: DeepReadonly<Location<StateOfRoute<R>>>;
   buildPath: BuildPath;
   historyState: {
-    get: RouterContext["getHistoryState"];
-    set: RouterContext["setHistoryState"];
+    get: () => StateOfRoute<R>;
+    set: (state: StateOfRoute<R>) => void;
   };
 }
 

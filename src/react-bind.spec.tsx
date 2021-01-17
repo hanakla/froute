@@ -53,9 +53,9 @@ describe("react-bind", () => {
     );
   };
 
-  const createAndRenderRouter = async (
+  const createAndRenderRouter = async <R extends RouteDefinition<any, any>>(
     url: string,
-    expectRoute: RouteDefinition<any, any>
+    expectRoute: R
   ) => {
     const router = createRouter(routes);
     await router.navigate(url);
@@ -144,6 +144,21 @@ describe("react-bind", () => {
       );
 
       expect(current.searchQuery).toMatchObject({ a: "1", b: ["2", "3"] });
+    });
+
+    it("should get / set history state correctly", async () => {
+      const {
+        result: { current },
+      } = await createAndRenderRouter("/users/1", routes.usersShow);
+
+      expect(current.historyState.get()).toMatchObject({ hist: 1 });
+
+      const eventSpy = jest.fn();
+      current.events.on("routeChangeStart", eventSpy);
+      current.historyState.set({ hist: 2 });
+
+      expect(current.historyState.get()).toMatchObject({ hist: 2 });
+      expect(eventSpy).not.toBeCalled();
     });
 
     it("buildPath passed correctly", async () => {
