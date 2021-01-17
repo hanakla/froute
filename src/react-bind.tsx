@@ -205,6 +205,7 @@ export interface UseFrouteRouter {
 
 interface FrouteRouter<R extends RouteDefinition<any, any>>
   extends NextCompatRouter<R> {
+  searchQuery: Record<string, string | string[] | undefined>;
   location: DeepReadonly<Location<StateOfRoute<R>>>;
   buildPath: BuildPath;
   historyState: {
@@ -229,6 +230,7 @@ export const useFrouteRouter: UseFrouteRouter = <
   return useMemo(
     () => ({
       ...nextCompatRouter,
+      searchQuery: qs.parse(location.search.slice(1) ?? ""),
       location: { ...location, state: location.state.app },
       buildPath,
       historyState: {

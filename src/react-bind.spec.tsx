@@ -128,19 +128,30 @@ describe("react-bind", () => {
       expect(current.location.hash).toBe("#1");
     });
 
-    it("location is buildPath correctly", async () => {
+    it("searchQuery passed correctly", async () => {
       const router = createRouter(routes);
-      await router.navigate("/users/1?a=1#1");
+      await router.navigate("/users/1?a=1&b=2&b=3#1");
 
       const {
-        result: {
-          current: { buildPath },
-        },
+        result: { current },
       } = renderHook(() => useFrouteRouter(routes.usersShow), {
         wrapper: createWrapper(router),
       });
 
-      expect(buildPath(routes.usersShow, { id: "1" })).toBe("/users/1");
+      expect(current.searchQuery).toMatchObject({ a: "1", b: ["2", "3"] });
+    });
+
+    it("buildPath passed correctly", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1?a=1#1");
+
+      const {
+        result: { current },
+      } = renderHook(() => useFrouteRouter(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expect(current.buildPath(routes.usersShow, { id: "1" })).toBe("/users/1");
     });
 
     it("Type inference check", async () => {
