@@ -6,6 +6,7 @@ import { StateBase } from "./FrouteHistoryState";
 import { parse as parseUrl } from "url";
 import { parse as qsParse } from "querystring";
 import { FrouteMatchResult } from "./routing";
+import { DeepReadonly } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 export interface RouteDefinition<Params extends string, S extends StateBase> {
@@ -22,7 +23,10 @@ export interface ActorDef<R extends RouteDefinition<any, StateBase>> {
   preload?: (
     context: any,
     params: ParamsOfRoute<R>,
-    query: { [K: string]: string | string[] | undefined }
+    extra: {
+      query: DeepReadonly<{ [K: string]: string | string[] | undefined }>
+      search: string
+    }
   ) => Promise<any>;
   [key: string]: any;
 }

@@ -7,7 +7,6 @@ import {
   Location,
   MemoryHistory,
 } from "history";
-import { parse as qsParse } from "querystring";
 import { parse as urlParse } from "url";
 import { canUseDOM, DeepReadonly } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
@@ -135,7 +134,6 @@ export class RouterContext {
     if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
 
     // Dispose listener for prevent duplicate route handling
-    // (Present next URL before preload for better UX)
     this.disposeHistory();
 
     this.events.emit("routeChangeStart", [loc.pathname ?? ""]);
@@ -156,11 +154,7 @@ export class RouterContext {
       } else if (action === "PUSH" && nextMatch) {
         this.history.push(nextLocation, nextLocation.state);
 
-        await this.preloadRoute(
-          nextMatch.route,
-          nextMatch.match.params,
-          nextMatch.match.query
-        );
+        await this.preloadRoute(nextMatch);
       } else {
         this.history.push(nextLocation, nextLocation.state);
       }
@@ -263,19 +257,21 @@ export class RouterContext {
   };
 
   public async preloadRoute<R extends RouteDefinition<any, any>>(
-    route: DeepReadonly<R>,
-    params: ParamsOfRoute<R>,
-    query: { [key: string]: string | string[] | undefined } = {},
+    match: DeepReadonly<FrouteMatch<any> & { route: R }>,
     { onlyComponentPreload = false }: { onlyComponentPreload?: boolean } = {}
   ) {
-    const actor = route.getActor();
+    const actor = match.route.getActor();
     if (!actor) return;
 
+    const { query, search, params } = match.match;
     await Promise.all([
       actor.loadComponent(),
       onlyComponentPreload
         ? null
-        : actor.preload?.(this.options.preloadContext, params, query),
+        : actor.preload?.(this.options.preloadContext, params, {
+            query,
+            search,
+          }),
     ]);
   }
 
@@ -285,16 +281,8 @@ export class RouterContext {
     onlyComponentPreload?: boolean;
   } = {}) {
     const matchedRoute = this.getCurrentMatch();
-    const location = this.getCurrentLocation();
-
     if (!matchedRoute) return;
 
-    const query = location ? qsParse(location.search.slice(1)) : {};
-    await this.preloadRoute(
-      matchedRoute.route,
-      matchedRoute.match.params,
-      query,
-      { onlyComponentPreload }
-    );
+    await this.preloadRoute(matchedRoute, { onlyComponentPreload });
   }
 }

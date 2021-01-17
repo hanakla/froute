@@ -162,14 +162,11 @@ export const useRouter: UseRouter = () => {
       prefetch: (url: string) => {
         const match = router.resolveRoute(url);
 
-        if (match) {
-          router.preloadRoute(
-            match.route,
-            match.match.params,
-            match.match.query,
-            { onlyComponentPreload: true }
-          );
-        }
+        if (!match) return;
+
+        router.preloadRoute(match, {
+          onlyComponentPreload: true,
+        });
       },
       back: nav.back,
       reload: () => window.location.reload(),
