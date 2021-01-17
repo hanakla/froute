@@ -18,7 +18,7 @@ import {
   FrouteHistoryState,
   StateBase,
 } from "./FrouteHistoryState";
-import { routerEvents } from "./RouterEvents";
+import { RouterEvents, routerEvents } from "./RouterEvents";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -66,7 +66,7 @@ export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
   public readonly history: History<FrouteHistoryState>;
-  public events = routerEvents();
+  public events: RouterEvents = routerEvents();
 
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
