@@ -4,12 +4,11 @@ on: [push]
 
 jobs:
   testing:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        os: [ubuntu-latest]
         node-version: [10.x, 12.x, 14.x, 15.x]
+
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -27,6 +26,33 @@ jobs:
       - name: Install deps
         run: yarn install
       - name: Testing @fluer/froute
-        run: |
-          yarn prepublishOnly
-          yarn test --coverage --verbose
+        run: yarn test --coverage --verbose
+
+  build-lint:
+    strategy:
+      matrix:
+        steps: [build, lint]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js for use with actions
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache
+        uses: actions/cache@v1.0.0
+        with:
+          path: ~/.cache/yarn
+          key: ${{ matrix.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          restore-keys: |
+            ${{ matrix.os }}-
+      - name: Install deps
+        run: yarn install
+      # - name: Linting
+      #   if: ${{ matrix.steps == 'lint' }}
+      #   run: yarn eslint .
+      - name: Building
+        if: ${{ matrix.steps == 'build' }}
+        run: yarn prepublishOnly

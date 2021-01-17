@@ -18,6 +18,8 @@ import {
   BeforeRouteListener,
 } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
+import { Location } from "history";
+import { buildPath, BuildPath } from "./builder";
 
 const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -120,16 +122,18 @@ export const useRouteComponent = () => {
 };
 
 export interface UseRouter {
-  <R extends RouteDefinition<any, any> = any>(): {
-    pathname: string;
-    query: ParamsOfRoute<R> & { [key: string]: string | string[] };
-    push: (url: string) => void;
-    replace: (url: string) => void;
-    prefetch: (url: string) => void;
-    back: FrouteNavigator["back"];
-    reload: () => void;
-    events: RouterEvents;
-  };
+  <R extends RouteDefinition<any, any> = any>(): NextCompatRouter<R>;
+}
+
+interface NextCompatRouter<R extends RouteDefinition<any, any>> {
+  pathname: string;
+  query: ParamsOfRoute<R> & { [key: string]: string | string[] };
+  push: (url: string) => void;
+  replace: (url: string) => void;
+  prefetch: (url: string) => void;
+  back: FrouteNavigator["back"];
+  reload: () => void;
+  events: RouterEvents;
 }
 
 /**
@@ -172,8 +176,9 @@ export const useRouter: UseRouter = () => {
   );
 };
 
-export type RouterProps = {
-  router: ReturnType<typeof useRouter>;
+// use `any` as default type to compat Next.js
+export type RouterProps<R extends RouteDefinition<any, any> = any> = {
+  router: NextCompatRouter<R>;
 };
 
 export const withRouter = <P extends RouterProps>(
@@ -191,6 +196,50 @@ export const withRouter = <P extends RouterProps>(
   return WithRouter;
 };
 
+export interface UseFrouteRouter {
+  <R extends RouteDefinition<any, any> = any>(r?: R): FrouteRouter<R>;
+}
+
+interface FrouteRouter<R extends RouteDefinition<any, any>>
+  extends NextCompatRouter<R> {
+  searchQuery: Record<string, string | string[] | undefined>;
+  location: DeepReadonly<Location<StateOfRoute<R>>>;
+  buildPath: BuildPath;
+  historyState: {
+    get: () => StateOfRoute<R>;
+    set: (state: StateOfRoute<R>) => void;
+  };
+}
+
+export const useFrouteRouter: UseFrouteRouter = <
+  R extends RouteDefinition<any, any>
+>(
+  r?: R
+): FrouteRouter<R> => {
+  const router = useRouterContext();
+  const nextCompatRouter = useRouter<R>();
+  const location = router.getCurrentLocation();
+
+  if (isDevelopment) {
+    checkExpectedRoute(router, r, "useLocation");
+  }
+
+  return useMemo(
+    () => ({
+      ...nextCompatRouter,
+      searchQuery: qs.parse(location.search.slice(1) ?? ""),
+      location: { ...location, state: location.state.app },
+      buildPath,
+      historyState: {
+        get: router.getHistoryState,
+        set: router.setHistoryState,
+      },
+    }),
+    [location, nextCompatRouter.pathname, nextCompatRouter.query]
+  );
+};
+
+/** @deprecated Use `useFrouteRouter` instead */
 export const useLocation = <R extends RouteDefinition<any, any>>(
   expectRoute?: R
 ) => {
@@ -203,6 +252,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
 
   return useMemo(
     () => ({
+      key: location.key,
       pathname: location.pathname,
       search: location.search,
       query: qs.parse(location.search.slice(1) ?? ""),
@@ -213,6 +263,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
   );
 };
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useHistoryState = <
   R extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
@@ -277,6 +328,7 @@ export interface FrouteNavigator {
   forward(): void;
 }
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useNavigation = () => {
   const router = useRouterContext();
   const { buildPath } = useUrlBuilder();
@@ -338,6 +390,7 @@ export const useNavigation = () => {
   );
 };
 
+/** @deprecated Use `useFrouteRouter` instead */
 export const useUrlBuilder = () => {
   const router = useRouterContext();
   return useMemo(

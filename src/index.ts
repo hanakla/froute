@@ -14,6 +14,7 @@ export {
   useRouteComponent,
   useUrlBuilder,
   useBeforeRouteChange,
+  useFrouteRouter,
   FrouteContext,
   FrouteNavigator,
   // Next.js compat

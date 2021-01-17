@@ -1,8 +1,10 @@
 import React from "react";
+import { expectType } from "tsd";
 import { renderHook } from "@testing-library/react-hooks";
 import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
+  useFrouteRouter,
   useHistoryState,
   useLocation,
   useNavigation,
@@ -11,7 +13,7 @@ import {
   useRouter,
   useUrlBuilder,
 } from "./react-bind";
-import { routeOf } from "./RouteDefiner";
+import { RouteDefinition, routeOf } from "./RouteDefiner";
 import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
 import { rescue } from "@hanakla/rescue";
@@ -49,6 +51,18 @@ describe("react-bind", () => {
     return ({ children }) => (
       <FrouteContext router={router}>{children}</FrouteContext>
     );
+  };
+
+  const createAndRenderRouter = async <R extends RouteDefinition<any, any>>(
+    url: string,
+    expectRoute: R
+  ) => {
+    const router = createRouter(routes);
+    await router.navigate(url);
+
+    return renderHook(() => useFrouteRouter(expectRoute), {
+      wrapper: createWrapper(router),
+    });
   };
 
   describe("useRouter", () => {
@@ -110,6 +124,66 @@ describe("react-bind", () => {
     });
   });
 
+  describe("useFrouteRouter", () => {
+    it("location is passed correctly", async () => {
+      const {
+        result: { current },
+      } = await createAndRenderRouter("/users/1?a=1#1", routes.usersShow);
+
+      expect(current.location.pathname).toBe("/users/1");
+      expect(current.location.search).toBe("?a=1");
+      expect(current.location.hash).toBe("#1");
+    });
+
+    it("searchQuery passed correctly", async () => {
+      const {
+        result: { current },
+      } = await createAndRenderRouter(
+        "/users/1?a=1&b=2&b=3#1",
+        routes.usersShow
+      );
+
+      expect(current.searchQuery).toMatchObject({ a: "1", b: ["2", "3"] });
+    });
+
+    it("should get / set history state correctly", async () => {
+      const {
+        result: { current },
+      } = await createAndRenderRouter("/users/1", routes.usersShow);
+
+      expect(current.historyState.get()).toMatchObject({ hist: 1 });
+
+      const eventSpy = jest.fn();
+      current.events.on("routeChangeStart", eventSpy);
+      current.historyState.set({ hist: 2 });
+
+      expect(current.historyState.get()).toMatchObject({ hist: 2 });
+      expect(eventSpy).not.toBeCalled();
+    });
+
+    it("buildPath passed correctly", async () => {
+      const {
+        result: { current },
+      } = await createAndRenderRouter("/users/1?a=1#1", routes.usersShow);
+
+      expect(current.buildPath(routes.usersShow, { id: "1" })).toBe("/users/1");
+    });
+
+    it("Type inference check", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1");
+
+      const {
+        result: { current },
+      } = renderHook(() => useFrouteRouter(routes.usersShow), {
+        wrapper: createWrapper(router),
+      });
+
+      expectType<{ id: string }>(current.query);
+      expectType<string | string[]>(current.query.some_query);
+    });
+  });
+
   describe("useLocation", () => {
     it("Should correctry parsed complex url", async () => {
       const router = createRouter(routes);
@@ -122,6 +196,7 @@ describe("react-bind", () => {
       expect(result.result.current).toMatchInlineSnapshot(`
         Object {
           "hash": "#hash",
+          "key": "",
           "pathname": "/users/1",
           "query": Object {
             "q": "1",
@@ -145,6 +220,7 @@ describe("react-bind", () => {
       expect(result.result.current).toMatchInlineSnapshot(`
         Object {
           "hash": "",
+          "key": "",
           "pathname": "/notfound",
           "query": Object {},
           "search": "",

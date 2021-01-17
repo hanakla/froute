@@ -3,11 +3,13 @@ import { stringify } from "querystring";
 import { isEmptyObject } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 
-export const buildPath = <T extends RouteDefinition<any, any>>(
+export type BuildPath = <T extends RouteDefinition<any, any>>(
   def: T,
   params: ParamsOfRoute<T>,
   query?: { [key: string]: string | string[] }
-) => {
+) => string;
+
+export const buildPath: BuildPath = (def, params, query?) => {
   const pathname = compile(def.toPath(), { encode: encodeURIComponent })(
     params
   );
