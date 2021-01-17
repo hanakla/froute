@@ -286,6 +286,7 @@ interface UseParams {
   <T extends RouteDefinition<any, any>>(expectRoute?: T): ParamsOfRoute<T>;
 }
 
+/** @deprecated Use `useFrouteRouter().query` instead */
 export const useParams: UseParams = <
   T extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
