@@ -57,13 +57,6 @@ jobs:
         id: tagged
         run: git show-ref --tags --verify --quiet -- "refs/tags/v${{ steps.package-version.outputs.version }}" && echo "::set-output name=tagged::0" || echo "::set-output name=tagged::1"
 
-      - env:
-          TAGGED: ${{ steps.tagged.outputs.tagged }}
-          VERSION: ${{ steps.package-version.outputs.version }}
-        run: |
-          echo $TAGGED
-          echo "refs/tags/v$VERSION"
-
       - name: package-version-to-git-tag
         if: ${{ steps.tagged.outputs.tagged == '0' }}
         uses: pkgdeps/git-tag-action@v2
