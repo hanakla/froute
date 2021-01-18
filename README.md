@@ -1,3 +1,14 @@
+[npm-url]: https://www.npmjs.com/package/@fleur/froute
+[ci-image-url]: https://img.shields.io/github/workflow/status/fleur-js/froute/CI?logo=github&style=flat-square
+[version-image-url]: https://img.shields.io/npm/v/@fleur/froute?style=flat-square
+[license-url]: https://opensource.org/licenses/MIT
+[license-image]: https://img.shields.io/npm/l/@fleur/froute.svg?style=flat-square
+[downloads-image]: https://img.shields.io/npm/dw/@fleur/froute.svg?style=flat-square&logo=npm
+[bundlephobia-url]: https://bundlephobia.com/result?p=@fleur/froute@2.0.1
+[bundlephobia-image]: https://img.shields.io/bundlephobia/minzip/@fleur/froute?style=flat-square
+
+![CI][ci-image-url] [![latest][version-image-url]][npm-url] [![BundleSize][bundlephobia-image]][bundlephobia-url] [![License][license-image]][license-url] [![npm][downloads-image]][npm-url]
+
 # Froute
 
 Framework independent Router for React.  
