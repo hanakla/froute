@@ -1,4 +1,5 @@
 import {
+  Blocker,
   BrowserHistory,
   createBrowserHistory,
   createMemoryHistory,
@@ -71,7 +72,8 @@ export class RouterContext {
 
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
-  private disposeHistory: () => void;
+  private unlistenHistory: () => void;
+  private releaseNavigationBlocker: (() => void) | null;
 
   private beforeRouteChangeListener: BeforeRouteListener | null = null;
 
@@ -87,15 +89,17 @@ export class RouterContext {
         ? (createBrowserHistory({}) as BrowserHistory<FrouteHistoryState>)
         : (createMemoryHistory({}) as MemoryHistory<FrouteHistoryState>);
 
-    this.disposeHistory = this.history.listen(this.historyListener);
+    this.unlistenHistory = this.history.listen(this.historyListener);
   }
 
   public dispose() {
-    this.disposeHistory();
+    this.unlistenHistory();
+    this.releaseNavigationBlocker?.();
 
     this.routeChangedListener.clear();
     (this as any).routeChangedListener = null;
     this.beforeRouteChangeListener = null;
+    this.releaseNavigationBlocker = null;
     this.location = null;
     this.currentMatch = null;
   }
@@ -110,15 +114,7 @@ export class RouterContext {
         (location.hash ?? "")
     );
 
-    if (
-      action === "POP" &&
-      (await this.beforeRouteChangeListener?.(nextMatch)) === false
-    ) {
-      this.history.forward();
-      return;
-    }
-
-    const nextLocation = {
+    const nextLocation: DeepReadonly<Location<FrouteHistoryState>> = {
       key: location.key,
       pathname: location.pathname,
       hash: location.hash,
@@ -153,9 +149,9 @@ export class RouterContext {
       return;
 
     // Dispose listener for prevent duplicate route handling
-    this.disposeHistory();
+    this.unlistenHistory();
 
-    this.events.emit("routeChangeStart", [loc.pathname ?? ""]);
+    this.events.emit("routeChangeStart", [loc.pathname ?? "/"]);
 
     try {
       const nextLocation = {
@@ -183,18 +179,20 @@ export class RouterContext {
 
       this.routeChangedListener.forEach((listener) => listener(nextLocation));
     } catch (e) {
-      this.events.emit("routeChangeError", [e, loc.pathname ?? ""]);
+      this.events.emit("routeChangeError", [e, loc.pathname ?? "/"]);
       throw e;
     } finally {
       // Restore listener
-      this.disposeHistory = this.history.listen(this.historyListener);
+      this.unlistenHistory = this.history.listen(this.historyListener);
     }
 
-    this.events.emit("routeChangeComplete", [loc.pathname ?? ""]);
+    this.events.emit("routeChangeComplete", [loc.pathname ?? "/"]);
   };
 
   public clearBeforeRouteChangeListener() {
+    this.releaseNavigationBlocker?.();
     this.beforeRouteChangeListener = null;
+    this.releaseNavigationBlocker = null;
   }
 
   public setBeforeRouteChangeListener(listener: BeforeRouteListener) {
@@ -204,7 +202,47 @@ export class RouterContext {
       );
     }
 
+    const block: Blocker = ({ action, location, retry }) => {
+      if (action === "PUSH") {
+        // When PUSH, navigatable condition are maybe checked in #navigate()
+
+        this.releaseNavigationBlocker?.();
+        retry();
+
+        setTimeout(() => {
+          this.releaseNavigationBlocker = this.history.block(block);
+        });
+
+        return;
+      }
+
+      const nextMatch = this.resolveRoute(
+        (location.pathname ?? "") +
+          (location.search ?? "") +
+          (location.hash ?? "")
+      );
+
+      if (this.beforeRouteChangeListener?.(nextMatch) === false) {
+        return;
+      } else {
+        // In route changed
+        this.events.emit("routeChangeStart", [location.pathname ?? "/"]);
+
+        try {
+          this.clearBeforeRouteChangeListener();
+          retry();
+
+          setTimeout(() => {
+            this.events.emit("routeChangeComplete", [location.pathname ?? "/"]);
+          });
+        } catch (e) {
+          this.events.emit("routeChangeError", [e, location.pathname ?? "/"]);
+        }
+      }
+    };
+
     this.beforeRouteChangeListener = listener;
+    this.releaseNavigationBlocker = this.history.block(block);
   }
 
   public get internalHitoryState() {

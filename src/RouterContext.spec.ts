@@ -67,6 +67,57 @@ describe("Router", () => {
     });
   });
 
+  describe("Prevent routing", () => {
+    it("on push(navigate)", async () => {
+      const router = createRouter(routes);
+      await router.navigate("/users/1");
+
+      // Prevent
+      const preventSpy = jest.fn(() => false);
+      router.setBeforeRouteChangeListener(preventSpy);
+      await router.navigate("/users/2", { action: "PUSH" });
+
+      expect(preventSpy).toBeCalledTimes(1);
+      expect(router.getCurrentLocation().pathname).toBe("/users/1");
+      router.clearBeforeRouteChangeListener();
+
+      // Navigate
+      const allowSpy = jest.fn(() => true);
+      router.setBeforeRouteChangeListener(allowSpy);
+      await router.navigate("/users/2", { action: "PUSH" });
+
+      expect(allowSpy).toBeCalledTimes(1);
+      expect(router.getCurrentLocation().pathname).toBe("/users/2");
+    });
+
+    it("on popstate", async () => {
+      const router = createRouter(routes);
+
+      await router.navigate("/users/1", { action: "PUSH" });
+      await router.navigate("/users/2", { action: "PUSH" });
+
+      const preventSpy = jest.fn(() => false);
+      router.setBeforeRouteChangeListener(preventSpy);
+
+      history.back();
+      await new Promise((r) => setTimeout(r, /* Allows under */ 20));
+
+      expect(preventSpy).toBeCalledTimes(1);
+      expect(router.getCurrentLocation().pathname).toBe("/users/2");
+      router.clearBeforeRouteChangeListener();
+
+      const allowSpy = jest.fn(() => /* allow transition is */ true);
+      router.setBeforeRouteChangeListener(allowSpy);
+
+      history.back();
+      await new Promise((r) => setTimeout(r, /* Allows under */ 20));
+      expect(allowSpy).toBeCalledTimes(1);
+      expect(router.getCurrentLocation().pathname).toBe("/users/1");
+
+      router.dispose();
+    });
+  });
+
   describe("History State", () => {
     it("check", async () => {
       const router = createRouter(routes);
