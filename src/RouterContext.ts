@@ -128,12 +128,10 @@ export class RouterContext {
     // Dispose listener for prevent duplicate route handling
     this.unlistenHistory();
 
-    this.events.emit("routeChangeStart", [loc.pathname ?? "/"]);
-
     try {
       const nextLocation = {
         key: createKey(),
-        pathname: loc.pathname ?? "",
+        pathname: loc.pathname ?? "/",
         search: loc.search ?? "",
         hash: loc.hash ?? "",
         state: createFrouteHistoryState(
@@ -143,7 +141,15 @@ export class RouterContext {
 
       if (action === "REPLACE") {
         this.history.replace(nextLocation, nextLocation.state);
-      } else if (action === "PUSH" && nextMatch) {
+
+        this.currentMatch = nextMatch;
+        this.location = nextLocation;
+        return;
+      }
+
+      this.events.emit("routeChangeStart", [loc.pathname ?? "/"]);
+
+      if (action === "PUSH" && nextMatch) {
         this.history.push(nextLocation, nextLocation.state);
         await this.preloadRoute(nextMatch);
       } else if (action === "POP" && nextMatch) {
@@ -156,6 +162,7 @@ export class RouterContext {
       this.location = nextLocation;
 
       this.routeChangedListener.forEach((listener) => listener(nextLocation));
+      this.events.emit("routeChangeComplete", [loc.pathname ?? "/"]);
     } catch (e) {
       this.events.emit("routeChangeError", [e, loc.pathname ?? "/"]);
       throw e;
@@ -163,8 +170,6 @@ export class RouterContext {
       // Restore listener
       this.unlistenHistory = this.history.listen(this.historyListener);
     }
-
-    this.events.emit("routeChangeComplete", [loc.pathname ?? "/"]);
   };
 
   public clearBeforeRouteChangeListener() {
