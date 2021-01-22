@@ -44,10 +44,7 @@ interface Navigate {
 interface NavigateOption {
   state?: StateBase;
   /** undefined only used at client side rehydration */
-  action?: "PUSH" | "REPLACE";
-  __FROUTE_INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_GOT_CRASH?: FrouteHistoryState<
-    any
-  > | null;
+  action?: "PUSH" | "POP" | "REPLACE" | undefined;
 }
 
 /** Return `false` to prevent routing */
@@ -108,27 +105,7 @@ export class RouterContext {
     location,
     action,
   }) => {
-    const nextMatch = this.resolveRoute(
-      (location.pathname ?? "") +
-        (location.search ?? "") +
-        (location.hash ?? "")
-    );
-
-    const nextLocation: DeepReadonly<Location<FrouteHistoryState>> = {
-      key: location.key,
-      pathname: location.pathname,
-      hash: location.hash,
-      search: location.search,
-      state:
-        action === "PUSH"
-          ? createFrouteHistoryState(nextMatch?.route.createState())
-          : location.state ?? createFrouteHistoryState(),
-    };
-
-    this.currentMatch = nextMatch;
-    this.location = nextLocation;
-
-    this.routeChangedListener.forEach((listener) => listener(nextLocation));
+    this.navigate(location, { action });
   };
 
   public navigate: Navigate = async (
@@ -143,7 +120,7 @@ export class RouterContext {
     );
 
     if (
-      action === "PUSH" &&
+      (action === "PUSH" || action === "POP") &&
       (await this.beforeRouteChangeListener?.(nextMatch)) === false
     )
       return;
@@ -168,7 +145,8 @@ export class RouterContext {
         this.history.replace(nextLocation, nextLocation.state);
       } else if (action === "PUSH" && nextMatch) {
         this.history.push(nextLocation, nextLocation.state);
-
+        await this.preloadRoute(nextMatch);
+      } else if (action === "POP" && nextMatch) {
         await this.preloadRoute(nextMatch);
       } else {
         this.history.push(nextLocation, nextLocation.state);
