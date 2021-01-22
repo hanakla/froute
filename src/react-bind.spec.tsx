@@ -259,20 +259,18 @@ describe("react-bind", () => {
           wrapper: createWrapper(router),
         });
 
-        expect(result.result.current).toMatchInlineSnapshot(`
-        Object {
-          "hash": "#hash",
-          "key": "",
-          "pathname": "/users/1",
-          "query": Object {
-            "q": "1",
+        expect(result.result.current).toMatchObject({
+          hash: "#hash",
+          key: expect.not.stringMatching(/^$/),
+          pathname: "/users/1",
+          query: {
+            q: "1",
           },
-          "search": "?q=1",
-          "state": Object {
-            "hist": 1,
+          search: "?q=1",
+          state: {
+            hist: 1,
           },
-        }
-      `);
+        });
       });
 
       it("in 404, returns location and empty query", async () => {
@@ -283,16 +281,14 @@ describe("react-bind", () => {
           wrapper: createWrapper(router),
         });
 
-        expect(result.result.current).toMatchInlineSnapshot(`
-        Object {
-          "hash": "",
-          "key": "",
-          "pathname": "/notfound",
-          "query": Object {},
-          "search": "",
-          "state": null,
-        }
-      `);
+        expect(result.result.current).toMatchObject({
+          hash: "",
+          key: expect.not.stringMatching(/^$/),
+          pathname: "/notfound",
+          query: {},
+          search: "",
+          state: null,
+        });
       });
     });
 
