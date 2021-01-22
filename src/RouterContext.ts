@@ -45,6 +45,9 @@ interface NavigateOption {
   state?: StateBase;
   /** undefined only used at client side rehydration */
   action?: "PUSH" | "POP" | "REPLACE" | undefined;
+  __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: FrouteHistoryState<
+    any
+  > | null;
 }
 
 /** Return `false` to prevent routing */
@@ -105,12 +108,19 @@ export class RouterContext {
     location,
     action,
   }) => {
-    this.navigate(location, { action });
+    this.navigate(location, {
+      action,
+      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: location.state,
+    });
   };
 
   public navigate: Navigate = async (
     pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
-    { state, action }: NavigateOption = {}
+    {
+      state,
+      action,
+      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+    }: NavigateOption = {}
   ) => {
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
@@ -134,9 +144,9 @@ export class RouterContext {
         pathname: loc.pathname ?? "/",
         search: loc.search ?? "",
         hash: loc.hash ?? "",
-        state: createFrouteHistoryState(
-          userState ?? nextMatch?.route.createState()
-        ),
+        state:
+          __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED ??
+          createFrouteHistoryState(userState ?? nextMatch?.route.createState()),
       };
 
       if (action === "REPLACE") {
