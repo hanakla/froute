@@ -100,10 +100,11 @@ export const App = () => {
 
 User.tsx:
 ```tsx
+import { useRouter, buildPath } from '@fleur/froute'
 import { routes, ResponseCode, Redirect } from './routes'
 
 export default () => {
-  const { buildPath, query: { userId } } = useFrouteRouter(routes.user)
+  const { query: { userId } } = useRouter()
   const user = useSelector(getUser(userId))
 
   if (!user) {
@@ -166,6 +167,8 @@ server.get("*", async (req, res, next) => {
       {content}
     </Html>
   ).pipe(res)
+
+  router.dispose()
 })
 ```
 

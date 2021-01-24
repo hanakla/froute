@@ -1,23 +1,30 @@
 {
-  "name": "@fleur/froute",
-  "version": "1.0.0-dev.7",
-  "description": "Type safe and flexible router for React",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
-  "homepage": "https://github.com/fleur-js/froute",
-  "author": "Hanakla <ragg.devpr@gmail.com>",
+  "private": true,
+  "name": "froute",
+  "version": "0.0.0",
+  "main": "index.js",
+  "author": "Hanakla <hanakla.dev@gmail.com>",
   "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "jest",
-    "clean-dist": "rm -rf ./dist",
-    "build:declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
-    "build:esm": "bili",
-    "build": "yarn build:declarations && yarn build:esm",
-    "prepublishOnly": "yarn clean-dist && yarn build",
-    "watch": "bili -w",
-    "example:start": "cd examples && yarn start",
-    "example:update": "cd examples && yarn add @fleur/froute@dev"
+    "watch": "wsrun -c watch",
+    "build": "wsrun -p @fleur/froute -c build",
+    "example:start": "wsrun -p examples start"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "cross-env": "^7.0.2",
+    "eslint": "^7.7.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
+    "wsrun": "^5.2.4"
   },
   "husky": {
     "hooks": {
@@ -30,40 +37,5 @@
       "prettier --write",
       "git add"
     ]
-  },
-  "peerDependencies": {
-    "react": ">= 16.8.x"
-  },
-  "devDependencies": {
-    "@hanakla/rescue": "^1.0.3",
-    "@testing-library/react": "^11.2.2",
-    "@testing-library/react-hooks": "^3.7.0",
-    "@types/history": "^4.7.7",
-    "@types/jest": "^26.0.19",
-    "@types/path-to-regexp": "^1.7.0",
-    "@types/react": "^17.0.0",
-    "@typescript-eslint/eslint-plugin": "^3.10.1",
-    "@typescript-eslint/parser": "^3.10.1",
-    "bili": "^5.0.5",
-    "cross-env": "^7.0.2",
-    "eslint": "^7.7.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "husky": "^4.2.5",
-    "jest": "^26.6.3",
-    "lint-staged": "^10.2.11",
-    "prettier": "^2.1.1",
-    "react": "^16.13.1",
-    "react-dom": "^17.0.1",
-    "react-test-renderer": "^17.0.1",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "ts-jest": "^26.4.4",
-    "tsd": "^0.14.0",
-    "typescript": "^4.1.3"
-  },
-  "dependencies": {
-    "history": "^5.0.0",
-    "path-to-regexp": "^6.1.0",
-    "rollup": "^2.16.1"
   }
 }

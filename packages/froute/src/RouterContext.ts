@@ -18,7 +18,7 @@ import {
   FrouteHistoryState,
   StateBase,
 } from "./FrouteHistoryState";
-import { RouterEvents, routerEvents } from "./RouterEvents";
+import { RouterEventsInternal, routerEvents } from "./RouterEvents";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -45,9 +45,7 @@ interface NavigateOption {
   state?: StateBase;
   /** undefined only used at client side rehydration */
   action?: "PUSH" | "POP" | "REPLACE" | undefined;
-  __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: FrouteHistoryState<
-    any
-  > | null;
+  __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: FrouteHistoryState<any> | null;
 }
 
 /** Return `false` to prevent routing */
@@ -68,7 +66,7 @@ export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
   public readonly history: History<FrouteHistoryState>;
-  public events: RouterEvents = routerEvents();
+  public events: RouterEventsInternal = routerEvents();
 
   /** Temporary session id for detect reloading */
   private sid = createKey();
@@ -277,7 +275,7 @@ export class RouterContext {
     this.history.replace(this.getCurrentLocation(), nextState);
   }
 
-  public getHistoryState = () => {
+  public getHistoryState = (): FrouteHistoryState["app"] => {
     return this.getCurrentLocation().state?.app;
   };
 

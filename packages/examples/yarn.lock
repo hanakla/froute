@@ -871,10 +871,10 @@
     immer "^8.0.0"
     invariant "^2.2.4"
 
-"@fleur/froute@^1.0.0-dev.4":
-  version "1.0.0-dev.4"
-  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-1.0.0-dev.4.tgz#30d302bd3dab2548fdedfd06d21692d4eff884ca"
-  integrity sha512-7wuEsfpNpB1uMQIMAJz+2rvxA5xT0ncA4+IZR+PNyMbwOZ/Px04KVzq3UgNqECyAodKzJmTWDi8bGOvu5SVjsw==
+"@fleur/froute@^1.0.0-dev.9":
+  version "1.0.0-dev.9"
+  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-1.0.0-dev.9.tgz#bbf53d7828b879fa19932625de55f2b9c6826a83"
+  integrity sha512-jtEv1fNJhSNooqza3Sl5/OTDTwGjHef3G+DzZSUK3JbUlTee7n8MAB3Eoy8Z5si6B25DYa2lu9XikQJnRxIaQg==
   dependencies:
     history "^5.0.0"
     path-to-regexp "^6.1.0"
