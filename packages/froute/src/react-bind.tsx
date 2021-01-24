@@ -48,6 +48,8 @@ export const FrouteContext = ({
 }) => {
   useIsomorphicEffect(() => {
     const observer: NavigationListener = async (location) => {
+      if (!location.state.__froute) return;
+
       window.scrollTo({
         left: location.state.__froute.scrollX,
         top: location.state.__froute.scrollY,
@@ -72,6 +74,8 @@ export const FrouteContext = ({
         if (!location) return;
 
         router.internalHistoryState = {
+          ...router.internalHistoryState,
+          sid: router.internalHistoryState?.sid,
           scrollX: window.scrollX || window.pageXOffset,
           scrollY: window.scrollY || window.pageYOffset,
         };
