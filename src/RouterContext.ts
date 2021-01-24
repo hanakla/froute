@@ -126,6 +126,8 @@ export class RouterContext {
       action,
       __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: internalState,
     } = options;
+    const currentNavKey = (this.latestNavKey = createKey());
+    const isCancelled = () => this.latestNavKey !== currentNavKey;
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
 
@@ -172,8 +174,11 @@ export class RouterContext {
       this.events.emit("routeChangeStart", [loc.pathname ?? "/"]);
 
       if (action === "PUSH" && nextMatch) {
-        this.history.push(nextLocation, nextLocation.state);
         await this.preloadRoute(nextMatch);
+
+        if (!isCancelled()) {
+          this.history.push(nextLocation, nextLocation.state);
+        }
       } else if (
         action === "POP" &&
         nextLocation.state.__froute?.sid !== this.sid &&
@@ -181,13 +186,18 @@ export class RouterContext {
       ) {
         await this.preloadRoute(nextMatch);
       } else {
-        this.history.push(nextLocation, nextLocation.state);
+        if (!isCancelled()) {
+          this.history.push(nextLocation, nextLocation.state);
+        }
       }
 
-      this.currentMatch = nextMatch;
-      this.location = nextLocation;
+      // Skip update if next navigation is started
+      if (!isCancelled()) {
+        this.currentMatch = nextMatch;
+        this.location = nextLocation;
+        this.routeChangedListener.forEach((listener) => listener(nextLocation));
+      }
 
-      this.routeChangedListener.forEach((listener) => listener(nextLocation));
       this.events.emit("routeChangeComplete", [loc.pathname ?? "/"]);
     } catch (e) {
       this.events.emit("routeChangeError", [e, loc.pathname ?? "/"]);
