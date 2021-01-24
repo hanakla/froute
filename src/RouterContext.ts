@@ -70,6 +70,9 @@ export class RouterContext {
   public readonly history: History<FrouteHistoryState>;
   public events: RouterEvents = routerEvents();
 
+  /** Temporary session id for detect reloading */
+  private sid = createKey();
+  private latestNavKey: string | null = null;
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
   private unlistenHistory: () => void;
@@ -116,14 +119,20 @@ export class RouterContext {
 
   public navigate: Navigate = async (
     pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
-    {
+    options: NavigateOption = {}
+  ) => {
+    const {
       state,
       action,
-      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
-    }: NavigateOption = {}
-  ) => {
+      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: internalState,
+    } = options;
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
+
+    const nextSid =
+      "__INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED" in options
+        ? internalState?.__froute?.sid
+        : this.sid;
 
     const nextMatch = this.resolveRoute(
       (loc.pathname ?? "") + (loc.search ?? "") + (loc.hash ?? "")
@@ -145,8 +154,11 @@ export class RouterContext {
         search: loc.search ?? "",
         hash: loc.hash ?? "",
         state:
-          __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED ??
-          createFrouteHistoryState(userState ?? nextMatch?.route.createState()),
+          internalState ??
+          createFrouteHistoryState(
+            nextSid,
+            userState ?? nextMatch?.route.createState()
+          ),
       };
 
       if (action === "REPLACE") {
@@ -162,7 +174,11 @@ export class RouterContext {
       if (action === "PUSH" && nextMatch) {
         this.history.push(nextLocation, nextLocation.state);
         await this.preloadRoute(nextMatch);
-      } else if (action === "POP" && nextMatch) {
+      } else if (
+        action === "POP" &&
+        nextLocation.state.__froute?.sid !== this.sid &&
+        nextMatch
+      ) {
         await this.preloadRoute(nextMatch);
       } else {
         this.history.push(nextLocation, nextLocation.state);

@@ -65,6 +65,50 @@ describe("Router", () => {
         }
       `);
     });
+
+    it.each([
+      [
+        "not",
+        "after reloading",
+        {
+          sameSession: false,
+          calledTimes: 2 /* if invalid implementation, it to be 1 */,
+        },
+      ],
+      [
+        "be",
+        "on same session",
+        {
+          sameSession: true,
+          calledTimes: 2 /* if invalid implementation, it to be 3 */,
+        },
+      ],
+    ])(
+      "Should %s preload on popstate %s",
+      async (_, __, { sameSession, calledTimes }) => {
+        const preloadSpy = jest.fn();
+        const router = createRouter({
+          users: routeOf("/users/:id").action({
+            component: () => () => null,
+            preload: preloadSpy,
+          }),
+        });
+
+        if (sameSession) {
+          await router.navigate("/users/2", { action: "PUSH" });
+        } else {
+          // Make non froute handled state emulates reload
+          history.pushState(null, "", "/users/2");
+        }
+
+        await router.navigate("/users/1", { action: "PUSH" });
+
+        router.history.back();
+        await new Promise<void>((r) => setTimeout(r, 100));
+
+        expect(preloadSpy).toBeCalledTimes(calledTimes);
+      }
+    );
   });
 
   describe("Prevent routing", () => {
