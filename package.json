@@ -9,8 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "watch": "wsrun -c watch",
-    "build": "wsrun -p @fleur/froute -c build",
+    "watch": "wsrun -m -c watch",
+    "build": "wsrun -m -c build",
+    "test": "wsrun -m -c test",
     "sync:readme": "cp ./README.md ./packages/froute/ && :",
     "example:start": "wsrun -p examples start"
   },
