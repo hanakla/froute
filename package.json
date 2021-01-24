@@ -11,6 +11,7 @@
   "scripts": {
     "watch": "wsrun -c watch",
     "build": "wsrun -p @fleur/froute -c build",
+    "sync:readme": "cp ./README.md ./packages/froute/ && :",
     "example:start": "wsrun -p examples start"
   },
   "devDependencies": {
@@ -32,6 +33,10 @@
     }
   },
   "lint-staged": {
+    "README.md": [
+      "yarn sync:readme",
+      "git add ./packages/froute/README.md"
+    ],
     "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write",
