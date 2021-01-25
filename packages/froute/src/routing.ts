@@ -129,7 +129,7 @@ export const isMatchToRoute = (
     context,
   }: { resolver?: RouteResolver; context?: RouterContext } = {}
 ) => {
-  context = context ?? new RouterContext({ route }, { resolver });
+  const usingContext = createRoutingOnlyContext(context, { route });
 
   const parsed = parseUrl(pathname);
   const afterHostUrl =
@@ -142,7 +142,7 @@ export const isMatchToRoute = (
   matched = match ? { route, match } : null;
 
   if (resolver) {
-    return resolver(afterHostUrl, matched, context);
+    return resolver(afterHostUrl, matched, usingContext);
   }
 
   return matched;
