@@ -931,14 +931,6 @@
     immer "^8.0.0"
     invariant "^2.2.4"
 
-"@fleur/froute@*":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@fleur/froute/-/froute-0.1.0.tgz#8ea084cbf0dd8695526e199c0509cf0846cb62e6"
-  integrity sha512-bybSI3HPUq4nmi18w3qyHEGDK1/86CnXMDqbsvbGAibikYoxkxCG0T6DWNGTtG3SOX70/boltZ707JNJCMaP2A==
-  dependencies:
-    history "^5.0.0"
-    path-to-regexp "^6.1.0"
-
 "@fleur/react@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@fleur/react/-/react-4.0.1.tgz#fb5068d4dc7d84439222811c836e8e66f0f39ef8"
@@ -7332,7 +7324,7 @@ querystring-es3@^0.2.0:
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
   integrity sha1-nsYfeQSYdXB9aUFFlv2Qek1xHnM=
 
-querystring@0.2.0, querystring@^0.2.0:
+querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
   integrity sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=

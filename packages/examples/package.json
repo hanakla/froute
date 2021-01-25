@@ -8,6 +8,12 @@
     "start": "parcel src/index.html --open",
     "watch": "yarn start"
   },
+  "workspaces": {
+    "nohoist": [
+      "parcel",
+      "parcel/**"
+    ]
+  },
   "devDependencies": {
     "@types/domready": "^1.0.0",
     "@types/react": "^17.0.0",
@@ -16,7 +22,7 @@
   },
   "dependencies": {
     "@fleur/fleur": "^2.0.0",
-    "@fleur/froute": "*",
+    "@fleur/froute": "1.0.0-dev.28",
     "@fleur/react": "^4.0.1",
     "domready": "^1.0.8",
     "react": "^17.0.1",
