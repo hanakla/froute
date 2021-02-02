@@ -184,8 +184,9 @@ export class RouterContext {
       ) {
         await this.preloadRoute(nextMatch);
       } else {
+        // on restore location
         if (!isCancelled()) {
-          this.history.push(nextLocation, nextLocation.state);
+          this.history.replace(nextLocation, nextLocation.state);
         }
       }
 
