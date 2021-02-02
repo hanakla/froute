@@ -14,7 +14,7 @@
     "build": "wsrun -m -c build",
     "test": "wsrun -m -c test",
     "sync:readme": "cp ./README.md ./packages/froute/ && :",
-    "example:start": "wsrun -p examples start"
+    "example:start": "wsrun -p examples -c start"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.10.1",
