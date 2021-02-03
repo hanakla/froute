@@ -22,7 +22,7 @@ import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
 import { buildPath, BuildPath } from "./builder";
 
-const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
 const Context = createContext<RouterContext | null>(null);
 Context.displayName = "FrouteContext";
@@ -46,7 +46,7 @@ export const FrouteContext = ({
   router: RouterContext;
   children: ReactNode;
 }) => {
-  useIsomorphicEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const observer: NavigationListener = async (location) => {
       if (!location.state.__froute) return;
 
@@ -61,33 +61,15 @@ export const FrouteContext = ({
   }, [router]);
 
   // Save scroll position
-  useEffect(() => {
-    let scrollTimerId: number;
-
-    const handleScroll = () => {
-      if (scrollTimerId) {
-        clearTimeout(scrollTimerId);
-      }
-
-      scrollTimerId = (setTimeout(() => {
-        const location = router.getCurrentLocation();
-        if (!location) return;
-
-        router.internalHistoryState = {
-          ...router.internalHistoryState,
-          sid: router.internalHistoryState?.sid,
-          scrollX: window.scrollX || window.pageXOffset,
-          scrollY: window.scrollY || window.pageYOffset,
-        };
-      }, 150) as any) as number;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(scrollTimerId);
-    };
+  useIsomorphicLayoutEffect(() => {
+    router.events.on("routeChangeStart", () => {
+      router.internalHistoryState = {
+        ...router.internalHistoryState,
+        sid: router.internalHistoryState?.sid,
+        scrollX: window.scrollX || window.pageXOffset,
+        scrollY: window.scrollY || window.pageYOffset,
+      };
+    });
   }, []);
 
   return <Context.Provider value={router}>{children}</Context.Provider>;
@@ -113,7 +95,7 @@ export const useRouteComponent = () => {
   const PageComponent = match?.route.getActor()?.cachedComponent;
   const [, rerender] = useReducer((s) => s + 1, 0);
 
-  useIsomorphicEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     router.observeRouteChanged(rerender);
     return () => router.unobserveRouteChanged(rerender);
   }, [router, rerender]);
