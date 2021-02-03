@@ -118,11 +118,6 @@ export const useRouteComponent = () => {
     return () => router.unobserveRouteChanged(rerender);
   }, [router, rerender]);
 
-  useIsomorphicEffect(() => {
-    router.observeRouteChanged(rerender);
-    return () => router.unobserveRouteChanged(rerender);
-  }, []);
-
   return useMemo(() => ({ PageComponent }), [match]);
 };
 
