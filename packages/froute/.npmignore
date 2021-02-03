@@ -1,6 +1,3 @@
-/examples
-/.vscode
-/.github
 /src
 /spec
 yarn-error.log
