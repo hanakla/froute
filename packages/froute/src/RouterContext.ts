@@ -274,10 +274,10 @@ export class RouterContext {
   public set internalHistoryState(state: FrouteHistoryState["__froute"]) {
     const nextState: FrouteHistoryState = {
       __froute: state,
-      app: this.getCurrentLocation()?.state,
+      app: this.getCurrentLocation()?.state.app,
     };
 
-    this.history.replace(this.getCurrentLocation(), nextState);
+    this.history.replace(this.history.location, nextState);
   }
 
   public getHistoryState = (): FrouteHistoryState["app"] => {

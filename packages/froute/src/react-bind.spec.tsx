@@ -1,7 +1,7 @@
 import React from "react";
 import { expectType } from "tsd";
 import { renderHook } from "@testing-library/react-hooks";
-import { render, act } from "@testing-library/react";
+import { render, act, wait } from "@testing-library/react";
 import {
   FrouteContext,
   useBeforeRouteChange,
