@@ -12,8 +12,9 @@ describe("Link", () => {
 
   it("Click to move location", async () => {
     const router = createRouter(routes);
-    const spy = jest.spyOn(router, "navigate");
+    await router.navigate("/");
 
+    const spy = jest.spyOn(router, "navigate");
     const result = render(
       <Link data-testid="link" href="/users/1">
         Link

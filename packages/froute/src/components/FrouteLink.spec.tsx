@@ -12,6 +12,8 @@ describe("FrouteLink", () => {
 
   it("Click to move location", async () => {
     const router = createRouter(routes);
+    await router.navigate("/");
+
     const spy = jest.spyOn(router, "navigate");
 
     const result = render(
