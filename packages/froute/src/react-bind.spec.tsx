@@ -1,7 +1,7 @@
 import React from "react";
 import { expectType } from "tsd";
 import { renderHook } from "@testing-library/react-hooks";
-import { render, act, wait } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import {
   FrouteContext,
   useBeforeRouteChange,
@@ -217,16 +217,18 @@ describe("react-bind", () => {
   });
 
   describe("useBeforeRouteChange", () => {
-    it("", async () => {
+    it("Should block and allow", async () => {
       const routable = { current: () => false };
 
       const routes = {
-        unloadHook: routeOf("/unloadhook").action({
-          component: () => () => {
-            useBeforeRouteChange(() => routable.current(), []);
-            return null;
-          },
-        }),
+        unloadHook: routeOf("/unloadhook")
+          .state(() => ({ a: "a" }))
+          .action({
+            component: () => () => {
+              useBeforeRouteChange(() => routable.current(), []);
+              return null;
+            },
+          }),
       };
 
       const router = createRouter(routes);
@@ -246,6 +248,27 @@ describe("react-bind", () => {
       routable.current = () => true;
       await act(() => router.navigate("/", { action: "PUSH" }));
       expect(router.getCurrentLocation().pathname).toBe("/");
+    });
+
+    it("Should replace state on block", async () => {
+      const routes = {
+        unloadHook: routeOf("/unloadhook").action({
+          component: () => () => {
+            useBeforeRouteChange(() => false, []);
+            return null;
+          },
+        }),
+      };
+
+      const router = createRouter(routes);
+      router.navigate("/unloadhook");
+
+      expect(router.getHistoryState()).toBe(null);
+      await router.navigate("/unloadhook", {
+        action: "REPLACE",
+        state: { a: "ok" },
+      });
+      expect(router.getHistoryState()).toEqual({ a: "ok" });
     });
   });
 
