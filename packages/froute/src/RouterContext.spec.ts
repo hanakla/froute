@@ -158,6 +158,12 @@ describe("Router", () => {
       expect(allowSpy).toBeCalledTimes(1);
       expect(router.getCurrentLocation().pathname).toBe("/users/1");
 
+      router.setBeforeRouteChangeListener(allowSpy);
+      history.forward();
+      await new Promise((r) => setTimeout(r, /* Allows under */ 20));
+      expect(allowSpy).toBeCalledTimes(2);
+      expect(router.getCurrentLocation().pathname).toBe("/users/2");
+
       router.dispose();
     });
   });
