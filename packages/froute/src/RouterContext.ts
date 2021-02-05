@@ -221,6 +221,10 @@ export class RouterContext {
     }
 
     const block: Blocker = ({ action, location, retry }) => {
+      if (action === "REPLACE") {
+        return;
+      }
+
       if (action === "PUSH") {
         // When PUSH, navigatable condition are maybe checked in #navigate()
 
