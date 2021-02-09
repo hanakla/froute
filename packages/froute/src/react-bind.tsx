@@ -13,11 +13,7 @@ import React, {
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
 import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
-import {
-  NavigationListener,
-  RouterContext,
-  BeforeRouteListener,
-} from "./RouterContext";
+import { RouterContext, BeforeRouteListener } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
 import { buildPath, BuildPath } from "./builder";
@@ -46,29 +42,42 @@ export const FrouteContext = ({
   router: RouterContext;
   children: ReactNode;
 }) => {
-  useIsomorphicLayoutEffect(() => {
-    const observer: NavigationListener = async (location) => {
-      if (!location.state.__froute) return;
-
-      window.scrollTo({
-        left: location.state.__froute.scrollX,
-        top: location.state.__froute.scrollY,
-      });
-    };
-
-    router.observeRouteChanged(observer);
-    return () => router.unobserveRouteChanged(observer);
-  }, [router]);
-
   // Save scroll position
   useIsomorphicLayoutEffect(() => {
-    router.events.on("routeChangeStart", () => {
-      router.internalHistoryState = {
-        ...router.internalHistoryState,
-        sid: router.internalHistoryState?.sid,
-        scrollX: window.scrollX || window.pageXOffset,
-        scrollY: window.scrollY || window.pageYOffset,
-      };
+    let scrollTimerId: number;
+
+    const handleScroll = () => {
+      if (scrollTimerId) {
+        clearTimeout(scrollTimerId);
+      }
+
+      scrollTimerId = (setTimeout(() => {
+        const location = router.getCurrentLocation();
+        if (!location) return;
+
+        router.internalHistoryState = {
+          ...router.internalHistoryState,
+          sid: router.internalHistoryState?.sid,
+          scrollX: window.scrollX || window.pageXOffset,
+          scrollY: window.scrollY || window.pageYOffset,
+        };
+      }, 30) as any) as number;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimerId);
+    };
+  }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    router.events.on("routeChangeComplete", () => {
+      window.scrollTo({
+        left: router.internalHistoryState?.scrollX || 0,
+        top: router.internalHistoryState?.scrollY || 0,
+      });
     });
   }, []);
 
