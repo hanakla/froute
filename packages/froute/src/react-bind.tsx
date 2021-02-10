@@ -42,45 +42,6 @@ export const FrouteContext = ({
   router: RouterContext;
   children: ReactNode;
 }) => {
-  // Save scroll position
-  useIsomorphicLayoutEffect(() => {
-    let scrollTimerId: number;
-
-    const handleScroll = () => {
-      if (scrollTimerId) {
-        clearTimeout(scrollTimerId);
-      }
-
-      scrollTimerId = (setTimeout(() => {
-        const location = router.getCurrentLocation();
-        if (!location) return;
-
-        router.internalHistoryState = {
-          ...router.internalHistoryState,
-          sid: router.internalHistoryState?.sid,
-          scrollX: window.scrollX || window.pageXOffset,
-          scrollY: window.scrollY || window.pageYOffset,
-        };
-      }, 30) as any) as number;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(scrollTimerId);
-    };
-  }, []);
-
-  useIsomorphicLayoutEffect(() => {
-    router.events.on("routeChangeComplete", () => {
-      window.scrollTo({
-        left: router.internalHistoryState?.scrollX || 0,
-        top: router.internalHistoryState?.scrollY || 0,
-      });
-    });
-  }, []);
-
   return <Context.Provider value={router}>{children}</Context.Provider>;
 };
 
