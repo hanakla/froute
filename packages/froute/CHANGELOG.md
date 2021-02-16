@@ -1,7 +1,7 @@
-### 1.0.0-dev.*
+### 1.0.0
 
 #### Breaking changes
--  [#4](https://github.com/fleur-js/froute/pull/4) Accept parsed query and string search in your `action.preload`.
+-  [#4](https://github.com/fleur-js/froute/pull/4) Accept parsed query and search string in your `action.preload`.
   ```ts
   // Before
   routeOf(...).action({
@@ -21,9 +21,9 @@
 - [#3](https://github.com/fleur-js/froute/pull/3) Add `useFrouteRouter` hooks, it's superset of `useRouter`
 - [#1](https://github.com/fleur-js/froute/pull/1) Add `useBeforeRouteChange` hooks for preventing navigation
 - [#2](https://github.com/fleur-js/froute/pull/2) Add `query` and `search` in result of `RouteDefinition.match`.
-- [#7](https://github.com/fleur-js/froute/pull/7) Accept plain string in 3rd argument of `buildPath`
+- [#7](https://github.com/fleur-js/froute/pull/7) Accept plain query string in 3rd argument of `buildPath`
   ```ts
-  buildPath(routeDef, { param: '' }, '**Accept string here** without `?` prefix')
+  buildPath(routeDef, { param: '' }, '**Accept query string here** without `?` prefix')
   ```
 
 

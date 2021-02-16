@@ -9,12 +9,16 @@ With provides Next.js subset `useRouter`
 yarn add @fleur/froute
 ```
 
+This library already works on Production([VRoid Hub](https://hub.vroid.com))
+
+
 - [Features](#features)
 - [API Overview](#api-overview)
   - [Hooks](#hooks)
   - [Components](#components)
 - [Example](#example)
 - [Next.js compat status](#nextjs-compat-status)
+  - [Why froute provides Next.js compat hooks?](#why-froute-provides-nextjs-compat-hooks)
   - [How to type-safe useRoute](#how-to-type-safe-useroute)
 
 
