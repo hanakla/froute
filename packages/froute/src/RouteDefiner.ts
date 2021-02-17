@@ -24,16 +24,21 @@ export interface ActorDef<R extends RouteDefinition<any, StateBase>> {
     context: any,
     params: ParamsOfRoute<R>,
     extra: {
-      query: DeepReadonly<{ [K: string]: string | string[] | undefined }>
-      search: string
+      query: DeepReadonly<{ [K: string]: string | string[] | undefined }>;
+      search: string;
     }
   ) => Promise<any>;
   [key: string]: any;
 }
 
-type ParamsObject<Params extends string | OptionalParam<string>> =
-  { [K in Extract<Params, Extract<Params, OptionalParam<any>>>]: string }
-  & { [K in OptionalParamStringToConst<Extract<Params, OptionalParam<string>>>]?: string }
+type ParamsObject<Params extends string | OptionalParam<string>> = {
+  [K in Extract<Params, Extract<Params, OptionalParam<any>>>]: string;
+} &
+  {
+    [K in OptionalParamStringToConst<
+      Extract<Params, OptionalParam<string>>
+    >]?: string;
+  };
 
 // prettier-ignore
 export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
@@ -42,15 +47,25 @@ export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
   : T extends RouteDefinition<infer P, any> ? ParamsObject<P>
   : never;
 
-export type StateOfRoute<R extends RouteDefinition<any, StateBase>> = R extends RouteDefinition<any, infer S> ? S : never
+export type StateOfRoute<
+  R extends RouteDefinition<any, StateBase>
+> = R extends RouteDefinition<any, infer S> ? S : never;
 
-type OptionalParam<S extends string> = S & { __OPTIONAL: true }
-type OptionalParamStringToConst<P extends OptionalParam<string>> = P extends OptionalParam<infer K> ? K : never
+type OptionalParam<S extends string> = S & { __OPTIONAL: true };
+type OptionalParamStringToConst<
+  P extends OptionalParam<string>
+> = P extends OptionalParam<infer K> ? K : never;
 
-type ParamFragment<T extends string> = T extends `:${infer R}?` ? OptionalParam<R> : T extends `:${infer R}` ? R : never
-type ParamsInPath<S extends string> = string extends S ? string
-  : S extends `${infer R}/${infer Rest}` ? ParamFragment<R> | ParamsInPath<Rest>
-    : ParamFragment<S>
+type ParamFragment<T extends string> = T extends `:${infer R}?`
+  ? OptionalParam<R>
+  : T extends `:${infer R}`
+  ? R
+  : never;
+type ParamsInPath<S extends string> = string extends S
+  ? string
+  : S extends `${infer R}/${infer Rest}`
+  ? ParamFragment<R> | ParamsInPath<Rest>
+  : ParamFragment<S>;
 
 /**
  * Define route by fragment chain
@@ -67,9 +82,11 @@ export const routeBy = (path: string): RouteDefiner<Exclude<"", "">> => {
  * - `routeOf('/fragment/:paramName')`
  * - `routeOf('/fragment/:paramName?')`
  */
-export const routeOf = <S extends string>(path: S): RouteDefiner<ParamsInPath<S>> => {
-  return new RouteDefiner(path)
-}
+export const routeOf = <S extends string>(
+  path: S
+): RouteDefiner<ParamsInPath<S>> => {
+  return new RouteDefiner(path);
+};
 
 class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
@@ -93,8 +110,10 @@ class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
   }
 }
 
-export class RouteDefiner<Params extends string, State extends StateBase = never>
-  implements RouteDefinition<Params, State> {
+export class RouteDefiner<
+  Params extends string,
+  State extends StateBase = never
+> implements RouteDefinition<Params, State> {
   private stack: string[] = [];
   private actor: Actor<this> | null = null;
   private stateFactory: (() => State) | null = null;
@@ -120,8 +139,8 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
     this: RouteDefiner<Params, S>,
     stateFactory: () => S
   ): RouteDefiner<Params, S> {
-    this.stateFactory = stateFactory
-    return this as any
+    this.stateFactory = stateFactory;
+    return this as any;
   }
 
   public action({
@@ -137,14 +156,18 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
   public match(pathname: string): FrouteMatchResult<Params> | null {
     const parsed = parseUrl(pathname);
     const result = match<Record<Params, string>>(this.toPath(), {
-      decode: decodeURIComponent
+      decode: decodeURIComponent,
     })(parsed.pathname!);
 
-    return result ? {
-      ...result,
-        query: qsParse(parsed.query ?? '', void 0, void 0, {decodeURIComponent}),
-        search: parsed.search ?? "",
-    } : null
+    return result
+      ? {
+          ...result,
+          query: qsParse(parsed.query ?? "", void 0, void 0, {
+            decodeURIComponent,
+          }),
+          search: parsed.search ?? "",
+        }
+      : null;
   }
 
   public getActor<R extends RouteDefiner<any, any>>(this: R) {
@@ -152,7 +175,7 @@ export class RouteDefiner<Params extends string, State extends StateBase = never
   }
 
   public createState() {
-    return this.stateFactory?.() ?? null
+    return this.stateFactory?.() ?? null;
   }
 
   public toPath() {

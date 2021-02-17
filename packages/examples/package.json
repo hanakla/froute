@@ -5,7 +5,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "parcel src/index.html --open "
+    "start": "parcel src/index.html --open",
+    "watch": "yarn start"
+  },
+  "workspaces": {
+    "nohoist": [
+      "parcel",
+      "parcel/**"
+    ]
   },
   "devDependencies": {
     "@types/domready": "^1.0.0",
@@ -15,7 +22,7 @@
   },
   "dependencies": {
     "@fleur/fleur": "^2.0.0",
-    "@fleur/froute": "^0.2.0-dev.9",
+    "@fleur/froute": "1.0.0-beta.12",
     "@fleur/react": "^4.0.1",
     "domready": "^1.0.8",
     "react": "^17.0.1",

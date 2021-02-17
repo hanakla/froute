@@ -1,8 +1,0 @@
-/examples
-/.vscode
-/.github
-/src
-yarn-error.log
-/*.ts
-/*.js
-/*.json

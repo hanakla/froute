@@ -4,7 +4,8 @@ interface Events {
   routeChangeError: [err: Error, url: string];
 }
 
-export type RouterEvents = ReturnType<typeof routerEvents>;
+export type RouterEventsInternal = ReturnType<typeof routerEvents>;
+export type RouterEvents = Omit<ReturnType<typeof routerEvents>, "dispose">;
 
 export const routerEvents = () => {
   const listeners: Record<string, ((...args: any) => void)[]> = Object.create(

@@ -2,7 +2,8 @@
 export type StateBase = object | null;
 
 export type FrouteHistoryState<S extends StateBase = any> = {
-  __froute: {
+  __froute?: {
+    sid: string | undefined | null;
     scrollX: number;
     scrollY: number;
   };
@@ -15,8 +16,9 @@ export const isFrouteState = (state: any): state is FrouteHistoryState => {
 };
 
 export const createFrouteHistoryState = (
+  sid: string | undefined | null,
   appState: StateBase = null
 ): FrouteHistoryState => ({
-  __froute: { scrollX: 0, scrollY: 0 },
+  __froute: { sid, scrollX: 0, scrollY: 0 },
   app: appState,
 });

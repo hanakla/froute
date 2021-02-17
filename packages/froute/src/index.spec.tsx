@@ -1,6 +1,6 @@
 // @ts-ignore TS6133 This is usage example file. ignore unused vars
 
-import React from "react";
+import React, { useEffect } from "react";
 import { render } from "@testing-library/react";
 import {
   createRouter,
@@ -11,7 +11,7 @@ import {
   RouterOptions,
 } from "./";
 import { ResponseCode } from "./components/ResponseCode";
-import { useHistoryState } from "./react-bind";
+import { useRouter } from "./react-bind";
 
 describe("Usage", () => {
   // Mock of external context likes fleur context or redux store
@@ -69,11 +69,13 @@ describe("Usage", () => {
     const App = () => {
       // Get preloaded Page component
       const { PageComponent } = useRouteComponent();
+      const router = useRouter();
 
-      // Use history state
-      const [getHistoryState, setHistoryState] = useHistoryState(
-        routes.usersShow
-      );
+      useEffect(() => {
+        router.events.on("routeChangeStart", () => {
+          // Do it something (likes nprogress)
+        });
+      });
 
       return (
         <div id="app">

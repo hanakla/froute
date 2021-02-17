@@ -1,6 +1,7 @@
 import React, {
   ComponentType,
   createContext,
+  DependencyList,
   forwardRef,
   ReactNode,
   useContext,
@@ -12,16 +13,12 @@ import React, {
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
 import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
-import {
-  NavigationListener,
-  RouterContext,
-  BeforeRouteListener,
-} from "./RouterContext";
+import { RouterContext, BeforeRouteListener } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
 import { buildPath, BuildPath } from "./builder";
 
-const useIsomorphicEffect = canUseDOM() ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
 const Context = createContext<RouterContext | null>(null);
 Context.displayName = "FrouteContext";
@@ -45,46 +42,6 @@ export const FrouteContext = ({
   router: RouterContext;
   children: ReactNode;
 }) => {
-  useIsomorphicEffect(() => {
-    const observer: NavigationListener = async (location) => {
-      window.scrollTo({
-        left: location.state.__froute.scrollX,
-        top: location.state.__froute.scrollY,
-      });
-    };
-
-    router.observeRouteChanged(observer);
-    return () => router.unobserveRouteChanged(observer);
-  }, [router]);
-
-  // Save scroll position
-  useEffect(() => {
-    let scrollTimerId: number;
-
-    const handleScroll = () => {
-      if (scrollTimerId) {
-        clearTimeout(scrollTimerId);
-      }
-
-      scrollTimerId = (setTimeout(() => {
-        const location = router.getCurrentLocation();
-        if (!location) return;
-
-        router.internalHistoryState = {
-          scrollX: window.scrollX || window.pageXOffset,
-          scrollY: window.scrollY || window.pageYOffset,
-        };
-      }, 150) as any) as number;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(scrollTimerId);
-    };
-  }, []);
-
   return <Context.Provider value={router}>{children}</Context.Provider>;
 };
 
@@ -108,15 +65,10 @@ export const useRouteComponent = () => {
   const PageComponent = match?.route.getActor()?.cachedComponent;
   const [, rerender] = useReducer((s) => s + 1, 0);
 
-  useIsomorphicEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     router.observeRouteChanged(rerender);
     return () => router.unobserveRouteChanged(rerender);
   }, [router, rerender]);
-
-  useIsomorphicEffect(() => {
-    router.observeRouteChanged(rerender);
-    return () => router.unobserveRouteChanged(rerender);
-  }, []);
 
   return useMemo(() => ({ PageComponent }), [match]);
 };
@@ -239,7 +191,7 @@ export const useFrouteRouter: UseFrouteRouter = <
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().location` instead */
 export const useLocation = <R extends RouteDefinition<any, any>>(
   expectRoute?: R
 ) => {
@@ -263,7 +215,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().historyState` instead */
 export const useHistoryState = <
   R extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
@@ -286,6 +238,7 @@ interface UseParams {
   <T extends RouteDefinition<any, any>>(expectRoute?: T): ParamsOfRoute<T>;
 }
 
+/** @deprecated Use `useFrouteRouter().query` instead */
 export const useParams: UseParams = <
   T extends RouteDefinition<any, any> = RouteDefinition<any, any>
 >(
@@ -303,6 +256,7 @@ export const useParams: UseParams = <
   return match ? (match.match.params as ParamsOfRoute<T>) : {};
 };
 
+/** @deprecated Use `useFrouteRouter().{push,replace,...}` instead */
 export interface FrouteNavigator {
   push<R extends RouteDefinition<any, any>>(
     route: R,
@@ -328,7 +282,7 @@ export interface FrouteNavigator {
   forward(): void;
 }
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().{push,replace,...}` and `buildPath()` instead */
 export const useNavigation = () => {
   const router = useRouterContext();
   const { buildPath } = useUrlBuilder();
@@ -390,7 +344,7 @@ export const useNavigation = () => {
   );
 };
 
-/** @deprecated Use `useFrouteRouter` instead */
+/** @deprecated Use `useFrouteRouter().buildPath` instead */
 export const useUrlBuilder = () => {
   const router = useRouterContext();
   return useMemo(
@@ -401,15 +355,16 @@ export const useUrlBuilder = () => {
   );
 };
 
-/** Handling */
+/** Handling route change */
 export const useBeforeRouteChange = (
   /** Return Promise&lt;false&gt; | false to prevent route changing. This listener only one can be set at a time */
-  beforeRouteListener: BeforeRouteListener
+  beforeRouteListener: BeforeRouteListener,
+  deps: DependencyList
 ) => {
   const router = useRouterContext();
 
   useEffect(() => {
     router.setBeforeRouteChangeListener(beforeRouteListener);
     return () => router.clearBeforeRouteChangeListener();
-  }, []);
+  }, deps);
 };

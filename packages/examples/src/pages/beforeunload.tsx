@@ -1,12 +1,16 @@
-import { FrouteLink } from "@fleur/froute";
+import { FrouteLink, useBeforeRouteChange } from "@fleur/froute";
 import { useEffect } from "react";
 import { routes } from "../routes";
 
 export default () => {
+  useBeforeRouteChange(() => {
+    // console.trace("hi");
+    return confirm("Really back?");
+  }, []);
+
   useEffect(() => {
-    window.addEventListener("beforeunload", () => {
-      return confirm("Really back?");
-    });
+    console.log("mouted");
+    return () => console.log("unmounted");
   }, []);
 
   return (

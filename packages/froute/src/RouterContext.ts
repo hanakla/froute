@@ -1,4 +1,5 @@
 import {
+  Blocker,
   BrowserHistory,
   createBrowserHistory,
   createMemoryHistory,
@@ -17,7 +18,7 @@ import {
   FrouteHistoryState,
   StateBase,
 } from "./FrouteHistoryState";
-import { RouterEvents, routerEvents } from "./RouterEvents";
+import { RouterEventsInternal, routerEvents } from "./RouterEvents";
 
 export interface RouterOptions {
   resolver?: RouteResolver;
@@ -43,10 +44,8 @@ interface Navigate {
 interface NavigateOption {
   state?: StateBase;
   /** undefined only used at client side rehydration */
-  action?: "PUSH" | "REPLACE";
-  __FROUTE_INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_GOT_CRASH?: FrouteHistoryState<
-    any
-  > | null;
+  action?: "PUSH" | "POP" | "REPLACE" | undefined;
+  __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: FrouteHistoryState<any> | null;
 }
 
 /** Return `false` to prevent routing */
@@ -57,6 +56,8 @@ export interface BeforeRouteListener {
     | void;
 }
 
+const createKey = () => Math.random().toString(36).substr(2, 8);
+
 export type NavigationListener = (
   location: DeepReadonly<Location<FrouteHistoryState>>
 ) => void;
@@ -65,11 +66,15 @@ export class RouterContext {
   public statusCode = 200;
   public redirectTo: string | null = null;
   public readonly history: History<FrouteHistoryState>;
-  public events: RouterEvents = routerEvents();
+  public events: RouterEventsInternal = routerEvents();
 
+  /** Temporary session id for detect reloading */
+  private sid = createKey();
+  private latestNavKey: string | null = null;
   private location: Location<FrouteHistoryState> | null = null;
   private currentMatch: FrouteMatch<any> | null = null;
-  private disposeHistory: () => void;
+  private unlistenHistory: () => void;
+  private releaseNavigationBlocker: (() => void) | null;
 
   private beforeRouteChangeListener: BeforeRouteListener | null = null;
 
@@ -85,15 +90,17 @@ export class RouterContext {
         ? (createBrowserHistory({}) as BrowserHistory<FrouteHistoryState>)
         : (createMemoryHistory({}) as MemoryHistory<FrouteHistoryState>);
 
-    this.disposeHistory = this.history.listen(this.historyListener);
+    this.unlistenHistory = this.history.listen(this.historyListener);
   }
 
   public dispose() {
-    this.disposeHistory();
+    this.unlistenHistory();
+    this.releaseNavigationBlocker?.();
 
     this.routeChangedListener.clear();
     (this as any).routeChangedListener = null;
     this.beforeRouteChangeListener = null;
+    this.releaseNavigationBlocker = null;
     this.location = null;
     this.currentMatch = null;
   }
@@ -102,93 +109,108 @@ export class RouterContext {
     location,
     action,
   }) => {
-    const nextMatch = this.resolveRoute(
-      (location.pathname ?? "") +
-        (location.search ?? "") +
-        (location.hash ?? "")
-    );
-
-    if (
-      action === "POP" &&
-      (await this.beforeRouteChangeListener?.(nextMatch)) === false
-    ) {
-      await this.navigate(this.getCurrentLocation());
-      return;
-    }
-
-    const nextLocation = {
-      key: location.key,
-      pathname: location.pathname,
-      hash: location.hash,
-      search: location.search,
-      state:
-        action === "PUSH"
-          ? createFrouteHistoryState(nextMatch?.route.createState())
-          : location.state ?? createFrouteHistoryState(),
-    };
-
-    this.currentMatch = nextMatch;
-    this.location = nextLocation;
-
-    this.routeChangedListener.forEach((listener) => listener(nextLocation));
+    this.navigate(location, {
+      action,
+      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: location.state,
+    });
   };
 
   public navigate: Navigate = async (
     pathname: string | Omit<Location<FrouteHistoryState | null>, "key">,
-    { state, action }: NavigateOption = {}
+    options: NavigateOption = {}
   ) => {
+    const {
+      state,
+      action,
+      __INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: internalState,
+    } = options;
+    const currentNavKey = (this.latestNavKey = createKey());
+    const isCancelled = () => this.latestNavKey !== currentNavKey;
     const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
+
+    const nextSid =
+      "__INTERNAL_STATE_DO_NOT_USE_OR_YOU_WILL_BE_FIRED" in options
+        ? internalState?.__froute?.sid
+        : this.sid;
 
     const nextMatch = this.resolveRoute(
       (loc.pathname ?? "") + (loc.search ?? "") + (loc.hash ?? "")
     );
 
-    if ((await this.beforeRouteChangeListener?.(nextMatch)) === false) return;
+    if (
+      (action === "PUSH" || action === "POP") &&
+      (await this.beforeRouteChangeListener?.(nextMatch)) === false
+    )
+      return;
 
     // Dispose listener for prevent duplicate route handling
-    this.disposeHistory();
-
-    this.events.emit("routeChangeStart", [loc.pathname ?? ""]);
+    this.unlistenHistory();
 
     try {
       const nextLocation = {
-        key: "",
-        pathname: loc.pathname ?? "",
+        key: createKey(),
+        pathname: loc.pathname ?? "/",
         search: loc.search ?? "",
         hash: loc.hash ?? "",
-        state: createFrouteHistoryState(
-          userState ?? nextMatch?.route.createState()
-        ),
+        state:
+          internalState ??
+          createFrouteHistoryState(
+            nextSid,
+            userState ?? nextMatch?.route.createState()
+          ),
       };
 
       if (action === "REPLACE") {
         this.history.replace(nextLocation, nextLocation.state);
-      } else if (action === "PUSH" && nextMatch) {
-        this.history.push(nextLocation, nextLocation.state);
 
-        await this.preloadRoute(nextMatch);
-      } else {
-        this.history.push(nextLocation, nextLocation.state);
+        this.currentMatch = nextMatch;
+        this.location = nextLocation;
+        return;
       }
 
-      this.currentMatch = nextMatch;
-      this.location = nextLocation;
+      this.events.emit("routeChangeStart", [loc.pathname ?? "/"]);
 
-      this.routeChangedListener.forEach((listener) => listener(nextLocation));
+      if (action === "PUSH" && nextMatch) {
+        await this.preloadRoute(nextMatch);
+
+        if (!isCancelled()) {
+          this.history.push(nextLocation, nextLocation.state);
+        }
+      } else if (
+        action === "POP" &&
+        nextLocation.state.__froute?.sid !== this.sid &&
+        nextMatch
+      ) {
+        await this.preloadRoute(nextMatch);
+      } else {
+        // on restore location
+        if (!isCancelled()) {
+          this.history.replace(nextLocation, nextLocation.state);
+        }
+      }
+
+      // Skip update if next navigation is started
+      if (!isCancelled()) {
+        this.currentMatch = nextMatch;
+        this.location = nextLocation;
+        this.routeChangedListener.forEach((listener) => listener(nextLocation));
+      }
+
+      this.events.emit("routeChangeComplete", [loc.pathname ?? "/"]);
     } catch (e) {
-      this.events.emit("routeChangeError", [e, loc.pathname ?? ""]);
+      this.events.emit("routeChangeError", [e, loc.pathname ?? "/"]);
       throw e;
     } finally {
       // Restore listener
-      this.disposeHistory = this.history.listen(this.historyListener);
+      this.unlistenHistory = this.history.listen(this.historyListener);
     }
-
-    this.events.emit("routeChangeComplete", [loc.pathname ?? ""]);
   };
 
   public clearBeforeRouteChangeListener() {
+    this.releaseNavigationBlocker?.();
     this.beforeRouteChangeListener = null;
+    this.releaseNavigationBlocker = null;
   }
 
   public setBeforeRouteChangeListener(listener: BeforeRouteListener) {
@@ -198,7 +220,51 @@ export class RouterContext {
       );
     }
 
+    const block: Blocker = ({ action, location, retry }) => {
+      if (action === "REPLACE") {
+        return;
+      }
+
+      if (action === "PUSH") {
+        // When PUSH, navigatable condition are maybe checked in #navigate()
+
+        this.releaseNavigationBlocker?.();
+        retry();
+
+        setTimeout(() => {
+          this.releaseNavigationBlocker = this.history.block(block);
+        });
+
+        return;
+      }
+
+      const nextMatch = this.resolveRoute(
+        (location.pathname ?? "") +
+          (location.search ?? "") +
+          (location.hash ?? "")
+      );
+
+      if (this.beforeRouteChangeListener?.(nextMatch) === false) {
+        return;
+      } else {
+        // In route changed
+        this.events.emit("routeChangeStart", [location.pathname ?? "/"]);
+
+        try {
+          this.clearBeforeRouteChangeListener();
+          retry();
+
+          setTimeout(() => {
+            this.events.emit("routeChangeComplete", [location.pathname ?? "/"]);
+          });
+        } catch (e) {
+          this.events.emit("routeChangeError", [e, location.pathname ?? "/"]);
+        }
+      }
+    };
+
     this.beforeRouteChangeListener = listener;
+    this.releaseNavigationBlocker = this.history.block(block);
   }
 
   public get internalHitoryState() {
@@ -208,13 +274,13 @@ export class RouterContext {
   public set internalHistoryState(state: FrouteHistoryState["__froute"]) {
     const nextState: FrouteHistoryState = {
       __froute: state,
-      app: this.getCurrentLocation()?.state,
+      app: this.getCurrentLocation()?.state.app,
     };
 
-    this.history.replace(this.getCurrentLocation(), nextState);
+    this.history.replace(this.history.location, nextState);
   }
 
-  public getHistoryState = () => {
+  public getHistoryState = (): FrouteHistoryState["app"] => {
     return this.getCurrentLocation().state?.app;
   };
 

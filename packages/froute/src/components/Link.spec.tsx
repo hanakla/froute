@@ -2,22 +2,23 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { routeOf } from "../RouteDefiner";
 import { createRouter } from "../RouterContext";
+import { Link } from "./Link";
 import { createComponentWrapper, waitTick } from "../../spec/utils";
-import { FrouteLink } from "./FrouteLink";
 
-describe("FrouteLink", () => {
+describe("Link", () => {
   const routes = {
     users: routeOf("/users/:id"),
   };
 
   it("Click to move location", async () => {
     const router = createRouter(routes);
-    const spy = jest.spyOn(router, "navigate");
+    await router.navigate("/");
 
+    const spy = jest.spyOn(router, "navigate");
     const result = render(
-      <FrouteLink data-testid="link" to={routes.users} params={{ id: "1" }}>
+      <Link data-testid="link" href="/users/1">
         Link
-      </FrouteLink>,
+      </Link>,
       { wrapper: createComponentWrapper(router) }
     );
 
