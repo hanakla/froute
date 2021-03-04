@@ -72,7 +72,7 @@ The following hooks are deprecated. These features are available from `useFroute
 - `<ResponseCode status={number} />`
 - `<Redirect url={string} status={number = 302}`
 
-## Example
+## Getting started
 
 Route definition:
 ```tsx
