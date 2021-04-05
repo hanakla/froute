@@ -38,7 +38,7 @@ export const Link = forwardRef<
       const parsed = parseUrl(href);
 
       push(
-        (parsed.pathname || "") + (parsed.query || "") + (parsed.hash || "")
+        (parsed.pathname || "") + (parsed.search || "") + (parsed.hash || "")
       );
     },
     [onClick, href]
