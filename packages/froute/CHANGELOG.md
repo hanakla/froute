@@ -1,6 +1,6 @@
 ### 1.0.1
 
-- [#5](https://github.com/fleur-js/froute/pull/5) Fix broken query fragment in `Link#href`
+- [#32](https://github.com/fleur-js/froute/pull/32) Fix broken query fragment in `Link#href`
 
 ### 1.0.0
 
