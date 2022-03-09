@@ -1,6 +1,6 @@
 import { parse as parseUrl } from "url";
 import React, { forwardRef, useCallback, MouseEvent } from "react";
-import { useNavigation } from "../react-bind";
+import { useFrouteRouter } from "../react-bind";
 
 const isRoutable = (href: string | undefined) => {
   const parsed = parseUrl(href ?? "");
@@ -23,7 +23,7 @@ export const Link = forwardRef<
     HTMLAnchorElement
   >
 >(({ href, onClick, ...props }, ref) => {
-  const { push } = useNavigation();
+  const { push } = useFrouteRouter();
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
