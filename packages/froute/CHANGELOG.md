@@ -1,3 +1,7 @@
+### 1.0.2
+
+- [#](https://github.com/fleur-js/froute/pull/) `target` attribute is no longer ignored on Link component
+
 ### 1.0.1
 
 - [#32](https://github.com/fleur-js/froute/pull/32) Fix broken query fragment in `Link#href`

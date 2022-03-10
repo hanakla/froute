@@ -35,4 +35,25 @@ describe("Link", () => {
     await waitTick();
     expect(spy.mock.calls.length).toBe(2);
   });
+
+  it("Click target='_blank' to ignore routing", async () => {
+    const router = createRouter(routes);
+    await router.navigate("/");
+
+    const spy = jest.spyOn(router, "navigate");
+    const result = render(
+      <Link data-testid="link" href="/users/1" target="_blank">
+        Link
+      </Link>,
+      { wrapper: createComponentWrapper(router) }
+    );
+
+    expect(location.href).toMatchInlineSnapshot(`"http://localhost/"`);
+
+    const link = await result.findByTestId("link");
+    link.click();
+    await waitTick();
+
+    expect(spy.mock.calls.length).toBe(0);
+  });
 });
