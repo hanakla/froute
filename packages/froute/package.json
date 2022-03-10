@@ -1,6 +1,6 @@
 {
   "name": "@fleur/froute",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Type safe and flexible router for React",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@hanakla/rescue": "^1.0.3",
-    "@testing-library/react": "^11.2.2",
+    "@testing-library/react": "^12.1.4",
     "@testing-library/react-hooks": "^3.7.0",
     "@types/history": "^4.7.11",
     "@types/jest": "^26.0.19",
