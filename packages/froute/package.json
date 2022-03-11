@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "history": "^5.0.0",
-    "path-to-regexp": "^6.1.0"
+    "path-to-regexp": "^6.1.0",
+    "zod": "^3.13.4"
   }
 }

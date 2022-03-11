@@ -12,11 +12,18 @@ import React, {
 } from "react";
 import qs from "querystring";
 import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
-import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
+import {
+  RouteDefinition,
+  ParamsOfRoute,
+  StateOfRoute,
+  QuerySchemaOfRoute,
+  AnyRouteDefinition,
+} from "./RouteDefiner";
 import { RouterContext, BeforeRouteListener } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
 import { Location } from "history";
 import { buildPath, BuildPath } from "./builder";
+import { z } from "zod";
 
 const useIsomorphicLayoutEffect = canUseDOM() ? useLayoutEffect : useEffect;
 
@@ -25,7 +32,7 @@ Context.displayName = "FrouteContext";
 
 const checkExpectedRoute = (
   router: RouterContext,
-  expectRoute?: RouteDefinition<any, any>,
+  expectRoute?: AnyRouteDefinition,
   methodName?: string
 ) => {
   if (expectRoute && router.getCurrentMatch()?.route !== expectRoute) {
@@ -74,10 +81,10 @@ export const useRouteComponent = () => {
 };
 
 export interface UseRouter {
-  <R extends RouteDefinition<any, any> = any>(): NextCompatRouter<R>;
+  <R extends AnyRouteDefinition = any>(): NextCompatRouter<R>;
 }
 
-interface NextCompatRouter<R extends RouteDefinition<any, any>> {
+interface NextCompatRouter<R extends AnyRouteDefinition> {
   pathname: string;
   query: ParamsOfRoute<R> & { [key: string]: string | string[] };
   push: (url: string) => void;
@@ -129,7 +136,7 @@ export const useRouter: UseRouter = () => {
 };
 
 // use `any` as default type to compat Next.js
-export type RouterProps<R extends RouteDefinition<any, any> = any> = {
+export type RouterProps<R extends AnyRouteDefinition = any> = {
   router: NextCompatRouter<R>;
 };
 
@@ -149,11 +156,19 @@ export const withRouter = <P extends RouterProps>(
 };
 
 export interface UseFrouteRouter {
-  <R extends RouteDefinition<any, any> = any>(r?: R): FrouteRouter<R>;
+  <R extends AnyRouteDefinition = any>(r?: R): FrouteRouter<R>;
 }
 
-interface FrouteRouter<R extends RouteDefinition<any, any>>
-  extends NextCompatRouter<R> {
+type FrouteRouter<R extends AnyRouteDefinition> = Omit<
+  NextCompatRouter<R>,
+  "query"
+> & {
+  query: QuerySchemaOfRoute<R> extends z.ZodType<any>
+    ? ParamsOfRoute<R> &
+        Omit<z.infer<QuerySchemaOfRoute<R>>, keyof ParamsOfRoute<R>>
+    : ParamsOfRoute<R> & { [key: string]: string | string[] };
+
+  // : ParamsOfRoute<R> & { [key: string]: string | string[] };
   searchQuery: Record<string, string | string[] | undefined>;
   location: DeepReadonly<Location<StateOfRoute<R>>>;
   buildPath: BuildPath;
@@ -161,16 +176,15 @@ interface FrouteRouter<R extends RouteDefinition<any, any>>
     get: () => StateOfRoute<R>;
     set: (state: StateOfRoute<R>) => void;
   };
-}
+};
 
-export const useFrouteRouter: UseFrouteRouter = <
-  R extends RouteDefinition<any, any>
->(
+export const useFrouteRouter: UseFrouteRouter = <R extends AnyRouteDefinition>(
   r?: R
 ): FrouteRouter<R> => {
   const router = useRouterContext();
   const nextCompatRouter = useRouter<R>();
   const location = router.getCurrentLocation();
+  const match = router.getCurrentMatch();
 
   if (isDevelopment) {
     checkExpectedRoute(router, r, "useLocation");
@@ -186,15 +200,22 @@ export const useFrouteRouter: UseFrouteRouter = <
         get: router.getHistoryState,
         set: router.setHistoryState,
       },
+      get query() {
+        const params = match?.match.params ?? { params: {} };
+        const schema = r?.getActor()?.query;
+
+        return {
+          ...match?.match.query,
+          ...(schema ? schema.safeParse(params) : params),
+        } as any;
+      },
     }),
     [location, nextCompatRouter.pathname, nextCompatRouter.query]
   );
 };
 
 /** @deprecated Use `useFrouteRouter().location` instead */
-export const useLocation = <R extends RouteDefinition<any, any>>(
-  expectRoute?: R
-) => {
+export const useLocation = <R extends AnyRouteDefinition>(expectRoute?: R) => {
   const router = useRouterContext();
   const location = router.getCurrentLocation();
 
@@ -217,7 +238,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
 
 /** @deprecated Use `useFrouteRouter().historyState` instead */
 export const useHistoryState = <
-  R extends RouteDefinition<any, any> = RouteDefinition<any, any>
+  R extends AnyRouteDefinition = AnyRouteDefinition
 >(
   expectRoute?: R
 ): [
@@ -235,12 +256,12 @@ export const useHistoryState = <
 
 interface UseParams {
   (): { [param: string]: string | undefined };
-  <T extends RouteDefinition<any, any>>(expectRoute?: T): ParamsOfRoute<T>;
+  <T extends AnyRouteDefinition>(expectRoute?: T): ParamsOfRoute<T>;
 }
 
 /** @deprecated Use `useFrouteRouter().query` instead */
 export const useParams: UseParams = <
-  T extends RouteDefinition<any, any> = RouteDefinition<any, any>
+  T extends AnyRouteDefinition = AnyRouteDefinition
 >(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   expectRoute?: T
@@ -258,7 +279,7 @@ export const useParams: UseParams = <
 
 /** @deprecated Use `useFrouteRouter().{push,replace,...}` instead */
 export interface FrouteNavigator {
-  push<R extends RouteDefinition<any, any>>(
+  push<R extends AnyRouteDefinition>(
     route: R,
     params: ParamsOfRoute<R>,
     extra?: {
@@ -268,7 +289,7 @@ export interface FrouteNavigator {
     }
   ): void;
   push(pathname: string): void;
-  replace<R extends RouteDefinition<any, any>>(
+  replace<R extends AnyRouteDefinition>(
     route: R,
     params: ParamsOfRoute<R>,
     extra?: {
@@ -289,7 +310,7 @@ export const useNavigation = () => {
 
   return useMemo<FrouteNavigator>(
     () => ({
-      push: <R extends RouteDefinition<any, any>>(
+      push: <R extends AnyRouteDefinition>(
         route: R | string,
         params: ParamsOfRoute<R> = {} as any,
         {
@@ -316,7 +337,7 @@ export const useNavigation = () => {
           action: "PUSH",
         });
       },
-      replace: <R extends RouteDefinition<any, any>>(
+      replace: <R extends AnyRouteDefinition>(
         route: R | string,
         params: ParamsOfRoute<R> = {} as any,
         {

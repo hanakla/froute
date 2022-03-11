@@ -14,16 +14,20 @@ import {
   useRouter,
   useUrlBuilder,
 } from "./react-bind";
-import { RouteDefinition, routeOf } from "./RouteDefiner";
+import { AnyRouteDefinition, routeOf } from "./RouteDefiner";
 import { createRouter, RouterContext } from "./RouterContext";
 import { waitTick } from "../spec/utils";
 import { rescue } from "@hanakla/rescue";
+import { z } from "zod";
 
 describe("react-bind", () => {
   const routes = {
     usersShow: routeOf("/users/:id")
       .state(() => ({ hist: 1 }))
       .action({
+        query: z.object({
+          post_order: z.enum(["asc", "desc"]).optional(),
+        }),
         component: () => {
           const Component = () => {
             const params = useParams(routes.usersShow);
@@ -54,7 +58,7 @@ describe("react-bind", () => {
     );
   };
 
-  const createAndRenderRouter = async <R extends RouteDefinition<any, any>>(
+  const createAndRenderRouter = async <R extends AnyRouteDefinition>(
     url: string,
     expectRoute: R
   ) => {
@@ -180,7 +184,7 @@ describe("react-bind", () => {
         wrapper: createWrapper(router),
       });
 
-      expectType<{ id: string }>(current.query);
+      expectType<{ id: string; post_order?: "asc" | "desc" }>(current.query);
       expectType<string | string[]>(current.query.some_query);
     });
   });
