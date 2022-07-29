@@ -7,19 +7,27 @@ import { parse as parseUrl } from "url";
 import { parse as qsParse } from "querystring";
 import { FrouteMatchResult } from "./routing";
 import { DeepReadonly } from "./utils";
+import { z } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-export interface RouteDefinition<Params extends string, S extends StateBase> {
+export interface RouteDefinition<
+  Params extends string,
+  S extends StateBase,
+  Q extends z.ZodType<any>
+> {
   match(pathname: string): FrouteMatchResult<Params> | null;
   toPath(): string;
   createState(): S | null;
   getActor(): Actor<any> | null;
 }
 
-export interface ActorDef<R extends RouteDefinition<any, StateBase>> {
+export type AnyRouteDefinition = RouteDefinition<any, any, any>;
+
+export interface ActorDef<R extends RouteDefinition<any, StateBase, any>> {
   component: () =>
     | Promise<{ default: ComponentType<any> } | ComponentType<any>>
     | ComponentType<any>;
+  query?: z.ZodType<any>;
   preload?: (
     context: any,
     params: ParamsOfRoute<R>,
@@ -41,15 +49,19 @@ type ParamsObject<Params extends string | OptionalParam<string>> = {
   };
 
 // prettier-ignore
-export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
+export type ParamsOfRoute<T extends RouteDefinition<any, any, any>> =
   T extends RouteDefiner<infer P> ? ParamsObject<P>
-  : T extends Readonly<RouteDefinition<infer P, any>> ? ParamsObject<P>
-  : T extends RouteDefinition<infer P, any> ? ParamsObject<P>
+  : T extends Readonly<RouteDefinition<infer P, any, any >> ? ParamsObject<P>
+  : T extends RouteDefinition<infer P, any, any> ? ParamsObject<P>
   : never;
 
 export type StateOfRoute<
-  R extends RouteDefinition<any, StateBase>
-> = R extends RouteDefinition<any, infer S> ? S : never;
+  R extends RouteDefinition<any, StateBase, any>
+> = R extends RouteDefinition<any, infer S, any> ? S : never;
+
+export type QuerySchemaOfRoute<
+  R extends RouteDefinition<any, any, any>
+> = R extends RouteDefinition<any, any, infer Q> ? Q : never;
 
 type OptionalParam<S extends string> = S & { __OPTIONAL: true };
 type OptionalParamStringToConst<
@@ -88,13 +100,14 @@ export const routeOf = <S extends string>(
   return new RouteDefiner(path);
 };
 
-class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
+class Actor<R extends RouteDefinition<any, any, any>> implements ActorDef<R> {
   // _cache: ComponentType<any>;
   private cache: ComponentType<any> | null = null;
 
   constructor(
     public component: ActorDef<any>["component"],
-    public preload?: ActorDef<any>["preload"]
+    public preload?: ActorDef<any>["preload"],
+    public query?: ActorDef<any>["query"]
   ) {}
 
   public async loadComponent() {
@@ -112,8 +125,9 @@ class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
 
 export class RouteDefiner<
   Params extends string,
-  State extends StateBase = never
-> implements RouteDefinition<Params, State> {
+  State extends StateBase = never,
+  Query extends z.ZodType<any> = any
+> implements RouteDefinition<Params, State, Query> {
   private stack: string[] = [];
   private actor: Actor<this> | null = null;
   private stateFactory: (() => State) | null = null;
@@ -138,19 +152,21 @@ export class RouteDefiner<
   public state<S extends StateBase>(
     this: RouteDefiner<Params, S>,
     stateFactory: () => S
-  ): RouteDefiner<Params, S> {
+  ): RouteDefiner<Params, S, Query> {
     this.stateFactory = stateFactory;
     return this as any;
   }
 
-  public action({
+  public action<Q extends z.ZodType<any>>({
     component,
     preload,
     ...rest
-  }: ActorDef<this>): Readonly<RouteDefinition<Params, State>> {
-    this.actor = new Actor(component, preload);
+  }: ActorDef<this> & { query?: Q }): Readonly<
+    RouteDefinition<Params, State, Q>
+  > {
+    this.actor = new Actor<this>(component, preload);
     Object.assign(this.actor, rest);
-    return this as any;
+    return this as RouteDefiner<Params, State, Q>;
   }
 
   public match(pathname: string): FrouteMatchResult<Params> | null {
