@@ -152,7 +152,7 @@ export const withRouter = <P extends RouterProps>(
     Component.displayName ?? (Component as any).name
   })`;
 
-  return WithRouter;
+  return WithRouter as ComponentType<P>;
 };
 
 export interface UseFrouteRouter {
@@ -163,10 +163,10 @@ type FrouteRouter<R extends AnyRouteDefinition> = Omit<
   NextCompatRouter<R>,
   "query"
 > & {
-  query: QuerySchemaOfRoute<R> extends z.ZodType<any>
-    ? ParamsOfRoute<R> &
-        Omit<z.infer<QuerySchemaOfRoute<R>>, keyof ParamsOfRoute<R>>
-    : ParamsOfRoute<R> & { [key: string]: string | string[] };
+  query: R;
+  // extends RouteDefinition<any, any, infer Q>
+  //   ? ParamsOfRoute<R> & Omit<z.infer<Q>, keyof ParamsOfRoute<R>>
+  //   : ParamsOfRoute<R> & { [key: string]: string | string[] };
 
   // : ParamsOfRoute<R> & { [key: string]: string | string[] };
   searchQuery: Record<string, string | string[] | undefined>;
@@ -205,8 +205,8 @@ export const useFrouteRouter: UseFrouteRouter = <R extends AnyRouteDefinition>(
         const schema = r?.getActor()?.query;
 
         return {
-          ...match?.match.query,
           ...(schema ? schema.safeParse(params) : params),
+          ...match?.match.query,
         } as any;
       },
     }),

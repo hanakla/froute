@@ -4,7 +4,7 @@ import { parse as parseUrl } from "url";
 import { RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {
-  route: RouteDefinition<P, any>;
+  route: RouteDefinition<P, any, any>;
   match: FrouteMatchResult<P>;
 }
 
