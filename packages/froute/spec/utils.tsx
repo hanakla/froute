@@ -1,8 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { FrouteContext } from "../src/react-bind";
 import { RouterContext } from "../src/RouterContext";
 
-export const createComponentWrapper = (router: RouterContext): React.FC => {
+export const createComponentWrapper = (
+  router: RouterContext
+): React.FC<{ children: ReactNode }> => {
   return ({ children }) => (
     <FrouteContext router={router}>{children}</FrouteContext>
   );
