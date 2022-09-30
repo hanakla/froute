@@ -1,11 +1,9 @@
-import React, { useMemo } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { useRouterContext } from "../react-bind";
 
-export const Redirect: React.FC<{ url: string; status?: number }> = ({
-  url,
-  status = 302,
-  children,
-}) => {
+type Props = { url: string; status?: number; children?: ReactNode };
+
+export const Redirect = ({ url, status = 302, children }: Props) => {
   const router = useRouterContext();
 
   useMemo(() => {
