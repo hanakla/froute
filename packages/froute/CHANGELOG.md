@@ -1,3 +1,7 @@
+### 1.0.3
+
+- [#137](https://github.com/fleur-js/froute/pull/137) Support typing for React 18
+
 ### 1.0.2
 
 - [#](https://github.com/fleur-js/froute/pull/) `target` attribute is no longer ignored on Link component
