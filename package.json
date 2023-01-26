@@ -14,7 +14,8 @@
     "build": "wsrun -m -c build",
     "test": "wsrun -m --no-prefix -c test",
     "sync:readme": "cp ./README.md ./packages/froute/ && :",
-    "example:start": "wsrun -p examples -c start"
+    "example:start": "wsrun -p examples -c start",
+    "postinstall": "husky install"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.10.1",
@@ -23,16 +24,11 @@
     "eslint": "^7.7.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "husky": "^4.2.5",
+    "husky": "^8.0.3",
     "lint-staged": "^10.2.11",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
     "wsrun": "^5.2.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "README.md": [
@@ -41,8 +37,8 @@
     ],
     "*.{ts,tsx}": [
       "eslint --fix",
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
-  }
+  },
+  "packageManager": "yarn@3.3.1"
 }
