@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/domready": "^1.0.0",
-    "@types/react": "^17.0.38",
+    "@types/react": "^18.0.27",
     "@types/react-dom": "^17.0.0",
     "parcel": "^1.12.4"
   },
@@ -25,8 +25,8 @@
     "@fleur/froute": "1.0.0-beta.12",
     "@fleur/react": "^4.0.1",
     "domready": "^1.0.8",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "regenerator-runtime": "^0.13.9"
   }
 }
