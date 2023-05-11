@@ -11,10 +11,8 @@
   "scripts": {
     "test": "vitest",
     "clean-dist": "rm -rf ./dist",
-    "build:esm": "vite build",
-    "watch:esm": "vite build --watch",
-    "watch": "run-p -c watch:*",
-    "build": "run-p build:*",
+    "watch": "vite build --watch",
+    "build": "vite build",
     "prepublishOnly": "yarn clean-dist && yarn build"
   },
   "peerDependencies": {
