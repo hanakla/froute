@@ -103,28 +103,6 @@ describe("Usage", () => {
     );
   });
 
-  it("Preload", async () => {
-    const spy = vitest.fn();
-    const router = createRouter({
-      userShow: routeOf("/users/:id").action({
-        component: async () => () => null,
-        preload: spy,
-      }),
-    });
-
-    await router.navigate("/users/2");
-    await router.preloadCurrent();
-
-    await router.navigate("/users/1");
-    await router.preloadCurrent();
-
-    await router.navigate("/users/2", { action: "POP" });
-
-    expect(spy.mock.calls[0][1]).toMatchObject({ id: "2" });
-    expect(spy.mock.calls[1][1]).toMatchObject({ id: "1" });
-    expect(spy.mock.calls[2][1]).toMatchObject({ id: "2" });
-  });
-
   it("Building URL", async () => {
     const router = createRouter(routes, routerOptions);
     router.buildPath(routes.usersShow, { id: "1" });

@@ -32,7 +32,7 @@ describe("Router", () => {
         search: "?a=1",
       });
       expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
-        Object {
+        {
           "hist": "default",
         }
       `);
@@ -60,7 +60,7 @@ describe("Router", () => {
         hash: "#1",
       });
       expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
-        Object {
+        {
           "hist": "default",
         }
       `);
