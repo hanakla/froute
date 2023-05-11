@@ -14,7 +14,7 @@ describe("Link", () => {
     const router = createRouter(routes);
     await router.navigate("/");
 
-    const spy = jest.spyOn(router, "navigate");
+    const spy = vi.spyOn(router, "navigate");
     const result = render(
       <Link data-testid="link" href="/users/1">
         Link
@@ -40,7 +40,7 @@ describe("Link", () => {
     const router = createRouter(routes);
     await router.navigate("/");
 
-    const spy = jest.spyOn(router, "navigate");
+    const spy = vi.spyOn(router, "navigate");
     const result = render(
       <Link data-testid="link" href="/users/1" target="_blank">
         Link

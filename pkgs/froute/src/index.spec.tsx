@@ -104,7 +104,7 @@ describe("Usage", () => {
   });
 
   it("Preload", async () => {
-    const spy = jest.fn();
+    const spy = vitest.fn();
     const router = createRouter({
       userShow: routeOf("/users/:id").action({
         component: async () => () => null,
