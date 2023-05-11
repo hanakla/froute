@@ -135,7 +135,7 @@ export type RouterProps<R extends RouteDefinition<any, any> = any> = {
 
 export const withRouter = <P extends RouterProps>(
   Component: ComponentType<P>
-): ComponentType<Omit<P, "router">> => {
+) => {
   const WithRouter = forwardRef<any, any>((props, ref) => {
     const router = useRouter();
     return <Component {...props} ref={ref} router={router} />;
@@ -145,7 +145,7 @@ export const withRouter = <P extends RouterProps>(
     Component.displayName ?? (Component as any).name
   })`;
 
-  return WithRouter;
+  return WithRouter as ComponentType<Omit<P, "router">>;
 };
 
 export interface UseFrouteRouter {

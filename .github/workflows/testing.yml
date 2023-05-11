@@ -6,7 +6,7 @@ jobs:
   testing:
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [16.x, 18.x, 20.x]
 
     runs-on: ubuntu-latest
 
@@ -16,18 +16,28 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache
+
+      - name: Cache .yarn/cache
         uses: actions/cache@v1.0.0
         with:
-          path: ~/.cache/yarn
-          key: ${{ matrix.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          path: .yarn/cache/
+          key: yarncache-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
           restore-keys: |
-            ${{ matrix.os }}-
+            yarncache-${{ matrix.node-version }}-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1.0.0
+        with:
+          path: node_modules/
+          key: nodemodules-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          restore-keys: |
+            nodemodules-${{ matrix.node-version }}-
+
       - name: Install deps
         run: yarn install
       - name: Testing @fluer/froute
-        working-directory: packages/froute
-        run: yarn test --coverage --verbose
+        working-directory: pkgs/froute
+        run: yarn test
 
   build-lint:
     strategy:
@@ -42,13 +52,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache
+
+      - name: Cache .yarn/cache
         uses: actions/cache@v1.0.0
         with:
-          path: ~/.cache/yarn
-          key: ${{ matrix.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          path: .yarn/cache/
+          key: yarncache-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
           restore-keys: |
-            ${{ matrix.os }}-
+            yarncache-${{ matrix.node-version }}-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1.0.0
+        with:
+          path: node_modules/
+          key: nodemodules-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          restore-keys: |
+            nodemodules-${{ matrix.node-version }}-
+
       - name: Install deps
         run: yarn install
       # - name: Linting
@@ -56,5 +76,5 @@ jobs:
       #   run: yarn eslint .
       - name: Building
         if: ${{ matrix.steps == 'build' }}
-        working-directory: packages/froute
+        working-directory: pkgs/froute
         run: yarn prepublishOnly

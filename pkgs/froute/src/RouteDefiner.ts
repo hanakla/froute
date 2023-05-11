@@ -33,12 +33,11 @@ export interface ActorDef<R extends RouteDefinition<any, StateBase>> {
 
 type ParamsObject<Params extends string | OptionalParam<string>> = {
   [K in Extract<Params, Extract<Params, OptionalParam<any>>>]: string;
-} &
-  {
-    [K in OptionalParamStringToConst<
-      Extract<Params, OptionalParam<string>>
-    >]?: string;
-  };
+} & {
+  [K in OptionalParamStringToConst<
+    Extract<Params, OptionalParam<string>>
+  >]?: string;
+};
 
 // prettier-ignore
 export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
@@ -47,14 +46,12 @@ export type ParamsOfRoute<T extends RouteDefinition<any, any>> =
   : T extends RouteDefinition<infer P, any> ? ParamsObject<P>
   : never;
 
-export type StateOfRoute<
-  R extends RouteDefinition<any, StateBase>
-> = R extends RouteDefinition<any, infer S> ? S : never;
+export type StateOfRoute<R extends RouteDefinition<any, StateBase>> =
+  R extends RouteDefinition<any, infer S> ? S : never;
 
 type OptionalParam<S extends string> = S & { __OPTIONAL: true };
-type OptionalParamStringToConst<
-  P extends OptionalParam<string>
-> = P extends OptionalParam<infer K> ? K : never;
+type OptionalParamStringToConst<P extends OptionalParam<string>> =
+  P extends OptionalParam<infer K> ? K : never;
 
 type ParamFragment<T extends string> = T extends `:${infer R}?`
   ? OptionalParam<R>
@@ -113,7 +110,8 @@ class Actor<R extends RouteDefinition<any, any>> implements ActorDef<R> {
 export class RouteDefiner<
   Params extends string,
   State extends StateBase = never
-> implements RouteDefinition<Params, State> {
+> implements RouteDefinition<Params, State>
+{
   private stack: string[] = [];
   private actor: Actor<this> | null = null;
   private stateFactory: (() => State) | null = null;

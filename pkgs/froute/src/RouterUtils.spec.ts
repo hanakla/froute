@@ -10,8 +10,8 @@ describe("RouterUtils", () => {
 
   describe(combineRouteResolver.name, () => {
     it("Should call to second resolver and reject routing", () => {
-      const spy = jest.fn((): FrouteMatch<any> | false | null => false);
-      const spy2 = jest.fn((): FrouteMatch<any> | false | null => null);
+      const spy = vi.fn((): FrouteMatch<any> | false | null => false);
+      const spy2 = vi.fn((): FrouteMatch<any> | false | null => null);
 
       const resolver = combineRouteResolver(spy, spy2);
       const router = createRouter(routes, { resolver });

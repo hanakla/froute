@@ -6,14 +6,14 @@
   "author": "Hanakla <hanakla.dev@gmail.com>",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "pkgs/*"
   ],
   "scripts": {
     "watch:build": "wsrun -p @fleur/froute -c watch",
     "watch:example": "wsrun -p examples -c watch",
     "build": "wsrun -m -c build",
     "test": "wsrun -m --no-prefix -c test",
-    "sync:readme": "cp ./README.md ./packages/froute/ && :",
+    "sync:readme": "cp ./README.md ./pkgs/froute/ && :",
     "example:start": "wsrun -p examples -c start",
     "postinstall": "husky install"
   },
@@ -33,7 +33,7 @@
   "lint-staged": {
     "README.md": [
       "yarn sync:readme",
-      "git add ./packages/froute/README.md"
+      "git add ./pkgs/froute/README.md"
     ],
     "*.{ts,tsx}": [
       "eslint --fix",

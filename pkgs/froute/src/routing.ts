@@ -8,9 +8,9 @@ export interface FrouteMatch<P extends string> {
   match: FrouteMatchResult<P>;
 }
 
-export type FrouteMatchResult<P extends string> = MatchResult<
-  { [K in P]: string }
-> & {
+export type FrouteMatchResult<P extends string> = MatchResult<{
+  [K in P]: string;
+}> & {
   query: ParsedQuery;
   search: string;
 };

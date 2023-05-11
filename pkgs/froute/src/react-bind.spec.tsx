@@ -81,10 +81,10 @@ describe("react-bind", () => {
         wrapper: createWrapper(router),
       });
 
-      const startSpy = jest.fn();
+      const startSpy = vi.fn();
       result.current.events.on("routeChangeStart", startSpy);
 
-      const completeSpy = jest.fn();
+      const completeSpy = vi.fn();
       result.current.events.on("routeChangeComplete", completeSpy);
 
       const promise = router.navigate("/users/2", { action: "PUSH" });
@@ -112,7 +112,7 @@ describe("react-bind", () => {
         wrapper: createWrapper(router),
       });
 
-      const errorSpy = jest.fn();
+      const errorSpy = vi.fn();
       result.current.events.on("routeChangeError", errorSpy);
 
       const [, error] = await rescue(() => {
@@ -154,7 +154,7 @@ describe("react-bind", () => {
 
       expect(current.historyState.get()).toMatchObject({ hist: 1 });
 
-      const eventSpy = jest.fn();
+      const eventSpy = vi.fn();
       current.events.on("routeChangeStart", eventSpy);
       current.historyState.set({ hist: 2 });
 
@@ -335,23 +335,23 @@ describe("react-bind", () => {
         rerender();
 
         expect(get()).toMatchInlineSnapshot(`
-        Object {
+        {
           "hist": 1,
         }
       `);
       });
 
       it("Logging if expected route isnt match", async () => {
-        jest.mock("./utils", () => ({
-          isDevelopment: true,
-          canUseDom: () => true,
-        }));
+        // vi.mock("./utils", () => ({
+        //   isDevelopment: true,
+        //   canUseDDOM: () => true,
+        // }));
 
         const router = createRouter(routes);
         await router.navigate("/users");
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
+        const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
         renderHook(() => useHistoryState(routes.userArtworks), {
           wrapper: createWrapper(router),
         });
@@ -375,7 +375,7 @@ describe("react-bind", () => {
         );
 
         expect(result.result.current).toMatchInlineSnapshot(`
-        Object {
+        {
           "id": "1",
         }
       `);
@@ -384,7 +384,7 @@ describe("react-bind", () => {
         result.rerender();
 
         expect(result.result.current).toMatchInlineSnapshot(`
-        Object {
+        {
           "artworkId": "1",
           "id": "1",
         }
@@ -444,15 +444,17 @@ describe("react-bind", () => {
     });
 
     describe("useUrlBuilder", () => {
-      const router = createRouter(routes);
+      it("works", () => {
+        const router = createRouter(routes);
 
-      const { result } = renderHook(useUrlBuilder, {
-        wrapper: createWrapper(router),
+        const { result } = renderHook(useUrlBuilder, {
+          wrapper: createWrapper(router),
+        });
+
+        expect(
+          result.current.buildPath(routes.usersShow, { id: "1" })
+        ).toMatchInlineSnapshot(`"/users/1"`);
       });
-
-      expect(
-        result.current.buildPath(routes.usersShow, { id: "1" })
-      ).toMatchInlineSnapshot(`"/users/1"`);
     });
   });
 });

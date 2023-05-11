@@ -32,7 +32,7 @@ describe("Router", () => {
         search: "?a=1",
       });
       expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
-        Object {
+        {
           "hist": "default",
         }
       `);
@@ -60,7 +60,7 @@ describe("Router", () => {
         hash: "#1",
       });
       expect(router.getCurrentLocation().state.app).toMatchInlineSnapshot(`
-        Object {
+        {
           "hist": "default",
         }
       `);
@@ -86,7 +86,7 @@ describe("Router", () => {
     ])(
       "Should %s preload on popstate %s",
       async (_, __, { sameSession, calledTimes }) => {
-        const preloadSpy = jest.fn();
+        const preloadSpy = vi.fn();
         const router = createRouter({
           users: routeOf("/users/:id").action({
             component: () => () => null,
@@ -117,7 +117,7 @@ describe("Router", () => {
       await router.navigate("/users/1");
 
       // Prevent
-      const preventSpy = jest.fn(() => false);
+      const preventSpy = vi.fn(() => false);
       router.setBeforeRouteChangeListener(preventSpy);
       await router.navigate("/users/2", { action: "PUSH" });
 
@@ -126,7 +126,7 @@ describe("Router", () => {
       router.clearBeforeRouteChangeListener();
 
       // Navigate
-      const allowSpy = jest.fn(() => true);
+      const allowSpy = vi.fn(() => true);
       router.setBeforeRouteChangeListener(allowSpy);
       await router.navigate("/users/2", { action: "PUSH" });
 
@@ -140,7 +140,7 @@ describe("Router", () => {
       await router.navigate("/users/1", { action: "PUSH" });
       await router.navigate("/users/2", { action: "PUSH" });
 
-      const preventSpy = jest.fn(() => false);
+      const preventSpy = vi.fn(() => false);
       router.setBeforeRouteChangeListener(preventSpy);
 
       history.back();
@@ -150,7 +150,7 @@ describe("Router", () => {
       expect(router.getCurrentLocation().pathname).toBe("/users/2");
       router.clearBeforeRouteChangeListener();
 
-      const allowSpy = jest.fn(() => /* allow transition is */ true);
+      const allowSpy = vi.fn(() => /* allow transition is */ true);
       router.setBeforeRouteChangeListener(allowSpy);
 
       history.back();
@@ -204,7 +204,7 @@ describe("Router", () => {
 
   describe("preload", () => {
     it("should receive params correctly", async () => {
-      const preloadSpy = jest.fn();
+      const preloadSpy = vi.fn();
 
       const routes = {
         users: routeOf("/users/:id").action({

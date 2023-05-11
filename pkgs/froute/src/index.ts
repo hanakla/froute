@@ -1,11 +1,11 @@
 export {
   routeBy,
   routeOf,
-  ParamsOfRoute,
-  StateOfRoute,
-  RouteDefinition,
+  type ParamsOfRoute,
+  type StateOfRoute,
+  type RouteDefinition,
 } from "./RouteDefiner";
-export { createRouter, RouterOptions } from "./RouterContext";
+export { createRouter, type RouterOptions } from "./RouterContext";
 export { combineRouteResolver } from "./RouterUtils";
 export {
   useLocation,
@@ -16,16 +16,16 @@ export {
   useBeforeRouteChange,
   useFrouteRouter,
   FrouteContext,
-  FrouteNavigator,
+  type FrouteNavigator,
   // Next.js compat
   useRouter,
   withRouter,
-  RouterProps,
-  UseRouter,
+  type RouterProps,
+  type UseRouter,
 } from "./react-bind";
 export { Link } from "./components/Link";
 export { FrouteLink } from "./components/FrouteLink";
 export { ResponseCode } from "./components/ResponseCode";
 export { Redirect } from "./components/Redirect";
-export { matchByRoutes, isMatchToRoute, FrouteMatch } from "./routing";
+export { matchByRoutes, isMatchToRoute, type FrouteMatch } from "./routing";
 export { buildPath } from "./builder";

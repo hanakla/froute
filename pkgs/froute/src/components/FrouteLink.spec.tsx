@@ -14,7 +14,7 @@ describe("FrouteLink", () => {
     const router = createRouter(routes);
     await router.navigate("/");
 
-    const spy = jest.spyOn(router, "navigate");
+    const spy = vi.spyOn(router, "navigate");
 
     const result = render(
       <FrouteLink data-testid="link" to={routes.users} params={{ id: "1" }}>

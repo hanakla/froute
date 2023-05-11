@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vitest/globals"],
     "baseUrl": "./src",
     "target": "es2015",
     "module": "es2015",
@@ -11,6 +12,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
+    "skipLibCheck": false,
     // "strict": true,
     "jsx": "react",
     "forceConsistentCasingInFileNames": true,
@@ -19,6 +21,7 @@
     "noEmitHelpers": false,
     "outDir": "dist"
   },
-  "files": ["src/index.ts"],
-  "exclude": ["src/**/*.spec.ts", "test_lib/"]
+  // "files": ["src/index.ts"],
+  "include": ["src/"],
+  "exclude": ["src/**/*.spec.ts", "test_lib/", "dist/"]
 }

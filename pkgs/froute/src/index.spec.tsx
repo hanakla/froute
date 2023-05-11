@@ -9,7 +9,7 @@ import {
   FrouteLink,
   FrouteContext,
   RouterOptions,
-} from "./";
+} from ".";
 import { ResponseCode } from "./components/ResponseCode";
 import { useRouter } from "./react-bind";
 
@@ -52,6 +52,14 @@ describe("Usage", () => {
     // Passing Fleur context or Redux store to preload function
     preloadContext: { store: externalContext },
   };
+
+  it("Routing", async () => {
+    const reqUrl = "/users/1";
+    const router = createRouter(routes, routerOptions);
+
+    await router.navigate(reqUrl);
+    await router.preloadCurrent();
+  });
 
   it("Routing", async () => {
     const reqUrl = "/users/1";

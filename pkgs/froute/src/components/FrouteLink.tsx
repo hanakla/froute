@@ -28,12 +28,10 @@ export const FrouteLink: FrouteLink = forwardRef(
   ({ to, params, query, ...props }, ref) => {
     const { buildPath } = useUrlBuilder();
 
-    const href = useMemo(() => buildPath(to, params, query), [
-      buildPath,
-      to,
-      params,
-      query,
-    ]);
+    const href = useMemo(
+      () => buildPath(to, params, query),
+      [buildPath, to, params, query]
+    );
 
     return <Link ref={ref} {...props} href={href} />;
   }
