@@ -1331,9 +1331,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fleur/froute@workspace:packages/froute":
+"@fleur/froute@workspace:pkgs/froute":
   version: 0.0.0-use.local
-  resolution: "@fleur/froute@workspace:packages/froute"
+  resolution: "@fleur/froute@workspace:pkgs/froute"
   dependencies:
     "@hanakla/rescue": ^1.0.3
     "@testing-library/react": ^11.2.2
@@ -5202,9 +5202,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"examples@workspace:packages/examples":
+"examples@workspace:pkgs/examples":
   version: 0.0.0-use.local
-  resolution: "examples@workspace:packages/examples"
+  resolution: "examples@workspace:pkgs/examples"
   dependencies:
     "@fleur/fleur": ^3.0.1
     "@fleur/froute": 1.0.0-beta.12

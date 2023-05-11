@@ -26,7 +26,7 @@ jobs:
       - name: Install deps
         run: yarn install
       - name: Testing @fluer/froute
-        working-directory: packages/froute
+        working-directory: pkgs/froute
         run: yarn test --coverage --verbose
 
   build-lint:
@@ -56,5 +56,5 @@ jobs:
       #   run: yarn eslint .
       - name: Building
         if: ${{ matrix.steps == 'build' }}
-        working-directory: packages/froute
+        working-directory: pkgs/froute
         run: yarn prepublishOnly

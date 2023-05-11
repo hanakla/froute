@@ -8,9 +8,8 @@ export type RouterEventsInternal = ReturnType<typeof routerEvents>;
 export type RouterEvents = Omit<ReturnType<typeof routerEvents>, "dispose">;
 
 export const routerEvents = () => {
-  const listeners: Record<string, ((...args: any) => void)[]> = Object.create(
-    null
-  );
+  const listeners: Record<string, ((...args: any) => void)[]> =
+    Object.create(null);
 
   return {
     on<K extends keyof Events>(

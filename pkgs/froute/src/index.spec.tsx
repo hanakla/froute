@@ -9,7 +9,7 @@ import {
   FrouteLink,
   FrouteContext,
   RouterOptions,
-} from "./";
+} from ".";
 import { ResponseCode } from "./components/ResponseCode";
 import { useRouter } from "./react-bind";
 
@@ -61,6 +61,14 @@ describe("Usage", () => {
     await router.preloadCurrent();
   });
 
+  it("Routing", async () => {
+    const reqUrl = "/users/1";
+    const router = createRouter(routes, routerOptions);
+
+    await router.navigate(reqUrl);
+    await router.preloadCurrent();
+  });
+
   it("In React", async () => {
     const router = createRouter(routes, routerOptions);
     await router.navigate("/users/1");
@@ -93,6 +101,28 @@ describe("Usage", () => {
     expect(result.container.innerHTML).toMatchInlineSnapshot(
       `"<div id=\\"app\\"><div>Here is UserShow<a href=\\"/users/1\\">A</a></div></div>"`
     );
+  });
+
+  it("Preload", async () => {
+    const spy = jest.fn();
+    const router = createRouter({
+      userShow: routeOf("/users/:id").action({
+        component: async () => () => null,
+        preload: spy,
+      }),
+    });
+
+    await router.navigate("/users/2");
+    await router.preloadCurrent();
+
+    await router.navigate("/users/1");
+    await router.preloadCurrent();
+
+    await router.navigate("/users/2", { action: "POP" });
+
+    expect(spy.mock.calls[0][1]).toMatchObject({ id: "2" });
+    expect(spy.mock.calls[1][1]).toMatchObject({ id: "1" });
+    expect(spy.mock.calls[2][1]).toMatchObject({ id: "2" });
   });
 
   it("Building URL", async () => {
