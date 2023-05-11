@@ -17,15 +17,22 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Cache
+      - name: Cache .yarn/cache
         uses: actions/cache@v1.0.0
         with:
-          path: |
-            .yarn/cache/
-            node_modules/
-          key: ${{ matrix.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          path: .yarn/cache/
+          key: yarncache-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
           restore-keys: |
-            ${{ matrix.os }}-
+            yarncache-${{ matrix.node-version }}-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1.0.0
+        with:
+          path: node_modules/
+          key: nodemodules-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          restore-keys: |
+            nodemodules-${{ matrix.node-version }}-
+
       - name: Install deps
         run: yarn install
       - name: Testing @fluer/froute
@@ -45,15 +52,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache
+
+      - name: Cache .yarn/cache
         uses: actions/cache@v1.0.0
         with:
-          path: |
-            .yarn/cache/
-            node_modules/
-          key: ${{ matrix.os }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          path: .yarn/cache/
+          key: yarncache-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
           restore-keys: |
-            ${{ matrix.os }}-
+            yarncache-${{ matrix.node-version }}-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1.0.0
+        with:
+          path: node_modules/
+          key: nodemodules-${{ matrix.node-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          restore-keys: |
+            nodemodules-${{ matrix.node-version }}-
+
       - name: Install deps
         run: yarn install
       # - name: Linting
