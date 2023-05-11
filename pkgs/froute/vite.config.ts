@@ -3,6 +3,7 @@ import {} from "vitest";
 import { join } from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import nodePolyfill from "vite-plugin-node-stdlib-browser";
 
 export default defineConfig({
   build: {
@@ -17,6 +18,7 @@ export default defineConfig({
     dts({
       tsConfigFilePath: join(__dirname, "tsconfig.json"),
     }),
+    nodePolyfill(),
   ],
   test: {
     globals: true,
