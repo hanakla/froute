@@ -30,7 +30,7 @@ jobs:
         run: yarn install
       - name: Testing @fluer/froute
         working-directory: pkgs/froute
-        run: yarn test --coverage --verbose
+        run: yarn test
 
   build-lint:
     strategy:
