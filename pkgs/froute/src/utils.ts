@@ -17,6 +17,61 @@ export const isEmptyObject = (t: object) => {
   return true;
 };
 
+export const parseUrl = (url: string) => {
+  const result = new URL(url, "p://_.com");
+  const path = result.pathname + result.search;
+
+  return {
+    protocol: result.protocol === "p:" ? null : result.protocol,
+    // slashes: null,
+    auth:
+      result.username !== "" || result.password !== ""
+        ? `${result.username ?? ""}:${result.password ?? ""}`
+        : null,
+    host: result.host === "" || result.host === "_.com" ? null : result.host,
+    port: result.port === "" ? null : result.port,
+    hostname:
+      result.hostname === "" || result.hostname === "_.com"
+        ? null
+        : result.hostname,
+    hash: result.hash === "" ? null : result.hash,
+    search: result.search === "" ? null : result.search,
+    query: result.search === "" ? null : result.search.replace(/^\?/, ""),
+    pathname: result.pathname === "" ? null : result.pathname,
+    path: path === "" ? null : path,
+    href: result.href.replace(/^p:\/\/_\.com/, ""),
+  };
+};
+
+export const parseQueryString = (query: string) => {
+  return Array.from(new URLSearchParams(query)).reduce((accum, [k, v]) => {
+    if (k in accum) {
+      accum[k] = Array.isArray(accum[k])
+        ? [...(accum[k] as any[]), v]
+        : [accum[k], v];
+    } else {
+      accum[k] = v;
+    }
+
+    return accum;
+  }, Object.create(null) as Record<string, string | string[] | undefined>);
+};
+
+export const stringifyQueryString = (
+  query: Record<string, string | string[]>
+) => {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      v.forEach((vv) => params.append(k, vv));
+    } else {
+      params.append(k, v);
+    }
+  });
+
+  return params.toString();
+};
+
 // prettier-ignore
 export type DeepReadonly<T> =
   T extends () => any | boolean | number | string | null | undefined ? T

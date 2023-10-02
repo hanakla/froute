@@ -1,4 +1,4 @@
-import { parse as parseUrl } from "url";
+import { parseUrl } from "../utils";
 import React, { forwardRef, useCallback, MouseEvent } from "react";
 import { useFrouteRouter } from "../react-bind";
 

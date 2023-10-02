@@ -3,10 +3,8 @@
 import { ComponentType } from "react";
 import { match } from "path-to-regexp";
 import { StateBase } from "./FrouteHistoryState";
-import { parse as parseUrl } from "url";
-import { parse as qsParse } from "querystring";
 import { FrouteMatchResult } from "./routing";
-import { DeepReadonly } from "./utils";
+import { type DeepReadonly, parseUrl, parseQueryString } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 export interface RouteDefinition<Params extends string, S extends StateBase> {
@@ -160,9 +158,7 @@ export class RouteDefiner<
     return result
       ? {
           ...result,
-          query: qsParse(parsed.query ?? "", void 0, void 0, {
-            decodeURIComponent,
-          }),
+          query: parseQueryString(parsed.query ?? ""),
           search: parsed.search ?? "",
         }
       : null;
