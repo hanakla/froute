@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "examples",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel src/index.html --open",
+    "watch": "yarn start"
+  },
+  "workspaces": {
+    "nohoist": [
+      "parcel",
+      "parcel/**"
+    ]
+  },
+  "devDependencies": {
+    "@types/domready": "^1.0.0",
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.0",
+    "parcel": "^2.8.3"
+  },
+  "dependencies": {
+    "@fleur/fleur": "^3.0.1",
+    "@fleur/froute": "1.0.0-beta.12",
+    "@fleur/react": "^4.0.1",
+    "domready": "^1.0.8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "regenerator-runtime": "^0.13.9"
+  }
+}

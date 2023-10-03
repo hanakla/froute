@@ -7,64 +7,54 @@ on:
       - dev
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
-      - uses: actions/cache@v1.0.0
+          node-version: 20
+
+      - uses: actions/cache@v3
         with:
-          path: ~/.cache/yarn
+          path: |
+            .yarn/cache/
+            node_modules/
           key: yarn-cache-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
           restore-keys: |
             yarn-cache-
+
       - name: Install dependencies
         run: yarn
+
       - name: Testing
-        working-directory: packages/froute
+        working-directory: pkgs/froute
         run: yarn test
-
-      # - name: Check can publish to npm
-      #   id: check-publishable
-      #   run: |
-      #     npx can-npm-publish
-      #     if [ $? -eq 1 ] ; then
-      #       echo "::set-output name=publishable::false"
-      #     else
-      #       echo "::set-output name=publishable::true"
-      #     fi
-
-      # - name: "Publishing"
-      #   if: steps.check-publishable.outputs.publishable == 'true'
-      #   env:
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     NODE_AUTH_TOKEN=$NPM_TOKEN yarn publish
-      #     NODE_AUTH_TOKEN=$GITHUB_TOKEN yarn publish
 
       - name: package-version
         id: package-version
-        working-directory: packages/froute
-        run: echo "::set-output name=version::`node -p -e 'require("./package.json").version'`"
+        working-directory: pkgs/froute
+        run: echo "name=version::`node -p -e 'require("./package.json").version'` >> $GITHUB_OUTPUT"
 
-      - uses: JS-DevTools/npm-publish@v1
-        working-directory: packages/froute
+      - uses: JS-DevTools/npm-publish@v2
         with:
+          provenance: true
+          package: pkgs/froute
           token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ (github.ref == 'refs/heads/dev' && 'dev') || 'latest' }}
 
       - name: "Check: package version has corrosponding git tag"
         id: tagged
-        working-directory: packages/froute
+        working-directory: pkgs/froute
         run: git show-ref --tags --verify --quiet -- "refs/tags/v${{ steps.package-version.outputs.version }}" && echo "::set-output name=tagged::0" || echo "::set-output name=tagged::1"
 
       - name: package-version-to-git-tag
-        if: ${{ steps.tagged.outputs.tagged == '0' }}
-        working-directory: packages/froute
         uses: pkgdeps/git-tag-action@v2
+        if: ${{ steps.tagged.outputs.tagged == '0' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_repo: ${{ github.repository }}
