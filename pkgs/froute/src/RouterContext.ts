@@ -8,8 +8,7 @@ import {
   Location,
   MemoryHistory,
 } from "history";
-import { parse as urlParse } from "url";
-import { canUseDOM, DeepReadonly } from "./utils";
+import { type DeepReadonly, canUseDOM, parseUrl } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 import { buildPath } from "./builder";
 import { FrouteMatch, RouteResolver, matchByRoutes } from "./routing";
@@ -126,7 +125,7 @@ export class RouterContext {
     } = options;
     const currentNavKey = (this.latestNavKey = createKey());
     const isCancelled = () => this.latestNavKey !== currentNavKey;
-    const loc = typeof pathname === "string" ? urlParse(pathname) : pathname;
+    const loc = typeof pathname === "string" ? parseUrl(pathname) : pathname;
     const userState = typeof pathname !== "string" ? pathname.state : state;
 
     const nextSid =

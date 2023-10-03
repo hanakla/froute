@@ -1,6 +1,6 @@
 import { MatchResult } from "path-to-regexp";
 import { RouterContext } from "./RouterContext";
-import { parse as parseUrl } from "url";
+import { parseUrl } from "./utils";
 import { RouteDefinition } from "./RouteDefiner";
 
 export interface FrouteMatch<P extends string> {

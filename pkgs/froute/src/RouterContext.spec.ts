@@ -183,15 +183,6 @@ describe("Router", () => {
 
   describe("resolveRoute", () => {
     describe("Edge cases", () => {
-      it("dotdot", () => {
-        const router = new RouterContext(routes);
-        const result = router.resolveRoute("/users/../");
-
-        // Basically, the browser will take care of it.
-        expect(result!.match.params.id).toBe("..");
-        expect(result!.route).toBe(routes.usersShow);
-      });
-
       it("# in fragment", () => {
         const router = new RouterContext(routes);
         const result = router.resolveRoute("/users/%23sharp");

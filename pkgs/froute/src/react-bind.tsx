@@ -10,8 +10,12 @@ import React, {
   useMemo,
   useReducer,
 } from "react";
-import qs from "querystring";
-import { canUseDOM, DeepReadonly, isDevelopment } from "./utils";
+import {
+  canUseDOM,
+  DeepReadonly,
+  isDevelopment,
+  parseQueryString,
+} from "./utils";
 import { RouteDefinition, ParamsOfRoute, StateOfRoute } from "./RouteDefiner";
 import { RouterContext, BeforeRouteListener } from "./RouterContext";
 import { RouterEvents } from "./RouterEvents";
@@ -179,7 +183,7 @@ export const useFrouteRouter: UseFrouteRouter = <
   return useMemo(
     () => ({
       ...nextCompatRouter,
-      searchQuery: qs.parse(location.search.slice(1) ?? ""),
+      searchQuery: parseQueryString(location.search.slice(1) ?? ""),
       location: { ...location, state: location.state.app },
       buildPath,
       historyState: {
@@ -207,7 +211,7 @@ export const useLocation = <R extends RouteDefinition<any, any>>(
       key: location.key,
       pathname: location.pathname,
       search: location.search,
-      query: qs.parse(location.search.slice(1) ?? ""),
+      query: parseQueryString(location.search.slice(1) ?? ""),
       hash: location.hash,
       state: location.state.app as StateOfRoute<R>,
     }),

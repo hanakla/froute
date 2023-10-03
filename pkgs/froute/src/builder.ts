@@ -1,6 +1,5 @@
 import { compile } from "path-to-regexp";
-import { stringify } from "querystring";
-import { isEmptyObject } from "./utils";
+import { isEmptyObject, stringifyQueryString } from "./utils";
 import { RouteDefinition, ParamsOfRoute } from "./RouteDefiner";
 
 export type BuildPath = <T extends RouteDefinition<any, any>>(
@@ -22,7 +21,7 @@ export const buildPath: BuildPath = (def, params, query?) => {
   } else if (typeof query === "string") {
     queryPart = query.length > 0 ? `?${query}` : "";
   } else {
-    queryPart = isEmptyObject(query) ? "" : "?" + stringify(query);
+    queryPart = isEmptyObject(query) ? "" : "?" + stringifyQueryString(query);
   }
 
   return query ? `${pathname}${queryPart}` : pathname;
