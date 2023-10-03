@@ -7,8 +7,11 @@ on:
       - dev
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
