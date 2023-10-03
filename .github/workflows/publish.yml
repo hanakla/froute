@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      - uses: actions/cache@v1.0.0
+      - uses: actions/cache@v3
         with:
           path: |
             .yarn/cache/
@@ -38,7 +38,7 @@ jobs:
       - name: package-version
         id: package-version
         working-directory: pkgs/froute
-        run: echo "::set-output name=version::`node -p -e 'require("./package.json").version'`"
+        run: echo "name=version::`node -p -e 'require("./package.json").version'` >> $GITHUB_OUTPUT"
 
       - uses: JS-DevTools/npm-publish@v2
         with:
