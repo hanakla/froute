@@ -13,7 +13,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "path-to-regexp"],
+      external: ["react", "history", "path-to-regexp"],
     },
   },
   plugins: [
