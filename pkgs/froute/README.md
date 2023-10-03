@@ -11,6 +11,8 @@
 
 # Froute
 
+[CHANGELOG](./pkgs/froute/CHANGELOG.md)
+
 Framework independent Router for React.  
 Can use with both Fleur / Redux (redux-thunk).
 
