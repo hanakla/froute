@@ -1,3 +1,8 @@
+### 1.0.4
+
+- [#152](https://github.com/fleur-js/froute/pull/152) [dev] Replace bili to vite
+- [#153](https://github.com/fleur-js/froute/pull/153) [dev] Replace `url` and `querystring` deps to WHATWG URL API
+
 ### 1.0.3
 
 - [#137](https://github.com/fleur-js/froute/pull/137) Support typing for React 18
