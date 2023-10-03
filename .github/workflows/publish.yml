@@ -10,6 +10,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
       packages: write # allow GITHUB_TOKEN to publish packages
     steps:
