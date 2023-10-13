@@ -18,7 +18,7 @@ export const isEmptyObject = (t: object) => {
 };
 
 export const parseUrl = (url: string) => {
-  const result = new URL(url, "p://_.com");
+  const result = new URL(url, "p:/___.com");
   const path = result.pathname + result.search;
 
   return {
@@ -28,18 +28,18 @@ export const parseUrl = (url: string) => {
       result.username !== "" || result.password !== ""
         ? `${result.username ?? ""}:${result.password ?? ""}`
         : null,
-    host: result.host === "" || result.host === "_.com" ? null : result.host,
+    host: result.host === "" ? null : result.host,
     port: result.port === "" ? null : result.port,
-    hostname:
-      result.hostname === "" || result.hostname === "_.com"
-        ? null
-        : result.hostname,
+    hostname: result.hostname === "" ? null : result.hostname,
     hash: result.hash === "" ? null : result.hash,
     search: result.search === "" ? null : result.search,
     query: result.search === "" ? null : result.search.replace(/^\?/, ""),
-    pathname: result.pathname === "" ? null : result.pathname,
-    path: path === "" ? null : path,
-    href: result.href.replace(/^p:\/\/_\.com/, ""),
+    pathname:
+      result.pathname === "" || result.pathname === "/___.com"
+        ? null
+        : result.pathname,
+    path: path === "" || path === "/___.com" ? null : path,
+    href: result.href.replace(/^(p:)?(\/___.com)?/g, ""),
   };
 };
 
