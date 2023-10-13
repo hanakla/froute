@@ -40,6 +40,11 @@ jobs:
         working-directory: pkgs/froute
         run: echo "name=version::`node -p -e 'require("./package.json").version'` >> $GITHUB_OUTPUT"
 
+      - name: npm whoami
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - uses: JS-DevTools/npm-publish@v2
         with:
           access: public
