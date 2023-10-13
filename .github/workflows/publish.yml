@@ -38,7 +38,7 @@ jobs:
       - name: package-version
         id: package-version
         working-directory: pkgs/froute
-        run: echo "name=version::`node -p -e 'require("./package.json").version'`" >> $GITHUB_OUTPUT
+        run: echo "name=version::`node -p -e 'require(\"./package.json\").version'`" >> $GITHUB_OUTPUT
 
       - uses: JS-DevTools/npm-publish@v2
         with:
