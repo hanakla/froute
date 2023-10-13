@@ -1,8 +1,11 @@
+### 1.0.6
+
+- [#154](https://github.com/fleur-js/froute/pull/154) Fix Invalid URL in Chromium browsers
+
 ### 1.0.5
 
 - [#152](https://github.com/fleur-js/froute/pull/152) [dev] Replace bili to vite
 - [#153](https://github.com/fleur-js/froute/pull/153) [dev] Replace `url` and `querystring` deps to WHATWG URL API
-
 
 ### 1.0.3
 
