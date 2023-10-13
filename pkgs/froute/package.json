@@ -2,7 +2,9 @@
   "name": "@fleur/froute",
   "version": "1.0.6",
   "description": "Type safe and flexible router for React",
-  "url": "https://github.com/fleur-js/froute",
+  "repository": {
+    "url": "https://github.com/fleur-js/froute"
+  },
   "homepage": "https://github.com/fleur-js/froute/",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
