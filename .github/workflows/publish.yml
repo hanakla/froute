@@ -42,6 +42,7 @@ jobs:
 
       - uses: JS-DevTools/npm-publish@v2
         with:
+          access: public
           provenance: true
           package: pkgs/froute
           token: ${{ secrets.NPM_TOKEN }}
