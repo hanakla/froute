@@ -1,4 +1,6 @@
-### 1.0.6
+### 1.0.6, 1.0.7
+
+`v1.0.6` is failed publish, `v1.0.7` is valid package for `v1.0.6`
 
 - [#154](https://github.com/fleur-js/froute/pull/154) Fix Invalid URL in Chromium browsers
 
