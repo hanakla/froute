@@ -35,6 +35,10 @@ jobs:
         working-directory: pkgs/froute
         run: yarn test
 
+      - name: Building
+        working-directory: pkgs/froute
+        run: yarn prepublishOnly
+
       - name: package-version
         id: package-version
         working-directory: pkgs/froute
