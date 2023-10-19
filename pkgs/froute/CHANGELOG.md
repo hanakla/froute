@@ -1,3 +1,7 @@
+### 1.0.8
+
+- [#155](https://github.com/fleur-js/froute/pull/155) Fix failed to route resolution on Chromium on Windows
+
 ### 1.0.6, 1.0.7
 
 `v1.0.6` is failed publish, `v1.0.7` is valid package for `v1.0.6`
