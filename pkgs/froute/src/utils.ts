@@ -18,11 +18,11 @@ export const isEmptyObject = (t: object) => {
 };
 
 export const parseUrl = (url: string) => {
-  const result = new URL(url, "p:/___.com");
+  const result = new URL(url, "pl:/___.com");
   const path = result.pathname + result.search;
 
   return {
-    protocol: result.protocol === "p:" ? null : result.protocol,
+    protocol: result.protocol === "pl:" ? null : result.protocol,
     // slashes: null,
     auth:
       result.username !== "" || result.password !== ""
@@ -39,7 +39,7 @@ export const parseUrl = (url: string) => {
         ? null
         : result.pathname,
     path: path === "" || path === "/___.com" ? null : path,
-    href: result.href.replace(/^(p:)?(\/___.com)?/g, ""),
+    href: result.href.replace(/^(pl:)?(\/___.com)?/g, ""),
   };
 };
 
