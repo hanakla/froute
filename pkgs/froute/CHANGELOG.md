@@ -1,6 +1,7 @@
-### 1.0.8
+### 1.0.8, 1.0.9
 
 - [#155](https://github.com/fleur-js/froute/pull/155) Fix failed to route resolution on Chromium on Windows
+- 1.0.8 was missing to publish to dev tag, 1.0.8 and 1.0.9 is same content different only publish tag
 
 ### 1.0.6, 1.0.7
 

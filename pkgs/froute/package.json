@@ -1,6 +1,6 @@
 {
   "name": "@fleur/froute",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Type safe and flexible router for React",
   "repository": {
     "url": "https://github.com/fleur-js/froute"
